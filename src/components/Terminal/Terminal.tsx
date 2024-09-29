@@ -19,14 +19,16 @@ import { Command, helpText } from "./constants";
 import { parseFs } from "./modules/fs";
 import { quotableRestArgs } from "./utils";
 
-export function Terminal() {
+export function Terminal(props: { initialPath?: string }) {
   const currentCommandIndex = useRef(0);
   const prevCommands = useRef<string[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const tree = useFileSystemStore((s) => s.tree);
   const move = useFileSystemStore((s) => s.move);
   const createFolder = useFileSystemStore((s) => s.createFolder);
-  const path = useRef<string[]>(["Home"]);
+  const path = useRef<string[]>(
+    props.initialPath?.split("/").filter(Boolean) ?? ["Home"]
+  );
   const [output, setOutput] = useState<ReactNode[]>([
     <Code size="1">Type "help" to get started</Code>,
   ]);

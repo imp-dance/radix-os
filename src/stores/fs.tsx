@@ -171,14 +171,17 @@ export const useFileSystemStore = create(
               );
           }
 
-          return { ...newState, tree: { ...newState.tree } };
+          return {
+            tree: { ...newState.tree },
+            favouriteFolders: [...newState.favouriteFolders],
+          };
         }),
       remove: (path) =>
         set((state) => {
-          const newState = { ...state };
+          const newTree = { ...state.tree };
           const parent = findNodeByPath(
             getParentPath(path),
-            newState.tree
+            newTree
           );
           if (!isFolder(parent)) return state;
 
@@ -188,22 +191,21 @@ export const useFileSystemStore = create(
             ),
           ];
 
-          newState.favouriteFolders =
-            newState.favouriteFolders.filter(
-              (f) => parsePath(f) !== parsePath(path)
-            );
-
           return {
-            ...newState,
+            favouriteFolders: [
+              ...state.favouriteFolders.filter(
+                (f) => parsePath(f) !== parsePath(path)
+              ),
+            ],
             tree: {
-              ...newState.tree,
+              ...newTree,
             },
           };
         }),
       setDefaultLauncher: (path: string, launcher: Launcher) =>
         set((state) => {
-          const newState = { ...state };
-          const node = findNodeByPath(path, newState.tree);
+          const newTree = { ...state.tree };
+          const node = findNodeByPath(path, newTree);
           if (!isFile(node)) {
             return state;
           }
@@ -211,17 +213,17 @@ export const useFileSystemStore = create(
             launcher,
             ...node.launcher.filter((l) => l !== launcher),
           ];
-          return { ...state, tree: { ...newState.tree } };
+          return { tree: { ...newTree } };
         }),
       updateFile: (path: string, data: string) =>
         set((state) => {
-          const newState = { ...state };
-          const node = findNodeByPath(path, newState.tree);
+          const newTree = { ...state.tree };
+          const node = findNodeByPath(path, newTree);
           if (!isFile(node)) {
             return state;
           }
           node.data = data;
-          return { ...state, tree: { ...newState.tree } };
+          return { tree: { ...newTree } };
         }),
 
       renameFile: (path: string, name: string) =>
@@ -242,7 +244,6 @@ export const useFileSystemStore = create(
               );
           }
           return {
-            ...state,
             favouriteFolders: newState.favouriteFolders,
             tree: { ...newState.tree },
           };
@@ -259,7 +260,7 @@ export const useFileSystemStore = create(
             ...node.launcher.filter((l) => l !== launcher),
             launcher,
           ];
-          return { ...newState, tree: { ...newState.tree } };
+          return { tree: { ...newState.tree } };
         }),
     }),
     {

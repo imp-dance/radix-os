@@ -35,6 +35,8 @@ import {
   Launcher,
   useFileSystemStore,
 } from "../../stores/fs";
+import { useWindowStore } from "../../stores/window";
+import { createTerminalWindow } from "../Terminal/Terminal.window";
 
 export function Explorer({
   initialPath = "",
@@ -237,8 +239,10 @@ export function Explorer({
             Create folder
           </ContextMenu.Item>
           <ContextMenu.Item
-            onClick={() => {
-              //
+            onClick={(e) => {
+              e.stopPropagation();
+              const { addWindow } = useWindowStore.getState();
+              addWindow(createTerminalWindow(path));
             }}
           >
             Open in terminal

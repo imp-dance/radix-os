@@ -1,12 +1,11 @@
 import {
   CameraIcon,
-  CardStackIcon,
   CodeIcon,
   GlobeIcon,
 } from "@radix-ui/react-icons";
 import { Code as CodeApp } from "../components/Code/Code";
 import { ImageViewer } from "../components/ImageViewer/ImageViewer";
-import { Terminal } from "../components/Terminal/Terminal";
+import { createTerminalWindow } from "../components/Terminal/Terminal.window";
 import { WebBrowser } from "../components/WebBrowser/WebBrowser";
 import {
   FsFile,
@@ -46,12 +45,9 @@ export function findNodeByPath(
   let current: FsNode = node;
   for (let i = 0; i < parts.length; i++) {
     const part = parts[i];
-    console.log({ part, current });
-
     current = (current as FsFolder).children.find(
       (c) => c.name === part
     ) as FsNode;
-    console.log({ part, current });
   }
   return current;
 }
@@ -117,13 +113,7 @@ export function openFile(
       });
       break;
     case "terminal":
-      newWindow = createWindow({
-        title: file.name,
-        icon: <CardStackIcon />,
-        content: <Terminal />,
-        initialHeight: 350,
-        initialWidth: 500,
-      });
+      newWindow = createTerminalWindow(file.data);
       break;
     case "image":
       newWindow = createWindow({
