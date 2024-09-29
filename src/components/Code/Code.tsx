@@ -6,11 +6,8 @@ import {
   Flex,
 } from "@radix-ui/themes";
 import { useRef, useState } from "react";
-import {
-  findNodeByPath,
-  FsFile,
-  useFileSystemStore,
-} from "../../stores/fs";
+import { findNodeByPath } from "../../services/fs";
+import { FsFile, useFileSystemStore } from "../../stores/fs";
 import { useSettingsStore } from "../../stores/settings";
 
 export function Code(props: { file: FsFile; path: string }) {

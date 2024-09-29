@@ -13,13 +13,11 @@ import React, {
   useRef,
   useState,
 } from "react";
-import {
-  findNodeByPath,
-  isFile,
-  isFolder,
-  openFile,
-  useFileSystemStore,
-} from "../../stores/fs";
+import { findNodeByPath, isFolder } from "../../services/fs";
+import { useFileSystemStore } from "../../stores/fs";
+import { Command, helpText } from "./constants";
+import { parseFs } from "./modules/fs";
+import { quotableRestArgs } from "./utils";
 
 export function Terminal() {
   const currentCommandIndex = useRef(0);
@@ -28,10 +26,6 @@ export function Terminal() {
   const tree = useFileSystemStore((s) => s.tree);
   const move = useFileSystemStore((s) => s.move);
   const createFolder = useFileSystemStore((s) => s.createFolder);
-  const setDefaultLauncher = useFileSystemStore(
-    (s) => s.setDefaultLauncher
-  );
-  const rename = useFileSystemStore((s) => s.renameFile);
   const path = useRef<string[]>(["Home"]);
   const [output, setOutput] = useState<ReactNode[]>([
     <Code size="1">Type "help" to get started</Code>,
@@ -160,99 +154,7 @@ export function Terminal() {
         break;
       }
       case "fs": {
-        const [path, flag, ...restArgs] = args;
-        const node = findNodeByPath(path, tree);
-        if (!node) {
-          dirNotFound(path);
-          break;
-        }
-        switch (flag) {
-          case "-R": {
-            const name = quotableRestArgs(restArgs);
-            if (!name) {
-              pushOutput(
-                <Code size="1" variant="soft" color="crimson">
-                  fs -R needs a name as argument
-                </Code>
-              );
-              break;
-            }
-            rename(path, name);
-            pushOutput(
-              <Command command={`fs ${path} -R ${name}`} />
-            );
-            break;
-          }
-          case "-O": {
-            const launcher = restArgs[0];
-            if (!isFile(node)) {
-              return pushOutput(
-                <Code size="1" variant="soft" color="crimson">
-                  Not a file
-                </Code>
-              );
-            }
-            const validLaunchers = node.launcher;
-            if (
-              launcher &&
-              !validLaunchers.includes(launcher as "code")
-            ) {
-              pushOutput(
-                <Code size="1" variant="soft" color="crimson">
-                  Invalid launcher
-                </Code>
-              );
-              break;
-            }
-            openFile(node, path, launcher as "code");
-            pushOutput(
-              <Command
-                command={`fs ${path} -O ${launcher ?? ""}`}
-              />
-            );
-            break;
-          }
-          case "-L": {
-            const launcher = restArgs[0];
-            if (!launcher) {
-              pushOutput(
-                <Code size="1" variant="soft" color="crimson">
-                  fs --L needs a launcher as argument
-                </Code>
-              );
-              break;
-            }
-            if (!isFile(node)) {
-              pushOutput(
-                <Code size="1" variant="soft" color="crimson">
-                  Not a file
-                </Code>
-              );
-              break;
-            }
-            const validLaunchers = node.launcher;
-            if (!validLaunchers.includes(launcher as "code")) {
-              pushOutput(
-                <Code size="1" variant="soft" color="crimson">
-                  Invalid launcher
-                </Code>
-              );
-              break;
-            }
-            setDefaultLauncher(path, launcher as "code");
-            pushOutput(
-              <Command command={`fs ${path} --L ${launcher}`} />
-            );
-            break;
-          }
-          case "--ll": {
-            break;
-          }
-          case "--sl": {
-            break;
-          }
-        }
-        break;
+        return parseFs({ pushOutput, args });
       }
       case "cd": {
         const nextPath = quotableRestArgs(args);
@@ -402,51 +304,4 @@ export function Terminal() {
       </Flex>
     </Box>
   );
-}
-
-const helpText = `help                       - Show this help message
-echo [...text]             - Print text to the terminal
-clear                      - Clear the terminal 
-
-mkdir [name]               - Create a new directory
-ls                         - List files in current directory
-cd [path]                  - Change directory
-mv [path1] [path2]         - Move file/folder from [path1] to [path2]
-
-fs [path] -R [name]        - Rename a file or folder
-fs [path] -O [launcher?]   - Open a file
-fs [path] -L [launcher]    - Set a file's default launcher
-fs [path] --ll             - List a file's available launchers
-fs [path] --sl [launcher]  - Make file executable in given launcher`;
-
-function Command(props: { command: string }) {
-  return (
-    <Code size="1" variant="ghost" color="indigo">
-      <Flex align="center" gap="2">
-        <ArrowRightIcon
-          style={{ width: "1em", height: "1em" }}
-        />{" "}
-        {props.command}
-      </Flex>
-    </Code>
-  );
-}
-
-function quotableRestArgs(args: string[]) {
-  let nextPath = args[0];
-  if (nextPath.startsWith('"')) {
-    nextPath = nextPath.substring(1);
-    if (nextPath.endsWith('"')) {
-      nextPath = nextPath.slice(0, -1);
-    }
-    for (let i = 1; i < args.length; i++) {
-      if (args[i].endsWith('"')) {
-        nextPath += " " + args[i].slice(0, -1);
-        break;
-      } else {
-        nextPath += " " + args[i];
-      }
-    }
-  }
-  return nextPath;
 }

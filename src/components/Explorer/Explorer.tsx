@@ -25,12 +25,14 @@ import {
 import React, { ReactNode, useRef, useState } from "react";
 import {
   findNodeByPath,
-  FsNode,
   isFile,
   isFolder,
-  Launcher,
   openFile,
   parsePath,
+} from "../../services/fs";
+import {
+  FsNode,
+  Launcher,
   useFileSystemStore,
 } from "../../stores/fs";
 

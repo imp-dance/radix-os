@@ -8,6 +8,6 @@ export const createTerminalWindow = () =>
     title: "Terminal",
     icon: <CardStackIcon />,
     initialHeight: 350,
-    initialWidth: 500,
+    initialWidth: 515,
     scrollable: false,
   });
