@@ -8,9 +8,14 @@ export function WebBrowser(props: {
   };
 }) {
   const frameRef = useRef<HTMLIFrameElement>(null);
+  const isLinked =
+    props.launchConfig !== undefined &&
+    props.launchConfig.data.startsWith("http");
   const [redirect, setRedirect] = useState("");
   const [url, setUrl] = useState(
-    props.launchConfig?.title ?? "https://haakon.dev"
+    isLinked
+      ? props.launchConfig!.data
+      : props.launchConfig?.title ?? "https://haakon.dev"
   );
 
   useEffect(() => {
@@ -18,6 +23,7 @@ export function WebBrowser(props: {
     if (!iframe) return;
     if (!props.launchConfig) return;
     if (!iframe.contentWindow) return;
+    if (isLinked) return;
     iframe.contentWindow.document.open();
     iframe.contentWindow.document.write(props.launchConfig.data);
     iframe.contentWindow.document.close();
@@ -26,8 +32,14 @@ export function WebBrowser(props: {
     <Flex direction="column" gap="0" style={{ height: "100%" }}>
       <Flex align="center">
         <TextField.Root
-          disabled={props.launchConfig !== undefined}
-          value={props.launchConfig?.title ?? url}
+          disabled={
+            props.launchConfig !== undefined && !isLinked
+          }
+          value={
+            isLinked
+              ? props.launchConfig?.data
+              : props.launchConfig?.title ?? url
+          }
           onChange={(e) => setUrl(e.target.value)}
           style={{ width: "100%" }}
           variant="classic"
@@ -43,8 +55,10 @@ export function WebBrowser(props: {
         ref={frameRef}
         key={redirect ?? props.launchConfig?.title}
         src={
-          redirect ||
-          (props.launchConfig ? "#" : "https://haakon.dev")
+          isLinked
+            ? props.launchConfig!.data
+            : redirect ||
+              (props.launchConfig ? "#" : "https://haakon.dev")
         }
         style={{
           flex: 1,

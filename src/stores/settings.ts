@@ -10,6 +10,8 @@ type SettingsStore = {
   setBg: (bg: string) => void;
 };
 
+export const SETTINGS_LS_KEY = "settings";
+
 export const useSettingsStore = create(
   persist<SettingsStore>(
     (set) => ({
@@ -33,7 +35,7 @@ export const useSettingsStore = create(
         })),
     }),
     {
-      name: "settings",
+      name: SETTINGS_LS_KEY,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) =>
         ({

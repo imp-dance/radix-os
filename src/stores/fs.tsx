@@ -10,6 +10,8 @@ import {
   pathToName,
 } from "../services/fs";
 
+export const FS_LS_KEY = "fs";
+
 export type FsFolder = {
   name: string;
   children: FsNode[];
@@ -139,17 +141,15 @@ export const useFileSystemStore = create(
         }),
       move: (from, to) =>
         set((state) => {
-          const newState = { ...state };
-          const fromNode = findNodeByPath(from, newState.tree);
-          const toNode = findNodeByPath(to, newState.tree);
+          const newTree = { ...state.tree };
+          let newFavourites = [...state.favouriteFolders];
+          const fromNode = findNodeByPath(from, newTree);
+          const toNode = findNodeByPath(to, newTree);
           const fromParentNode = findNodeByPath(
             getParentPath(from),
-            newState.tree
+            newTree
           );
-          if (!isFolder(fromParentNode)) {
-            return state;
-          }
-          if (!isFolder(toNode)) {
+          if (!isFolder(fromParentNode) || !isFolder(toNode)) {
             return state;
           }
           fromParentNode.children =
@@ -159,21 +159,20 @@ export const useFileSystemStore = create(
           toNode.children.push(fromNode);
 
           if (
-            newState.favouriteFolders.some(
+            newFavourites.some(
               (f) => parsePath(f) === parsePath(from)
             )
           ) {
-            newState.favouriteFolders =
-              newState.favouriteFolders.map((f) =>
-                parsePath(f) === parsePath(from)
-                  ? parsePath(`${to}/${pathToName(from)}`)
-                  : f
-              );
+            newFavourites = newFavourites.map((f) =>
+              parsePath(f) === parsePath(from)
+                ? parsePath(`${to}/${pathToName(from)}`)
+                : f
+            );
           }
 
           return {
-            tree: { ...newState.tree },
-            favouriteFolders: [...newState.favouriteFolders],
+            tree: { ...newTree },
+            favouriteFolders: [...newFavourites],
           };
         }),
       remove: (path) =>
@@ -264,7 +263,7 @@ export const useFileSystemStore = create(
         }),
     }),
     {
-      name: "fs",
+      name: FS_LS_KEY,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) =>
         ({
