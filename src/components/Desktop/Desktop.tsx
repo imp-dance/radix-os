@@ -29,7 +29,7 @@ import {
   createWindow,
   useWindowStore,
 } from "../../stores/window";
-import { Code } from "../Code/Code";
+import { createCodeWindow } from "../Code/Code.window";
 import { createExplorerWindow } from "../Explorer/Explorer.window";
 import { createSettingsWindow } from "../Settings/Settings.window";
 import { createTerminalWindow } from "../Terminal/Terminal.window";
@@ -107,22 +107,14 @@ export function Desktop() {
       id: "code",
       onClick: () => {
         addWindow(
-          createWindow({
-            content: (
-              <Code
-                path="Home"
-                file={{
-                  data: "",
-                  launcher: [],
-                  name: "Note",
-                  title: "Note",
-                }}
-              />
-            ),
-            title: "Code",
-            icon: <CodeIcon />,
-            initialHeight: 600,
-            initialWidth: 800,
+          createCodeWindow({
+            path: "",
+            file: {
+              data: "",
+              launcher: [],
+              name: "Note",
+              title: "Note",
+            },
           })
         );
       },

@@ -42,6 +42,7 @@ type FileSystemStore = {
   move: (from: string, to: string) => void;
   remove: (path: string) => void;
   createFolder: (path: string) => void;
+  createFile: (path: string) => void;
   updateFile: (path: string, data: string) => void;
   renameFile: (path: string, name: string) => void;
   addFolderToFavourites: (path: string) => void;
@@ -136,6 +137,24 @@ export const useFileSystemStore = create(
           parent.children.push({
             name: pathToName(path),
             children: [] as FsNode[],
+          });
+          return { ...state, tree: { ...newState.tree } };
+        }),
+      createFile: (path) =>
+        set((state) => {
+          const newState = { ...state };
+          const parent = findNodeByPath(
+            getParentPath(path),
+            newState.tree
+          );
+          if (!isFolder(parent)) {
+            return state;
+          }
+          parent.children.push({
+            name: pathToName(path),
+            data: "",
+            launcher: ["code"],
+            title: "New file",
           });
           return { ...state, tree: { ...newState.tree } };
         }),

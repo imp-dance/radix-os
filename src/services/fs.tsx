@@ -1,9 +1,5 @@
-import {
-  CameraIcon,
-  CodeIcon,
-  GlobeIcon,
-} from "@radix-ui/react-icons";
-import { Code as CodeApp } from "../components/Code/Code";
+import { CameraIcon, GlobeIcon } from "@radix-ui/react-icons";
+import { createCodeWindow } from "../components/Code/Code.window";
 import { ImageViewer } from "../components/ImageViewer/ImageViewer";
 import { createTerminalWindow } from "../components/Terminal/Terminal.window";
 import { WebBrowser } from "../components/WebBrowser/WebBrowser";
@@ -88,13 +84,7 @@ export function openFile(
   let newWindow;
   switch (launcher ?? file.launcher[0]!) {
     case "code":
-      newWindow = createWindow({
-        title: `${file.name}`,
-        icon: <CodeIcon />,
-        content: <CodeApp path={path} file={file} />,
-        initialHeight: 600,
-        initialWidth: 500,
-      });
+      newWindow = createCodeWindow({ path, file });
       break;
     case "web":
       newWindow = createWindow({

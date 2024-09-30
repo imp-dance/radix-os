@@ -6,11 +6,13 @@ export function useOnKeyDown({
   callback,
   windowId,
   metaKey,
+  deps = [],
 }: {
   key: string;
   callback: (e: KeyboardEvent) => void;
   metaKey?: boolean;
   windowId?: symbol;
+  deps?: any[];
 }) {
   const activeWindow = useWindowStore(
     (state) => state.activeWindow
@@ -30,5 +32,5 @@ export function useOnKeyDown({
     return () => {
       window.removeEventListener("keydown", handler);
     };
-  }, [key, callback, isActive, metaKey, windowId]);
+  }, [key, callback, isActive, metaKey, windowId, ...deps]);
 }

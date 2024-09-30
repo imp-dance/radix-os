@@ -7,6 +7,8 @@ import {
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import {
+  ArrowDownIcon,
+  ArrowUpIcon,
   CameraIcon,
   CardStackIcon,
   CaretRightIcon,
@@ -50,6 +52,10 @@ export function Explorer({
   });
   const [createFolderOpen, setCreateFolderOpen] =
     useState(false);
+  const [createFileOpen, setCreateFileOpen] = useState(false);
+  const [sortDir, setSortDir] = useState<"asc" | "desc" | null>(
+    "asc"
+  );
   const [renameFileOpen, setRenameFileOpen] = useState(false);
   const [renamingNode, setRenamingNode] = useState<string>("");
   const tree = useFileSystemStore((s) => s.tree);
@@ -64,6 +70,17 @@ export function Explorer({
     if (!("children" in acc)) return acc as FsNode;
     return acc.children.find((c) => c.name === step)!;
   }, tree as FsNode);
+
+  let sortedChildren = isFolder(currentFolder)
+    ? [...currentFolder.children]
+    : [];
+  if (sortDir) {
+    sortedChildren = sortedChildren.sort((a, b) =>
+      sortDir === "asc"
+        ? a.name.localeCompare(b.name)
+        : b.name.localeCompare(a.name)
+    );
+  }
   return (
     <DndContext
       sensors={[mouseSensor]}
@@ -71,7 +88,7 @@ export function Explorer({
         const active = event.active.id.toString();
         const over = event.over?.id.toString();
         if (!over) return;
-        if (active === over) return;
+        if (parsePath(active) === parsePath(over)) return;
         move(`${active}`, `${over}`);
       }}
     >
@@ -79,6 +96,11 @@ export function Explorer({
         <CreateFolderDialog
           open={createFolderOpen}
           onOpenChange={setCreateFolderOpen}
+          path={path}
+        />
+        <CreateFileDialog
+          open={createFileOpen}
+          onOpenChange={setCreateFileOpen}
           path={path}
         />
         <RenameFileDialog
@@ -146,40 +168,70 @@ export function Explorer({
                       />
                     </React.Fragment>
                   ))}
+                  <Button
+                    ml="auto"
+                    onClick={() =>
+                      setSortDir((p) =>
+                        p === "asc"
+                          ? "desc"
+                          : p === "desc"
+                          ? null
+                          : "asc"
+                      )
+                    }
+                    variant="ghost"
+                    color={sortDir === null ? "gray" : "indigo"}
+                    size="2"
+                    style={{
+                      display: "block",
+                      marginLeft: "auto",
+                      marginTop: "calc(var(--space-1) * -1)",
+                    }}
+                  >
+                    {sortDir === "asc" ? (
+                      <ArrowDownIcon
+                        style={{
+                          width: "0.875em",
+                          height: "0.875em",
+                        }}
+                      />
+                    ) : (
+                      <ArrowUpIcon
+                        style={{
+                          width: "0.875em",
+                          height: "0.875em",
+                        }}
+                      />
+                    )}
+                  </Button>
                 </Flex>
 
                 <Flex gap="3" direction="column">
                   {isFolder(currentFolder)
-                    ? [...currentFolder.children]
-                        .sort((a, b) =>
-                          a.name.localeCompare(b.name)
-                        )
-                        .map((child, i) => {
-                          return (
-                            <ExplorerItem
-                              key={child.name}
-                              item={child}
-                              path={`${path}/${child.name}`}
-                              onClick={() => {
-                                if (isFolder(child)) {
-                                  setPath(
-                                    (prev) =>
-                                      `${prev}/${child.name}`
-                                  );
-                                }
-                              }}
-                              returnFocus={
-                                i === 0 ? true : false
-                              }
-                              onRename={() => {
-                                setRenamingNode(
-                                  `${path}/${child.name}`
+                    ? sortedChildren.map((child, i) => {
+                        return (
+                          <ExplorerItem
+                            key={child.name}
+                            item={child}
+                            path={`${path}/${child.name}`}
+                            onClick={() => {
+                              if (isFolder(child)) {
+                                setPath(
+                                  (prev) =>
+                                    `${prev}/${child.name}`
                                 );
-                                setRenameFileOpen(true);
-                              }}
-                            />
-                          );
-                        })
+                              }
+                            }}
+                            returnFocus={i === 0 ? true : false}
+                            onRename={() => {
+                              setRenamingNode(
+                                `${path}/${child.name}`
+                              );
+                              setRenameFileOpen(true);
+                            }}
+                          />
+                        );
+                      })
                     : null}
                 </Flex>
               </Flex>
@@ -191,6 +243,11 @@ export function Explorer({
               onClick={() => setCreateFolderOpen(true)}
             >
               Create folder
+            </ContextMenu.Item>
+            <ContextMenu.Item
+              onClick={() => setCreateFileOpen(true)}
+            >
+              Create file
             </ContextMenu.Item>
             <ContextMenu.Item
               onClick={(e) => {
@@ -495,6 +552,64 @@ function CreateFolderDialog(props: {
               }}
             >
               Create folder
+            </Button>
+          </Dialog.Close>
+        </Flex>
+      </Dialog.Content>
+    </Dialog.Root>
+  );
+}
+
+function CreateFileDialog(props: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  path: string;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const createFile = useFileSystemStore((s) => s.createFile);
+  return (
+    <Dialog.Root
+      open={props.open}
+      onOpenChange={props.onOpenChange}
+    >
+      <Dialog.Content maxWidth="450px">
+        <Dialog.Title>Create file</Dialog.Title>
+        <Dialog.Description size="2">
+          Give your file a name.
+        </Dialog.Description>
+        <Flex direction="column" gap="3">
+          <label>
+            <TextField.Root
+              mt="3"
+              autoFocus
+              size="2"
+              defaultValue="New file"
+              ref={inputRef}
+            />
+          </label>
+        </Flex>
+
+        <Flex gap="3" mt="4" justify="end">
+          <Dialog.Close>
+            <Button variant="soft" color="gray">
+              Cancel
+            </Button>
+          </Dialog.Close>
+          <Dialog.Close>
+            <Button
+              variant="solid"
+              color="indigo"
+              onClick={() => {
+                createFile(
+                  `${props.path}/${
+                    inputRef.current?.value ?? "New file"
+                  }`
+                );
+                inputRef.current!.value = "New file";
+                props.onOpenChange(false);
+              }}
+            >
+              Create file
             </Button>
           </Dialog.Close>
         </Flex>

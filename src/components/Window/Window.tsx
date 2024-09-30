@@ -105,6 +105,7 @@ export function Window(props: {
             }}
             m="-3"
             p="3"
+            px="3"
             mb="0"
           >
             <Flex
@@ -113,7 +114,7 @@ export function Window(props: {
               style={{ flexGrow: 2 }}
             >
               <Heading
-                size="2"
+                size="1"
                 color="gray"
                 {...draggable.attributes}
                 {...draggable.listeners}

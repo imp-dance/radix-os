@@ -6,11 +6,16 @@ import {
   Flex,
 } from "@radix-ui/themes";
 import { useRef, useState } from "react";
+import { useOnKeyDown } from "../../hooks/useKeyboard";
 import { findNodeByPath } from "../../services/fs";
 import { FsFile, useFileSystemStore } from "../../stores/fs";
 import { useSettingsStore } from "../../stores/settings";
 
-export function Code(props: { file: FsFile; path: string }) {
+export function Code(props: {
+  file: FsFile;
+  path: string;
+  windowId: symbol;
+}) {
   const fs = useFileSystemStore((s) => s.tree);
   const [value, setValue] = useState(props.file.data);
   const editorRef = useRef<{ getValue: () => string } | null>(
@@ -20,6 +25,16 @@ export function Code(props: { file: FsFile; path: string }) {
   const save = useFileSystemStore((s) => s.updateFile);
   const node = findNodeByPath(props.path, fs);
   const touched = node && "data" in node && node.data !== value;
+
+  useOnKeyDown({
+    key: "s",
+    metaKey: true,
+    callback: () => {
+      save(props.path, value);
+    },
+    windowId: props.windowId,
+    deps: [value],
+  });
 
   return (
     <Flex
