@@ -9,6 +9,7 @@ import {
 import {
   Box,
   Card,
+  ContextMenu,
   Flex,
   Heading,
   IconButton,
@@ -96,85 +97,105 @@ export function Window(props: {
       }}
       onAnimationEnd={() => setHasAnimated(true)}
     >
-      <Box
-        style={{
-          background: "var(--gray-3)",
-        }}
-        m="-3"
-        p="3"
-        mb="0"
-      >
-        <Flex
-          justify="between"
-          align="center"
-          style={{ flexGrow: 2 }}
-        >
-          <Heading
-            size="2"
-            color="gray"
-            {...draggable.attributes}
-            {...draggable.listeners}
-            tabIndex={-1}
+      <ContextMenu.Root>
+        <ContextMenu.Trigger>
+          <Box
             style={{
-              userSelect: "none",
-              width: "100%",
-              paddingBlock: "var(--space-3)",
-              cursor: "-moz-grab",
+              background: "var(--gray-3)",
             }}
-            my="-3"
-            onMouseUp={(e) => {
-              draggable.listeners?.onMouseUp?.(e);
-              if (draggable.node.current) {
-                const target =
-                  draggable.node.current.querySelector<HTMLButtonElement>(
-                    "[data-returnfocus]"
-                  );
-                setTimeout(() => {
-                  target?.focus();
-                }, 100);
-              }
-            }}
+            m="-3"
+            p="3"
+            mb="0"
           >
-            <Flex gap="2" align="center">
-              {props.window.icon}
-              {props.window.title}
+            <Flex
+              justify="between"
+              align="center"
+              style={{ flexGrow: 2 }}
+            >
+              <Heading
+                size="2"
+                color="gray"
+                {...draggable.attributes}
+                {...draggable.listeners}
+                tabIndex={-1}
+                style={{
+                  userSelect: "none",
+                  width: "100%",
+                  paddingBlock: "var(--space-3)",
+                  cursor: "-moz-grab",
+                }}
+                my="-3"
+                onMouseUp={(e) => {
+                  draggable.listeners?.onMouseUp?.(e);
+                  if (draggable.node.current) {
+                    const target =
+                      draggable.node.current.querySelector<HTMLButtonElement>(
+                        "[data-returnfocus]"
+                      );
+                    setTimeout(() => {
+                      target?.focus();
+                    }, 100);
+                  }
+                }}
+              >
+                <Flex gap="2" align="center">
+                  {props.window.icon}
+                  {props.window.title}
+                </Flex>
+              </Heading>
+              <Flex
+                gap="2"
+                align="center"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <IconButton
+                  variant="ghost"
+                  size="1"
+                  color="gray"
+                  onClick={props.onMinimize}
+                >
+                  <MinusIcon />
+                </IconButton>
+                <IconButton
+                  variant="ghost"
+                  size="1"
+                  color="gray"
+                  onClick={toggleMax}
+                  disabled={props.window.resizeable === false}
+                >
+                  <SizeIcon />
+                </IconButton>
+                <IconButton
+                  variant="ghost"
+                  size="1"
+                  color="red"
+                  onClick={() => {
+                    closeWindow(props.window);
+                  }}
+                >
+                  <Cross1Icon />
+                </IconButton>
+              </Flex>
             </Flex>
-          </Heading>
-          <Flex
-            gap="2"
-            align="center"
-            onClick={(e) => e.stopPropagation()}
+          </Box>
+        </ContextMenu.Trigger>
+        <ContextMenu.Content size="1">
+          <ContextMenu.Item onSelect={props.onMinimize}>
+            Minimize
+          </ContextMenu.Item>
+          <ContextMenu.Item onSelect={toggleMax}>
+            Maximize
+          </ContextMenu.Item>
+          <ContextMenu.Item
+            onSelect={() => {
+              closeWindow(props.window);
+            }}
+            color="crimson"
           >
-            <IconButton
-              variant="ghost"
-              size="1"
-              color="gray"
-              onClick={props.onMinimize}
-            >
-              <MinusIcon />
-            </IconButton>
-            <IconButton
-              variant="ghost"
-              size="1"
-              color="gray"
-              onClick={toggleMax}
-              disabled={props.window.resizeable === false}
-            >
-              <SizeIcon />
-            </IconButton>
-            <IconButton
-              variant="ghost"
-              size="1"
-              color="red"
-              onClick={() => {
-                closeWindow(props.window);
-              }}
-            >
-              <Cross1Icon />
-            </IconButton>
-          </Flex>
-        </Flex>
-      </Box>
+            Close
+          </ContextMenu.Item>
+        </ContextMenu.Content>
+      </ContextMenu.Root>
       <ErrorBoundary
         onError={() => {
           return (

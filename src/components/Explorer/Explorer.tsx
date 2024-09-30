@@ -53,9 +53,6 @@ export function Explorer({
   const [renameFileOpen, setRenameFileOpen] = useState(false);
   const [renamingNode, setRenamingNode] = useState<string>("");
   const tree = useFileSystemStore((s) => s.tree);
-  const removeFavourite = useFileSystemStore(
-    (s) => s.removeFolderFromFavourites
-  );
   const favourites = useFileSystemStore(
     (s) => s.favouriteFolders
   );
@@ -68,99 +65,57 @@ export function Explorer({
     return acc.children.find((c) => c.name === step)!;
   }, tree as FsNode);
   return (
-    <Flex gap="3" style={{ height: "100%" }}>
-      <CreateFolderDialog
-        open={createFolderOpen}
-        onOpenChange={setCreateFolderOpen}
-        path={path}
-      />
-      <RenameFileDialog
-        open={renameFileOpen}
-        onOpenChange={setRenameFileOpen}
-        path={renamingNode}
-      />
-      <Flex
-        direction="column"
-        gap="2"
-        style={{
-          width: 200,
-          borderRight: "1px solid var(--gray-5)",
-          height: "100%",
-        }}
-        p="2"
-        pr="4"
-      >
-        {favourites.map((favourite) => (
-          <ContextMenu.Root key={favourite}>
-            <ContextMenu.Trigger>
-              <Button
-                style={{
-                  justifyContent: "flex-start",
-                  paddingInline: "var(--space-4)",
-                }}
-                variant="ghost"
-                size="1"
-                color="gray"
-                onClick={() => setPath(parsePath(favourite))}
-              >
-                {findNodeByPath(favourite, tree)?.name ??
-                  favourite}
-              </Button>
-            </ContextMenu.Trigger>
-            <ContextMenu.Content size="1">
-              <ContextMenu.Item
-                onClick={() => {
-                  setPath(parsePath(favourite));
-                }}
-              >
-                Open
-              </ContextMenu.Item>
-              <ContextMenu.Item
-                onClick={() => {
-                  setRenamingNode(favourite);
-                  setRenameFileOpen(true);
-                }}
-              >
-                Rename
-              </ContextMenu.Item>
-              <ContextMenu.Item
-                onClick={() => {
-                  removeFavourite(favourite);
-                }}
-              >
-                Remove from favourites
-              </ContextMenu.Item>
-              <ContextMenu.Item
-                onClick={() => {
-                  useFileSystemStore
-                    .getState()
-                    .remove(favourite);
-                }}
-                color="crimson"
-              >
-                Delete
-              </ContextMenu.Item>
-            </ContextMenu.Content>
-          </ContextMenu.Root>
-        ))}
-      </Flex>
-      <ContextMenu.Root key={path}>
-        <ContextMenu.Trigger>
-          <div
-            style={{
-              height: "100%",
-              position: "relative",
-              width: "100%",
-            }}
-          >
-            <DndContext
-              sensors={[mouseSensor]}
-              onDragEnd={(event) => {
-                const active = event.active.id.toString();
-                const over = event.over?.id.toString();
-                if (!over) return;
-                if (active === over) return;
-                move(`${active}`, `${over}`);
+    <DndContext
+      sensors={[mouseSensor]}
+      onDragEnd={(event) => {
+        const active = event.active.id.toString();
+        const over = event.over?.id.toString();
+        if (!over) return;
+        if (active === over) return;
+        move(`${active}`, `${over}`);
+      }}
+    >
+      <Flex gap="3" style={{ height: "100%" }}>
+        <CreateFolderDialog
+          open={createFolderOpen}
+          onOpenChange={setCreateFolderOpen}
+          path={path}
+        />
+        <RenameFileDialog
+          open={renameFileOpen}
+          onOpenChange={setRenameFileOpen}
+          path={renamingNode}
+        />
+        <Flex
+          direction="column"
+          gap="2"
+          style={{
+            width: 200,
+            borderRight: "1px solid var(--gray-5)",
+            height: "100%",
+          }}
+          p="2"
+          pr="4"
+        >
+          {favourites.map((favourite) => (
+            <FavouriteItem
+              key={favourite}
+              favourite={favourite}
+              onClick={() => setPath(parsePath(favourite))}
+              onRename={() => {
+                setRenamingNode(favourite);
+                setRenameFileOpen(true);
+              }}
+            />
+          ))}
+        </Flex>
+        <ContextMenu.Root key={path}>
+          <ContextMenu.Trigger>
+            <div
+              style={{
+                height: "100%",
+                position: "relative",
+                width: "100%",
               }}
             >
               <Flex
@@ -228,28 +183,94 @@ export function Explorer({
                     : null}
                 </Flex>
               </Flex>
-            </DndContext>
-          </div>
-        </ContextMenu.Trigger>
+            </div>
+          </ContextMenu.Trigger>
 
-        <ContextMenu.Content size="1">
+          <ContextMenu.Content size="1">
+            <ContextMenu.Item
+              onClick={() => setCreateFolderOpen(true)}
+            >
+              Create folder
+            </ContextMenu.Item>
+            <ContextMenu.Item
+              onClick={(e) => {
+                e.stopPropagation();
+                const { addWindow } = useWindowStore.getState();
+                addWindow(createTerminalWindow(path));
+              }}
+            >
+              Open in terminal
+            </ContextMenu.Item>
+          </ContextMenu.Content>
+        </ContextMenu.Root>
+      </Flex>
+    </DndContext>
+  );
+}
+
+function FavouriteItem(props: {
+  favourite: string;
+  onClick: () => void;
+  onRename: () => void;
+}) {
+  const tree = useFileSystemStore((s) => s.tree);
+  const droppable = useDroppable({
+    id: removeStartingSlash(props.favourite),
+  });
+  return (
+    <ContextMenu.Root>
+      <ContextMenu.Trigger>
+        <Button
+          style={{
+            justifyContent: "flex-start",
+            paddingInline: "var(--space-4)",
+          }}
+          variant="ghost"
+          size="1"
+          color={droppable.isOver ? "indigo" : "gray"}
+          onClick={() => props.onClick()}
+          ref={droppable.setNodeRef}
+        >
+          {findNodeByPath(props.favourite, tree)?.name ??
+            props.favourite}
+        </Button>
+      </ContextMenu.Trigger>
+      <ContextMenu.Content size="1">
+        <ContextMenu.Item
+          onClick={() => {
+            props.onClick();
+          }}
+        >
+          Open
+        </ContextMenu.Item>
+        <ContextMenu.Item onClick={props.onRename}>
+          Rename
+        </ContextMenu.Item>
+        {props.favourite !== "Home" && (
           <ContextMenu.Item
-            onClick={() => setCreateFolderOpen(true)}
-          >
-            Create folder
-          </ContextMenu.Item>
-          <ContextMenu.Item
-            onClick={(e) => {
-              e.stopPropagation();
-              const { addWindow } = useWindowStore.getState();
-              addWindow(createTerminalWindow(path));
+            onClick={() => {
+              useFileSystemStore
+                .getState()
+                .removeFolderFromFavourites(props.favourite);
             }}
           >
-            Open in terminal
+            Remove from favourites
           </ContextMenu.Item>
-        </ContextMenu.Content>
-      </ContextMenu.Root>
-    </Flex>
+        )}
+        {props.favourite !== "Home" && (
+          <ContextMenu.Item
+            onClick={() => {
+              useFileSystemStore
+                .getState()
+                .remove(props.favourite);
+            }}
+            color="crimson"
+          >
+            Delete
+          </ContextMenu.Item>
+        )}
+      </ContextMenu.Content>
+    </ContextMenu.Root>
   );
 }
 
@@ -291,6 +312,7 @@ function ExplorerItem(props: {
     <ContextMenu.Root>
       <ContextMenu.Trigger>
         <Button
+          className="focus-normal"
           style={{
             justifyContent: "flex-start",
             paddingInline: "var(--space-4)",

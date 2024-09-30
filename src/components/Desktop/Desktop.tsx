@@ -230,29 +230,16 @@ export function Desktop() {
             ))}
           </div>
         </ContextMenu.Trigger>
-        <ContextMenu.Content>
+        <ContextMenu.Content size="1">
           <ContextMenu.Item
             onClick={() => {
               addWindow(createSettingsWindow());
             }}
           >
-            Settings
+            Open Settings
           </ContextMenu.Item>
         </ContextMenu.Content>
       </ContextMenu.Root>
-      {/* <DragOverlay>
-        <Flex
-          style={{
-            width: 50,
-            height: 50,
-            background: "rgba(0,0,0,0.2)",
-          }}
-          align="center"
-          justify="center"
-        >
-          {draggedApp?.icon ?? <MoveIcon />}
-        </Flex>
-      </DragOverlay> */}
     </DndContext>
   );
 }
