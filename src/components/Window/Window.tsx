@@ -68,7 +68,7 @@ export function Window(props: {
 
   return (
     <Card
-      variant={props.active ? "classic" : "surface"}
+      variant={props.active ? "classic" : "classic"}
       size="1"
       onClick={() => props.onFocused?.()}
       ref={(el) => {
@@ -93,6 +93,9 @@ export function Window(props: {
         gap: "var(--space-2)",
         opacity: props.minimized ? 0 : 1,
         pointerEvents: props.minimized ? "none" : "auto",
+        filter: !props.active
+          ? "brightness(90%) contrast(0.98)"
+          : "none",
         transition: "opacity 0.1s ease-in-out",
       }}
       onAnimationEnd={() => setHasAnimated(true)}

@@ -3,7 +3,7 @@ import { createWindow } from "../../stores/window";
 import { Settings } from "./Settings";
 const windowId = Symbol("window");
 
-const height = 268;
+const height = 358;
 const width = 459;
 
 export const createSettingsWindow = () => ({

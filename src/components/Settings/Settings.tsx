@@ -16,6 +16,7 @@ import {
   useSettingsStore,
 } from "../../stores/settings";
 import { BrowserLink } from "../BrowserLink/BrowserLink";
+import { ImageDropper } from "../ImageDropper/ImageDropper";
 
 export function Settings() {
   return (
@@ -146,6 +147,15 @@ function CustomizeTab() {
             </Badge>
           ))}
         </Grid>
+        <Text size="1" color="gray">
+          or
+        </Text>
+        <ImageDropper
+          onChange={(img) => {
+            console.log(img);
+            settingsStore.setBg(img);
+          }}
+        />
       </Flex>
     </Tabs.Content>
   );
