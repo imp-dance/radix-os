@@ -1,7 +1,7 @@
 import { CodeIcon } from "@radix-ui/react-icons";
 import { FsFile } from "../../stores/fs";
 import { createWindow } from "../../stores/window";
-import { Code as CodeApp } from "./Code";
+import { CodeApp } from "./Code";
 
 export const createCodeWindow = (args: {
   path: string;

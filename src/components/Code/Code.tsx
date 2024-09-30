@@ -2,20 +2,23 @@ import Editor from "@monaco-editor/react";
 import {
   Box,
   Button,
+  Dialog,
   DropdownMenu,
   Flex,
 } from "@radix-ui/themes";
 import { useRef, useState } from "react";
-import { useOnKeyDown } from "../../hooks/useKeyboard";
-import { findNodeByPath } from "../../services/fs";
+import { useKeydown } from "../../hooks/useKeyboard";
+import { findNodeByPath, parsePath } from "../../services/fs";
 import { FsFile, useFileSystemStore } from "../../stores/fs";
 import { useSettingsStore } from "../../stores/settings";
+import { useWindowStore } from "../../stores/window";
 
-export function Code(props: {
+export function CodeApp(props: {
   file: FsFile;
   path: string;
   windowId: symbol;
 }) {
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const fs = useFileSystemStore((s) => s.tree);
   const [value, setValue] = useState(props.file.data);
   const editorRef = useRef<{ getValue: () => string } | null>(
@@ -23,10 +26,14 @@ export function Code(props: {
   );
   const theme = useSettingsStore((s) => s.theme);
   const save = useFileSystemStore((s) => s.updateFile);
+  const deleteFile = useFileSystemStore((s) => s.remove);
+  const windows = useWindowStore((s) => s.windows);
+  const win = windows.find((win) => win.id === props.windowId);
+  const removeWindow = useWindowStore((s) => s.removeWindow);
   const node = findNodeByPath(props.path, fs);
   const touched = node && "data" in node && node.data !== value;
 
-  useOnKeyDown({
+  useKeydown({
     key: "s",
     metaKey: true,
     callback: () => {
@@ -61,14 +68,6 @@ export function Code(props: {
           </DropdownMenu.Trigger>
           <DropdownMenu.Content size="1">
             <DropdownMenu.Item
-              shortcut="⌘ N"
-              onClick={() => {
-                // ...
-              }}
-            >
-              New
-            </DropdownMenu.Item>
-            <DropdownMenu.Item
               shortcut="⌘ S"
               onClick={() => {
                 save(props.path, value);
@@ -79,11 +78,46 @@ export function Code(props: {
               Save {touched ? "changes" : ""}
             </DropdownMenu.Item>
             <DropdownMenu.Separator />
-            <DropdownMenu.Item color="red">
-              Delete
-            </DropdownMenu.Item>
+            {props.file.title !== "__new" && (
+              <DropdownMenu.Item
+                color="red"
+                onClick={() => setDeleteOpen(true)}
+              >
+                Delete
+              </DropdownMenu.Item>
+            )}
           </DropdownMenu.Content>
         </DropdownMenu.Root>
+        <Dialog.Root
+          open={deleteOpen}
+          onOpenChange={setDeleteOpen}
+        >
+          <Dialog.Content>
+            <Dialog.Title>Delete file</Dialog.Title>
+            <Dialog.Description>
+              Are you sure you want to delete this file?
+            </Dialog.Description>
+            <Flex gap="3" mt="4" justify="end">
+              <Dialog.Close>
+                <Button variant="soft" color="gray">
+                  Cancel
+                </Button>
+              </Dialog.Close>
+              <Dialog.Close>
+                <Button
+                  variant="solid"
+                  color="crimson"
+                  onClick={() => {
+                    deleteFile(parsePath(props.path));
+                    if (win) removeWindow(win);
+                  }}
+                >
+                  Delete file
+                </Button>
+              </Dialog.Close>
+            </Flex>
+          </Dialog.Content>
+        </Dialog.Root>
       </Box>
       <div
         style={{

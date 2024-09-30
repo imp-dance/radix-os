@@ -113,7 +113,7 @@ export function Desktop() {
               data: "",
               launcher: [],
               name: "Note",
-              title: "Note",
+              title: "__new",
             },
           })
         );
