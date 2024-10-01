@@ -54,16 +54,6 @@ export function MultiTaskBar() {
         <ContextMenu.Trigger>
           <Box style={{ background: "var(--gray-4)" }}>
             <Flex>
-              {/* <Button
-                variant="soft"
-                color="indigo"
-                style={{ borderRadius: 0 }}
-              >
-                <Flex gap="2" align="center">
-                  <StarFilledIcon />
-                  Launch
-                </Flex>
-              </Button> */}
               {windows.map((win) => {
                 const maxLength = 20;
                 const title =

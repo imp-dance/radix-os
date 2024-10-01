@@ -1,5 +1,4 @@
 import { useDraggable } from "@dnd-kit/core";
-import { CSS } from "@dnd-kit/utilities";
 import {
   Cross1Icon,
   MinusIcon,
@@ -74,13 +73,16 @@ export function Window(props: {
       ref={(el) => {
         draggable.setNodeRef(el);
       }}
+      data-key={props.window.key}
       style={{
         position: "absolute",
         left: props.window.x,
         top: props.window.y,
         width: props.window.initialWidth,
         height: props.window.initialHeight,
-        transform: CSS.Transform.toString(draggable.transform),
+        transform: draggable.transform
+          ? `translate(${draggable.transform.x}px, ${draggable.transform.y}px)`
+          : undefined,
         maxWidth: `min(100vw, ${props.window.maxWidth}px)`,
         maxHeight: `min(calc(100vh - var(--space-6)), ${props.window.maxHeight}px)`,
         animation: !hasAnimated
@@ -127,6 +129,7 @@ export function Window(props: {
                   width: "100%",
                   paddingBlock: "var(--space-3)",
                   cursor: "-moz-grab",
+                  outline: "none",
                 }}
                 my="-3"
                 onMouseUp={(e) => {

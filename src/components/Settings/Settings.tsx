@@ -201,7 +201,6 @@ function CustomizeTab() {
         </Text>
         <ImageDropper
           onChange={(img) => {
-            console.log(img);
             settingsStore.setBg(img);
           }}
         />
