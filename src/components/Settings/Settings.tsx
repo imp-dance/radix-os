@@ -6,6 +6,7 @@ import {
   Flex,
   Grid,
   Heading,
+  Kbd,
   Switch,
   Tabs,
   Text,
@@ -19,6 +20,8 @@ import { BrowserLink } from "../BrowserLink/BrowserLink";
 import { ImageDropper } from "../ImageDropper/ImageDropper";
 
 export function Settings() {
+  const isMac = navigator.platform.toUpperCase().includes("MAC");
+  const altOrOpt = isMac ? "⌥" : "Alt";
   return (
     <Tabs.Root
       defaultValue="customize"
@@ -27,10 +30,33 @@ export function Settings() {
       <Tabs.List mb="1">
         <Tabs.Trigger value="customize">Customize</Tabs.Trigger>
         <Tabs.Trigger value="storage">Storage</Tabs.Trigger>
+        <Tabs.Trigger value="shortcuts">Shortcuts</Tabs.Trigger>
         <Tabs.Trigger value="about">About</Tabs.Trigger>
       </Tabs.List>
       <CustomizeTab />
       <StorageTab />
+      <Tabs.Content value="shortcuts">
+        <Flex p="2" direction="column" gap="3">
+          <Flex gap="2" align="center">
+            <Kbd>{isMac ? altOrOpt : "CTRL"} + Tab</Kbd>
+            <Text size="2" color="gray">
+              Switch between applications
+            </Text>
+          </Flex>
+          <Flex gap="2" align="center">
+            <Kbd>{isMac ? altOrOpt : "CTRL"} + Shift + Tab</Kbd>
+            <Text size="2" color="gray">
+              Switch between applications
+            </Text>
+          </Flex>
+          <Flex gap="2" align="center">
+            <Kbd>{altOrOpt} + W</Kbd>
+            <Text size="2" color="gray">
+              Close active window
+            </Text>
+          </Flex>
+        </Flex>
+      </Tabs.Content>
       <Tabs.Content value="about" style={{ height: "100%" }}>
         <Flex p="2" direction="column" gap="3" height="100%">
           <Text size="2" color="gray">
@@ -110,7 +136,7 @@ function CustomizeTab() {
           />
           Translucency
         </Text>
-        <Heading size="2" color="gray">
+        <Heading size="1" color="gray">
           Background
         </Heading>
         <Grid columns="4" gap="3" style={{ minWidth: 420 }}>

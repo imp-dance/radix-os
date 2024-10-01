@@ -24,6 +24,8 @@ export function ImageDropper(props: {
         border: isDragging
           ? "2px dotted var(--indigo-5)"
           : "2px dotted var(--gray-5)",
+        background: isDragging ? "var(--gray-1)" : "transparent",
+        textAlign: "center",
       }}
       onDragEnter={() => setIsDragging(true)}
       onDragLeave={() => setIsDragging(false)}
@@ -51,7 +53,7 @@ export function ImageDropper(props: {
         });
       }}
     >
-      <Text size="1" color="indigo">
+      <Text size="1" color="indigo" weight="medium">
         Drop image here
       </Text>
       <input

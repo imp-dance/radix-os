@@ -94,7 +94,7 @@ export function Window(props: {
         opacity: props.minimized ? 0 : 1,
         pointerEvents: props.minimized ? "none" : "auto",
         filter: !props.active
-          ? "brightness(90%) contrast(0.98)"
+          ? "brightness(98%) contrast(0.98)"
           : "none",
         transition: "opacity 0.1s ease-in-out",
       }}

@@ -7,6 +7,7 @@ import {
   Text,
 } from "@radix-ui/themes";
 import React, { memo, useState } from "react";
+import { useKeydown } from "../../hooks/useKeyboard";
 import { useWindowStore } from "../../stores/window";
 import { Window } from "../Window/Window";
 
@@ -30,6 +31,22 @@ export function MultiTaskBar() {
   const clearActiveWindow = useWindowStore(
     (state) => state.clearActiveWindow
   );
+
+  const closeActiveWindow = () => {
+    if (activeWindow) removeWindow(activeWindow);
+  };
+
+  useKeydown({
+    key: "Ω",
+    altKey: true,
+    callback: closeActiveWindow,
+  });
+
+  useKeydown({
+    key: "w",
+    altKey: true,
+    callback: closeActiveWindow,
+  });
 
   return (
     <>
