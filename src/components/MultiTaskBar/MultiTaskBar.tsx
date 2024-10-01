@@ -101,6 +101,25 @@ export function MultiTaskBar() {
                         >
                           Close window
                         </ContextMenu.Item>
+
+                        <ContextMenu.Item
+                          onClick={() => {
+                            const wasMini =
+                              minimizedWindows.includes(win.id);
+                            setMinimizedWindows((p) =>
+                              p.includes(win.id)
+                                ? p.filter((id) => id !== win.id)
+                                : [...p, win.id]
+                            );
+                            if (wasMini) {
+                              bringToFront(win);
+                            }
+                          }}
+                        >
+                          {minimizedWindows.includes(win.id)
+                            ? "Bring to front"
+                            : "Minimize window"}
+                        </ContextMenu.Item>
                       </ContextMenu.Content>
                     </ContextMenu.Root>
                   </React.Fragment>

@@ -6,9 +6,11 @@ const windowId = Symbol("window");
 const height = 358;
 const width = 459;
 
-export const createSettingsWindow = () => ({
+export const createSettingsWindow = (
+  tab?: "customize" | "storage" | "shortcuts" | "about"
+) => ({
   ...createWindow({
-    content: <Settings />,
+    content: <Settings initialTab={tab} />,
     title: "Settings",
     icon: <GearIcon />,
     initialHeight: height,

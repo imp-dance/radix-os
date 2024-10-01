@@ -230,10 +230,31 @@ export function Desktop() {
         <ContextMenu.Content size="1">
           <ContextMenu.Item
             onClick={() => {
-              addWindow(createSettingsWindow());
+              addWindow(createSettingsWindow("customize"));
             }}
           >
-            Open Settings
+            Customize
+          </ContextMenu.Item>
+          <ContextMenu.Item
+            onClick={() => {
+              addWindow(createSettingsWindow("storage"));
+            }}
+          >
+            Storage
+          </ContextMenu.Item>
+          <ContextMenu.Item
+            onClick={() => {
+              addWindow(createSettingsWindow("shortcuts"));
+            }}
+          >
+            View shortcuts
+          </ContextMenu.Item>
+          <ContextMenu.Item
+            onClick={() => {
+              addWindow(createSettingsWindow("about"));
+            }}
+          >
+            About
           </ContextMenu.Item>
         </ContextMenu.Content>
       </ContextMenu.Root>

@@ -31,21 +31,29 @@ type WindowStore = {
 export const useWindowStore = create<WindowStore>((set) => ({
   windows: [] as Window[],
   addWindow: (win) =>
-    set((state) =>
-      state.windows.find((w) => w.id === win.id)
-        ? {
-            windowOrder: [
-              ...state.windowOrder.filter((w) => w !== win.id),
-              win.id,
-            ],
-            activeWindow: win,
+    set((state) => {
+      if (state.windows.find((w) => w.id === win.id)) {
+        const newWindows = state.windows.map((w) => {
+          if (w.id === win.id) {
+            return win;
           }
-        : {
-            windows: [...state.windows, win],
-            windowOrder: [...state.windowOrder, win.id],
-            activeWindow: win,
-          }
-    ),
+          return w;
+        });
+        return {
+          windows: newWindows,
+          windowOrder: [
+            ...state.windowOrder.filter((w) => w !== win.id),
+            win.id,
+          ],
+          activeWindow: win,
+        };
+      }
+      return {
+        windows: [...state.windows, win],
+        windowOrder: [...state.windowOrder, win.id],
+        activeWindow: win,
+      };
+    }),
   removeWindow: (win) =>
     set((state) => ({
       windows: state.windows.filter((w) => w.id !== win.id),

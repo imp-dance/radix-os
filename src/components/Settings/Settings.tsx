@@ -1,7 +1,9 @@
+import { InfoCircledIcon } from "@radix-ui/react-icons";
 import {
   AlertDialog,
   Badge,
   Button,
+  Callout,
   Code,
   Flex,
   Grid,
@@ -11,6 +13,7 @@ import {
   Tabs,
   Text,
 } from "@radix-ui/themes";
+import { useEffect, useState } from "react";
 import { FS_LS_KEY } from "../../stores/fs";
 import {
   SETTINGS_LS_KEY,
@@ -19,12 +22,23 @@ import {
 import { BrowserLink } from "../BrowserLink/BrowserLink";
 import { ImageDropper } from "../ImageDropper/ImageDropper";
 
-export function Settings() {
+export function Settings(props: {
+  initialTab?: "customize" | "storage" | "shortcuts" | "about";
+}) {
+  const [tab, setTab] = useState<
+    "customize" | "storage" | "shortcuts" | "about"
+  >(props.initialTab ?? "customize");
   const isMac = navigator.platform.toUpperCase().includes("MAC");
   const altOrOpt = isMac ? "⌥" : "Alt";
+
+  useEffect(() => {
+    setTab(props.initialTab ?? "customize");
+  }, [props.initialTab]);
   return (
     <Tabs.Root
-      defaultValue="customize"
+      defaultValue={props.initialTab ?? "customize"}
+      value={tab}
+      onValueChange={(v) => setTab(v as "customize")}
       style={{ height: "calc(100% - 3rem)" }}
     >
       <Tabs.List mb="1">
@@ -37,6 +51,15 @@ export function Settings() {
       <StorageTab />
       <Tabs.Content value="shortcuts">
         <Flex p="2" direction="column" gap="3">
+          <Callout.Root size="1">
+            <Callout.Icon>
+              <InfoCircledIcon />
+            </Callout.Icon>
+            <Callout.Text>
+              Shortcuts have varying support across browsers and
+              operating systems.
+            </Callout.Text>
+          </Callout.Root>
           <Flex gap="2" align="center">
             <Kbd>{isMac ? altOrOpt : "CTRL"} + Tab</Kbd>
             <Text size="2" color="gray">
