@@ -30,7 +30,7 @@ const restrictToDesktopEdges: Modifier = ({
 
 function App() {
   const shiftHeld = useKeyHeld("Shift");
-  const [showDropzones, setShowDropzones] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const mouseSensor = useSensor(MouseSensor, {
     // Require the mouse to move by 10 pixels before activating
     activationConstraint: {
@@ -70,7 +70,7 @@ function App() {
         modifiers={[restrictToDesktopEdges]}
         sensors={[mouseSensor]}
         onDragEnd={(event) => {
-          setShowDropzones(false);
+          setIsDragging(false);
           const window = windows.find(
             (win) => win.key === event.active.id?.toString()
           );
@@ -101,11 +101,11 @@ function App() {
           );
         }}
         onDragStart={() => {
-          if (shiftHeld) setShowDropzones(true);
+          setIsDragging(true);
         }}
       >
         <Desktop />
-        {showDropzones && (
+        {shiftHeld && isDragging && (
           <>
             <Dropzone dir="left" />
             <Dropzone dir="right" />
