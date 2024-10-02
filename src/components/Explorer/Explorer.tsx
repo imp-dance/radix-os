@@ -1,5 +1,6 @@
 import {
   DndContext,
+  DragOverlay,
   MouseSensor,
   useDraggable,
   useDroppable,
@@ -17,11 +18,13 @@ import {
   GlobeIcon,
 } from "@radix-ui/react-icons";
 import {
+  Box,
   Button,
   Code,
   ContextMenu,
   Dialog,
   Flex,
+  Text,
   TextField,
 } from "@radix-ui/themes";
 import React, { ReactNode, useRef, useState } from "react";
@@ -42,14 +45,21 @@ import { createTerminalWindow } from "../Terminal/Terminal.window";
 
 export function Explorer({
   initialPath = "",
+  windowId,
 }: {
   initialPath?: string;
+  windowId: symbol;
 }) {
   const mouseSensor = useSensor(MouseSensor, {
     activationConstraint: {
       distance: 10,
     },
   });
+  const [isDragging, setIsDragging] = useState(false);
+  const prevSelected = useRef<string>("");
+  const windows = useWindowStore((s) => s.windows);
+  const window = windows.find((w) => w.id === windowId);
+  const [selected, setSelected] = useState<string[]>([]);
   const [createFolderOpen, setCreateFolderOpen] =
     useState(false);
   const [createFileOpen, setCreateFileOpen] = useState(false);
@@ -63,7 +73,7 @@ export function Explorer({
     (s) => s.favouriteFolders
   );
   const move = useFileSystemStore((s) => s.move);
-  const [path, setPath] = useState(initialPath);
+  const [path, _setPath] = useState(initialPath);
 
   const steps = path.split("/").filter(Boolean);
   const currentFolder = steps.reduce((acc, step) => {
@@ -81,15 +91,33 @@ export function Explorer({
         : b.name.localeCompare(a.name)
     );
   }
+
+  const setPath = (
+    path: string | ((prev: string) => string)
+  ) => {
+    _setPath(path);
+    setSelected([]);
+  };
+
   return (
     <DndContext
       sensors={[mouseSensor]}
       onDragEnd={(event) => {
         const active = event.active.id.toString();
         const over = event.over?.id.toString();
+        setIsDragging(false);
         if (!over) return;
         if (parsePath(active) === parsePath(over)) return;
-        move(`${active}`, `${over}`);
+        if (selected.length > 1) {
+          selected.forEach((s) => {
+            move(s, over);
+          });
+        } else {
+          move(`${active}`, `${over}`);
+        }
+      }}
+      onDragStart={() => {
+        setIsDragging(true);
       }}
     >
       <Flex gap="3" style={{ height: "100%" }}>
@@ -124,6 +152,13 @@ export function Explorer({
               key={favourite}
               favourite={favourite}
               onClick={() => setPath(parsePath(favourite))}
+              disabled={
+                selected.find(
+                  (s) => parsePath(s) === parsePath(favourite)
+                )
+                  ? true
+                  : false
+              }
               onRename={() => {
                 setRenamingNode(favourite);
                 setRenameFileOpen(true);
@@ -136,7 +171,6 @@ export function Explorer({
             <div
               style={{
                 height: "100%",
-                position: "relative",
                 width: "100%",
               }}
             >
@@ -207,6 +241,31 @@ export function Explorer({
                 </Flex>
 
                 <Flex gap="3" direction="column">
+                  {selected.length > 1 && (
+                    <DragOverlay
+                      adjustScale={false}
+                      wrapperElement="span"
+                      style={{}}
+                    >
+                      <Box
+                        p="1"
+                        px="2"
+                        style={{
+                          background: "var(--gray-1)",
+                          cursor: "default",
+                          pointerEvents: "none",
+                          width: "max-content",
+                          transform: `translate(-${window?.x}px, -${window?.y}px)`,
+                          borderRadius: "var(--radius-2)",
+                          opacity: 0.8,
+                        }}
+                      >
+                        <Text size="1" color="gray">
+                          {selected.length} items selected
+                        </Text>
+                      </Box>
+                    </DragOverlay>
+                  )}
                   {isFolder(currentFolder)
                     ? sortedChildren.map((child, i) => {
                         return (
@@ -214,6 +273,68 @@ export function Explorer({
                             key={child.name}
                             item={child}
                             path={`${path}/${child.name}`}
+                            selected={selected.includes(
+                              `${path}/${child.name}`
+                            )}
+                            isDragging={
+                              selected.includes(
+                                `${path}/${child.name}`
+                              ) &&
+                              isDragging &&
+                              selected.length > 1
+                            }
+                            onSelect={({
+                              shiftKey,
+                              metaKey,
+                            }) => {
+                              setSelected((prev) => {
+                                if (shiftKey) {
+                                  const start =
+                                    prevSelected.current ||
+                                    `${path}/${child.name}`;
+                                  const end = `${path}/${child.name}`;
+                                  const startIdx =
+                                    sortedChildren.findIndex(
+                                      (c) =>
+                                        c.name ===
+                                        start.split("/").pop()
+                                    );
+                                  const endIdx =
+                                    sortedChildren.findIndex(
+                                      (c) =>
+                                        c.name ===
+                                        end.split("/").pop()
+                                    );
+                                  const [a, b] =
+                                    startIdx < endIdx
+                                      ? [startIdx, endIdx]
+                                      : [endIdx, startIdx];
+                                  return sortedChildren
+                                    .slice(a, b + 1)
+                                    .map(
+                                      (c) => `${path}/${c.name}`
+                                    );
+                                } else if (metaKey) {
+                                  return prev.includes(
+                                    `${path}/${child.name}`
+                                  )
+                                    ? prev.filter(
+                                        (p) =>
+                                          p !==
+                                          `${path}/${child.name}`
+                                      )
+                                    : [
+                                        ...prev,
+                                        `${path}/${child.name}`,
+                                      ];
+                                } else {
+                                  prevSelected.current = `${path}/${child.name}`;
+                                  return [
+                                    `${path}/${child.name}`,
+                                  ];
+                                }
+                              });
+                            }}
                             onClick={() => {
                               if (isFolder(child)) {
                                 setPath(
@@ -269,10 +390,12 @@ function FavouriteItem(props: {
   favourite: string;
   onClick: () => void;
   onRename: () => void;
+  disabled?: boolean;
 }) {
   const tree = useFileSystemStore((s) => s.tree);
   const droppable = useDroppable({
     id: removeStartingSlash(props.favourite),
+    disabled: props.disabled,
   });
   return (
     <ContextMenu.Root>
@@ -284,7 +407,11 @@ function FavouriteItem(props: {
           }}
           variant="ghost"
           size="1"
-          color={droppable.isOver ? "indigo" : "gray"}
+          color={
+            droppable.isOver && !props.disabled
+              ? "indigo"
+              : "gray"
+          }
           onClick={() => props.onClick()}
           ref={droppable.setNodeRef}
         >
@@ -343,8 +470,21 @@ function ExplorerItem(props: {
   item: FsNode;
   onClick?: () => void;
   path: string;
-  onRename?: () => void;
+  onRename: () => void;
+  selected?: boolean;
+  onSelect?: (opts: {
+    shiftKey: boolean;
+    metaKey: boolean;
+  }) => void;
+  isDragging?: boolean;
 }) {
+  const droppable = useDroppable({
+    id: removeStartingSlash(props.path),
+    disabled: isFile(props.item) || props.isDragging,
+  });
+  const draggable = useDraggable({
+    id: removeStartingSlash(props.path),
+  });
   const remove = useFileSystemStore((s) => s.remove);
   const addToFavourites = useFileSystemStore(
     (s) => s.addFolderToFavourites
@@ -358,18 +498,10 @@ function ExplorerItem(props: {
   const isFavorite = favourites.some(
     (f) => parsePath(f) === parsePath(props.path)
   );
-  const droppable = useDroppable({
-    id: removeStartingSlash(props.path),
-    disabled: isFile(props.item),
-  });
-  const draggable = useDraggable({
-    id: removeStartingSlash(props.path),
-  });
   return (
     <ContextMenu.Root>
       <ContextMenu.Trigger>
         <Button
-          className="focus-normal"
           style={{
             justifyContent: "flex-start",
             paddingInline: "var(--space-4)",
@@ -379,6 +511,12 @@ function ExplorerItem(props: {
             background: droppable.isOver
               ? "rgba(0,0,0,0.25)"
               : undefined,
+            outline: props.selected
+              ? "2px solid var(--focus-8)"
+              : "none",
+            outlineOffset: "-1px",
+            opacity: props.isDragging ? 0 : 1,
+            pointerEvents: props.isDragging ? "none" : "auto",
           }}
           data-returnfocus={
             props.returnFocus ? "true" : undefined
@@ -386,11 +524,25 @@ function ExplorerItem(props: {
           variant="ghost"
           size="1"
           color="gray"
-          onClick={(e) => {
+          onDoubleClick={(e) => {
             props.onClick?.();
             if (isFile(props.item)) {
               e.stopPropagation();
               openFile(props.item, props.path);
+            }
+          }}
+          onClick={(e) => {
+            if (props.onSelect) {
+              props.onSelect({
+                shiftKey: e.shiftKey,
+                metaKey: e.metaKey,
+              });
+            } else {
+              props.onClick?.();
+              if (isFile(props.item)) {
+                e.stopPropagation();
+                openFile(props.item, props.path);
+              }
             }
           }}
           ref={(el) => {
@@ -479,7 +631,7 @@ function Step(props: {
           ? "amber"
           : props.isCurrent
           ? "indigo"
-          : "gray" // i === steps.length - 1 ? "indigo" : "gray"
+          : "gray"
       }
       size="1"
       asChild
@@ -488,12 +640,6 @@ function Step(props: {
         size="1"
         onClick={() => {
           props.onClick();
-          /* setPath((prev) =>
-                          prev
-                            .split("/")
-                            .slice(0, i + 2)
-                            .join("/")
-                        ); */
         }}
       >
         {props.name ?? steps[steps.length - 1]}

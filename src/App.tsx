@@ -127,7 +127,7 @@ function Dropzone(props: { dir?: "left" | "right" }) {
     <Box
       position="absolute"
       top="2"
-      bottom="2"
+      bottom="7"
       right={props.dir === "left" ? undefined : "2"}
       left={props.dir === "left" ? "2" : undefined}
       width="40%"
