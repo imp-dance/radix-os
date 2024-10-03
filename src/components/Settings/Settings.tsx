@@ -78,6 +78,18 @@ export function Settings(props: {
               Close active window
             </Text>
           </Flex>
+          <Flex gap="2" align="center">
+            <Kbd>Double click window title</Kbd>
+            <Text size="2" color="gray">
+              Toggle maximize
+            </Text>
+          </Flex>
+          <Flex gap="2" align="center">
+            <Kbd>Shift + Drag window</Kbd>
+            <Text size="2" color="gray">
+              Tile window
+            </Text>
+          </Flex>
         </Flex>
       </Tabs.Content>
       <Tabs.Content value="about" style={{ height: "100%" }}>
@@ -278,6 +290,7 @@ function StorageTab() {
                   color="red"
                   onClick={() => {
                     localStorage.removeItem(FS_LS_KEY);
+                    window.location.reload();
                   }}
                 >
                   Format file system

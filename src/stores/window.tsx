@@ -22,10 +22,16 @@ type WindowStore = {
   addWindow: (win: Window) => void;
   removeWindow: (win: Window) => void;
   setWindowPosition: (win: Window, x: number, y: number) => void;
+  setWindowSize: (
+    win: Window,
+    width: number,
+    height: number
+  ) => void;
   activeWindow: Window | null;
   windowOrder: symbol[];
   bringToFront: (win: Window) => void;
   clearActiveWindow: () => void;
+  invalidateWindows: () => void;
 };
 
 export const useWindowStore = create<WindowStore>((set) => ({
@@ -68,6 +74,14 @@ export const useWindowStore = create<WindowStore>((set) => ({
         w.id === win.id ? { ...w, x, y } : w
       ),
     })),
+  setWindowSize: (win, width, height) =>
+    set((state) => ({
+      windows: state.windows.map((w) =>
+        w.id === win.id
+          ? { ...w, initialWidth: width, initialHeight: height }
+          : w
+      ),
+    })),
   windowOrder: [],
   bringToFront: (win) =>
     set((state) => ({
@@ -80,6 +94,10 @@ export const useWindowStore = create<WindowStore>((set) => ({
   clearActiveWindow: () =>
     set(() => ({
       activeWindow: null,
+    })),
+  invalidateWindows: () =>
+    set((state) => ({
+      windows: state.windows.map((w) => ({ ...w })),
     })),
 }));
 

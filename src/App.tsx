@@ -6,11 +6,12 @@ import {
   useSensor,
 } from "@dnd-kit/core";
 import { Box } from "@radix-ui/themes";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Desktop } from "./components/Desktop/Desktop";
 import { MultiTaskBar } from "./components/MultiTaskBar/MultiTaskBar";
 import { useKeydown } from "./hooks/useKeyboard";
 import { restrictToBoundingRect } from "./lib/dnd-kit/restrictToBoundingRect";
+import { setWindowDimensions } from "./services/window";
 import { useWindowStore } from "./stores/window";
 
 const restrictToDesktopEdges: Modifier = ({
@@ -29,6 +30,7 @@ const restrictToDesktopEdges: Modifier = ({
 };
 
 function App() {
+  const [hoverTile, setHoverTile] = useState("");
   const shiftHeld = useKeyHeld("Shift");
   const [isDragging, setIsDragging] = useState(false);
   const mouseSensor = useSensor(MouseSensor, {
@@ -64,6 +66,7 @@ function App() {
     },
     deps: [],
   });
+
   return (
     <div id="app">
       <DndContext
@@ -77,22 +80,63 @@ function App() {
           if (!window) return;
           const over = event.over?.id?.toString() ?? "";
           if (event.over && over.startsWith("dropzone")) {
-            const win = document.querySelector(
-              `[data-key="${event.active.id}"]`
-            ) as HTMLElement;
-            if (win) {
-              const halfScreen =
-                document.body.clientWidth / 2 + "px";
-              win.style.width = halfScreen;
-              win.style.height = "100%";
-              if (over.endsWith("right")) {
-                win.style.left = halfScreen;
-              } else {
-                win.style.left = "0px";
-              }
-              win.style.top = "0px";
-              return;
+            const halfWidth =
+              document.body.clientWidth / 2 + "px";
+            const halfHeight =
+              document.getElementById("desktop")!.clientHeight /
+                2 +
+              "px";
+            switch (over) {
+              case "dropzone-left":
+                setWindowDimensions(window.key, {
+                  width: halfWidth,
+                  height: "100%",
+                  x: "0px",
+                  y: "0px",
+                });
+                break;
+              case "dropzone-topleft":
+                setWindowDimensions(window.key, {
+                  width: halfWidth,
+                  height: halfHeight,
+                  x: "0px",
+                  y: "0px",
+                });
+                break;
+              case "dropzone-bottomleft":
+                setWindowDimensions(window.key, {
+                  width: halfWidth,
+                  height: halfHeight,
+                  x: "0px",
+                  y: halfHeight,
+                });
+                break;
+              case "dropzone-right":
+                setWindowDimensions(window.key, {
+                  width: halfWidth,
+                  height: "100%",
+                  x: halfWidth,
+                  y: "0px",
+                });
+                break;
+              case "dropzone-topright":
+                setWindowDimensions(window.key, {
+                  width: halfWidth,
+                  height: halfHeight,
+                  x: halfWidth,
+                  y: "0px",
+                });
+                break;
+              case "dropzone-bottomright":
+                setWindowDimensions(window.key, {
+                  width: halfWidth,
+                  height: halfHeight,
+                  x: halfWidth,
+                  y: halfHeight,
+                });
+                break;
             }
+            return;
           }
           setPosition(
             window,
@@ -105,13 +149,65 @@ function App() {
         }}
       >
         <Desktop />
+        <MultiTaskBar />
         {shiftHeld && isDragging && (
           <>
-            <Dropzone dir="left" />
-            <Dropzone dir="right" />
+            <Dropzone
+              id="left"
+              left="2"
+              top="2"
+              bottom="7"
+              width="50%"
+              height="auto"
+              onDragEnter={() => setHoverTile("left")}
+            />
+            <Dropzone
+              id="right"
+              right="2"
+              top="2"
+              bottom="7"
+              width="50%"
+              height="auto"
+              onDragEnter={() => setHoverTile("right")}
+            />
+            {hoverTile === "left" && (
+              <>
+                <Dropzone
+                  id="topleft"
+                  left="5"
+                  top="5"
+                  height="40%"
+                  width="calc(50% - var(--space-5) * 2)"
+                />
+                <Dropzone
+                  id="bottomleft"
+                  left="5"
+                  bottom="8"
+                  height="40%"
+                  width="calc(50% - var(--space-5) * 2)"
+                />
+              </>
+            )}
+            {hoverTile === "right" && (
+              <>
+                <Dropzone
+                  id="topright"
+                  right="5"
+                  top="5"
+                  height="40%"
+                  width="calc(50% - var(--space-5) * 2)"
+                />
+                <Dropzone
+                  id="bottomright"
+                  right="5"
+                  bottom="8"
+                  height="40%"
+                  width="calc(50% - var(--space-5) * 2)"
+                />
+              </>
+            )}
           </>
         )}
-        <MultiTaskBar />
       </DndContext>
     </div>
   );
@@ -119,20 +215,48 @@ function App() {
 
 export default App;
 
-function Dropzone(props: { dir?: "left" | "right" }) {
+type DirNum = Parameters<typeof Box>[0]["left"];
+
+function Dropzone(props: {
+  id: string;
+  top?: DirNum;
+  bottom?: DirNum;
+  left?: DirNum;
+  right?: DirNum;
+  width: string;
+  height: string;
+  onDragEnter?: () => void;
+  onDragLeave?: () => void;
+}) {
+  const isInside = useRef(false);
   const droppable = useDroppable({
-    id: "dropzone-" + props.dir,
+    id: "dropzone-" + props.id,
   });
+  useEffect(() => {
+    if (droppable.isOver) {
+      props.onDragEnter?.();
+      isInside.current = true;
+    } else if (isInside.current) {
+      props.onDragLeave?.();
+      isInside.current = false;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [droppable.isOver]);
   return (
     <Box
       position="absolute"
-      top="2"
-      bottom="7"
-      right={props.dir === "left" ? undefined : "2"}
-      left={props.dir === "left" ? "2" : undefined}
-      width="40%"
-      height="auto"
-      style={{ background: "var(--gray-4)", opacity: 0.6 }}
+      top={props.top}
+      bottom={props.bottom}
+      right={props.right}
+      left={props.left}
+      width={props.width}
+      height={props.height}
+      style={{
+        background: droppable.isOver
+          ? "var(--gray-9)"
+          : "var(--gray-7)",
+        opacity: 0.5,
+      }}
       ref={droppable.setNodeRef}
     ></Box>
   );

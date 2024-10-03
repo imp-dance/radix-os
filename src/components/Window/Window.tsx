@@ -15,7 +15,8 @@ import {
   ScrollArea,
   Text,
 } from "@radix-ui/themes";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { setWindowDimensions } from "../../services/window";
 import {
   useWindowStore,
   type Window,
@@ -30,8 +31,8 @@ export function Window(props: {
   onFocused?: () => void;
 }) {
   const lastSizeRef = useRef({
-    width: 0,
-    height: 0,
+    width: props.window.initialWidth ?? 0,
+    height: props.window.initialHeight ?? 0,
     x: 0,
     y: 0,
   });
@@ -47,23 +48,42 @@ export function Window(props: {
       draggable.node.current &&
       draggable.node.current.style.width === "100%"
     ) {
-      draggable.node.current.style.width = `${lastSizeRef.current.width}px`;
-      draggable.node.current.style.height = `${lastSizeRef.current.height}px`;
-      draggable.node.current.style.left = `${lastSizeRef.current.x}px`;
-      draggable.node.current.style.top = `${lastSizeRef.current.y}px`;
-      return;
+      // Revert to last size
+      return setWindowDimensions(
+        props.window.key,
+        lastSizeRef.current
+      );
     }
+    const rect = draggable.node.current.getBoundingClientRect();
     lastSizeRef.current = {
-      width: draggable.node.current.clientWidth,
-      height: draggable.node.current.clientHeight,
-      x: draggable.node.current.getBoundingClientRect().left,
-      y: draggable.node.current.getBoundingClientRect().top,
+      width: rect.width,
+      height: rect.height,
+      x: rect.left,
+      y: rect.top,
     };
-    draggable.node.current.style.setProperty("left", "0");
-    draggable.node.current.style.setProperty("top", "0");
-    draggable.node.current.style.setProperty("width", "100%");
-    draggable.node.current.style.setProperty("height", "100%");
+    setWindowDimensions(props.window.key, {
+      x: 0,
+      y: 0,
+      width: "100%",
+      height: "100%",
+    });
   };
+
+  useEffect(() => {
+    const el = draggable.node.current;
+    if (
+      draggable.isDragging &&
+      el &&
+      el.style.height === "100%"
+    ) {
+      // Reset to last size after being maximized or in a window tile
+      setWindowDimensions(props.window.key, {
+        width: lastSizeRef.current.width,
+        height: lastSizeRef.current.height,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draggable.isDragging]);
 
   return (
     <Card
@@ -109,7 +129,11 @@ export function Window(props: {
             p="3"
             px="3"
             mb="0"
-            onDoubleClick={toggleMax}
+            onDoubleClick={
+              props.window.resizeable === false
+                ? undefined
+                : toggleMax
+            }
           >
             <Flex
               justify="between"
