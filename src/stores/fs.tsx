@@ -42,7 +42,7 @@ type FileSystemStore = {
   move: (from: string, to: string) => void;
   remove: (path: string) => void;
   createFolder: (path: string) => void;
-  createFile: (path: string) => void;
+  createFile: (path: string, content?: string) => void;
   updateFile: (path: string, data: string) => void;
   renameFile: (path: string, name: string) => void;
   addFolderToFavourites: (path: string) => void;
@@ -140,7 +140,7 @@ export const useFileSystemStore = create(
           });
           return { ...state, tree: { ...newState.tree } };
         }),
-      createFile: (path) =>
+      createFile: (path, content) =>
         set((state) => {
           const newState = { ...state };
           const parent = findNodeByPath(
@@ -152,7 +152,7 @@ export const useFileSystemStore = create(
           }
           parent.children.push({
             name: pathToName(path),
-            data: "",
+            data: content ?? "",
             launcher: ["code"],
             title: "New file",
           });

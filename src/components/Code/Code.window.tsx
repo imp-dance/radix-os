@@ -4,12 +4,12 @@ import { createWindow } from "../../stores/window";
 import { CodeApp } from "./Code";
 
 export const createCodeWindow = (args: {
-  path: string;
-  file: FsFile;
+  path?: string;
+  file?: FsFile;
 }) => {
   const win = createWindow({
     key: "code",
-    title: args.file.name,
+    title: args.file?.name ?? "New file",
     content: <div />,
     icon: <CodeIcon />,
     initialHeight: 600,

@@ -46,9 +46,13 @@ import { createTerminalWindow } from "../Terminal/Terminal.window";
 export function Explorer({
   initialPath = "",
   windowId,
+  onPathChange,
+  disableFiles,
 }: {
   initialPath?: string;
-  windowId: symbol;
+  windowId?: symbol;
+  onPathChange?: (path: string) => void;
+  disableFiles?: boolean;
 }) {
   const mouseSensor = useSensor(MouseSensor, {
     activationConstraint: {
@@ -93,10 +97,13 @@ export function Explorer({
   }
 
   const setPath = (
-    path: string | ((prev: string) => string)
+    newPath: string | ((prev: string) => string)
   ) => {
-    _setPath(path);
+    _setPath(newPath);
     setSelected([]);
+    const nextValue =
+      typeof newPath === "string" ? newPath : newPath(path);
+    onPathChange?.(nextValue);
   };
 
   return (
@@ -173,6 +180,7 @@ export function Explorer({
                 height: "100%",
                 width: "100%",
               }}
+              onClick={() => setSelected([])}
             >
               <Flex
                 style={{ width: "100%" }}
@@ -271,6 +279,9 @@ export function Explorer({
                         return (
                           <ExplorerItem
                             key={child.name}
+                            disabled={
+                              disableFiles && isFile(child)
+                            }
                             item={child}
                             path={`${path}/${child.name}`}
                             selected={selected.includes(
@@ -477,6 +488,7 @@ function ExplorerItem(props: {
     metaKey: boolean;
   }) => void;
   isDragging?: boolean;
+  disabled?: boolean;
 }) {
   const droppable = useDroppable({
     id: removeStartingSlash(props.path),
@@ -515,7 +527,11 @@ function ExplorerItem(props: {
               ? "2px solid var(--focus-8)"
               : "none",
             outlineOffset: "-1px",
-            opacity: props.isDragging ? 0 : 1,
+            opacity: props.isDragging
+              ? 0
+              : props.disabled
+              ? 0.5
+              : 1,
             pointerEvents: props.isDragging ? "none" : "auto",
           }}
           data-returnfocus={
@@ -525,6 +541,7 @@ function ExplorerItem(props: {
           size="1"
           color="gray"
           onDoubleClick={(e) => {
+            if (props.disabled) return;
             props.onClick?.();
             if (isFile(props.item)) {
               e.stopPropagation();
@@ -532,6 +549,8 @@ function ExplorerItem(props: {
             }
           }}
           onClick={(e) => {
+            if (props.disabled) return;
+            e.stopPropagation();
             if (props.onSelect) {
               props.onSelect({
                 shiftKey: e.shiftKey,
@@ -545,6 +564,7 @@ function ExplorerItem(props: {
               }
             }
           }}
+          disabled={props.disabled}
           ref={(el) => {
             draggable.setNodeRef(el);
             droppable.setNodeRef(el);

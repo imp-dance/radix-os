@@ -106,17 +106,7 @@ export function Desktop() {
       title: "Code",
       id: "code",
       onClick: () => {
-        addWindow(
-          createCodeWindow({
-            path: "",
-            file: {
-              data: "",
-              launcher: [],
-              name: "Note",
-              title: "__new",
-            },
-          })
-        );
+        addWindow(createCodeWindow({}));
       },
       position: {
         x: gridPad,

@@ -157,7 +157,7 @@ function App() {
               left="2"
               top="2"
               bottom="7"
-              width="50%"
+              width="calc(50% - var(--space-3)"
               height="auto"
               onDragEnter={() => setHoverTile("left")}
             />
@@ -166,7 +166,7 @@ function App() {
               right="2"
               top="2"
               bottom="7"
-              width="50%"
+              width="calc(50% - var(--space-3)"
               height="auto"
               onDragEnter={() => setHoverTile("right")}
             />
@@ -176,14 +176,14 @@ function App() {
                   id="topleft"
                   left="5"
                   top="5"
-                  height="40%"
+                  height="calc(50% - var(--space-7))"
                   width="calc(50% - var(--space-5) * 2)"
                 />
                 <Dropzone
                   id="bottomleft"
                   left="5"
                   bottom="8"
-                  height="40%"
+                  height="calc(50% - var(--space-7))"
                   width="calc(50% - var(--space-5) * 2)"
                 />
               </>
@@ -194,14 +194,14 @@ function App() {
                   id="topright"
                   right="5"
                   top="5"
-                  height="40%"
+                  height="calc(50% - var(--space-7))"
                   width="calc(50% - var(--space-5) * 2)"
                 />
                 <Dropzone
                   id="bottomright"
                   right="5"
                   bottom="8"
-                  height="40%"
+                  height="calc(50% - var(--space-7))"
                   width="calc(50% - var(--space-5) * 2)"
                 />
               </>
@@ -255,7 +255,7 @@ function Dropzone(props: {
         background: droppable.isOver
           ? "var(--gray-9)"
           : "var(--gray-7)",
-        opacity: 0.5,
+        opacity: 0.3,
       }}
       ref={droppable.setNodeRef}
     ></Box>

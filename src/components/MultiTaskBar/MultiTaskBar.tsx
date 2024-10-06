@@ -73,10 +73,22 @@ export function MultiTaskBar() {
                           }
                           style={{ borderRadius: 0 }}
                           onClick={() => {
-                            bringToFront(win);
-                            setMinimizedWindows((prev) =>
-                              prev.filter((id) => id !== win.id)
-                            );
+                            const isMinimized =
+                              minimizedWindows.includes(win.id);
+                            if (isMinimized) {
+                              bringToFront(win);
+                              setMinimizedWindows((prev) =>
+                                prev.filter(
+                                  (id) => id !== win.id
+                                )
+                              );
+                            } else {
+                              setMinimizedWindows((prev) => [
+                                ...prev,
+                                win.id,
+                              ]);
+                              clearActiveWindow();
+                            }
                           }}
                         >
                           <Flex align="center" gap="2">

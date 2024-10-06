@@ -32,6 +32,7 @@ type WindowStore = {
   bringToFront: (win: Window) => void;
   clearActiveWindow: () => void;
   invalidateWindows: () => void;
+  setTitle: (win: Window, title: string) => void;
 };
 
 export const useWindowStore = create<WindowStore>((set) => ({
@@ -98,6 +99,12 @@ export const useWindowStore = create<WindowStore>((set) => ({
   invalidateWindows: () =>
     set((state) => ({
       windows: state.windows.map((w) => ({ ...w })),
+    })),
+  setTitle: (win, title) =>
+    set((state) => ({
+      windows: state.windows.map((w) =>
+        w.id === win.id ? { ...w, title } : w
+      ),
     })),
 }));
 
