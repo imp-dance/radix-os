@@ -8,7 +8,6 @@ export const createCodeWindow = (args: {
   file?: FsFile;
 }) => {
   const win = createWindow({
-    key: "code",
     title: args.file?.name ?? "New file",
     content: <div />,
     icon: <CodeIcon />,

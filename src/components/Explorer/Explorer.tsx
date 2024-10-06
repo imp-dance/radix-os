@@ -581,7 +581,7 @@ function ExplorerItem(props: {
       <ContextMenu.Content size="1">
         {isFile(props.item) && (
           <ContextMenu.Sub>
-            <ContextMenu.SubTrigger>
+            <ContextMenu.SubTrigger disabled={props.disabled}>
               Open with
             </ContextMenu.SubTrigger>
             <ContextMenu.SubContent>

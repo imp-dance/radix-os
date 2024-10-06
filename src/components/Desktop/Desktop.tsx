@@ -211,7 +211,7 @@ export function Desktop() {
           >
             {applications.map((application) => (
               <Application
-                key={application.title}
+                key={application.id}
                 {...application}
               />
             ))}

@@ -2,9 +2,11 @@ import Editor from "@monaco-editor/react";
 import {
   Box,
   Button,
+  Card,
   Dialog,
   DropdownMenu,
   Flex,
+  Separator,
   Text,
   TextField,
 } from "@radix-ui/themes";
@@ -19,6 +21,7 @@ import { FsFile, useFileSystemStore } from "../../stores/fs";
 import { useSettingsStore } from "../../stores/settings";
 import { useWindowStore } from "../../stores/window";
 import { Explorer } from "../Explorer/Explorer";
+import { createCodeWindow } from "./Code.window";
 
 export function CodeApp(props: {
   file?: FsFile;
@@ -38,9 +41,10 @@ export function CodeApp(props: {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const fs = useFileSystemStore((s) => s.tree);
   const [value, setValue] = useState(file?.data ?? "");
-  const editorRef = useRef<{ getValue: () => string } | null>(
-    null
-  );
+  const editorRef = useRef<{
+    getValue: () => string;
+    focus: () => void;
+  } | null>(null);
   const theme = useSettingsStore((s) => s.theme);
   const save = useFileSystemStore((s) => s.updateFile);
   const deleteFile = useFileSystemStore((s) => s.remove);
@@ -63,6 +67,27 @@ export function CodeApp(props: {
     metaKey: true,
     callback: () => {
       requestSave();
+    },
+    windowId: props.windowId,
+    deps: [value, createdFile],
+  });
+
+  useKeydown({
+    key: "n",
+    altKey: true,
+    callback: () => {
+      const winState = useWindowStore.getState();
+      winState.addWindow(createCodeWindow({}));
+    },
+    windowId: props.windowId,
+    deps: [value, createdFile],
+  });
+  useKeydown({
+    key: "‘",
+    altKey: true,
+    callback: () => {
+      const winState = useWindowStore.getState();
+      winState.addWindow(createCodeWindow({}));
     },
     windowId: props.windowId,
     deps: [value, createdFile],
@@ -93,6 +118,16 @@ export function CodeApp(props: {
           </DropdownMenu.Trigger>
           <DropdownMenu.Content size="1">
             <DropdownMenu.Item
+              shortcut="Alt N"
+              onClick={(e) => {
+                e.stopPropagation();
+                const winState = useWindowStore.getState();
+                winState.addWindow(createCodeWindow({}));
+              }}
+            >
+              New file
+            </DropdownMenu.Item>
+            <DropdownMenu.Item
               shortcut="⌘ S"
               onClick={() => {
                 requestSave();
@@ -100,16 +135,18 @@ export function CodeApp(props: {
               color={touched ? "indigo" : "gray"}
               disabled={!touched}
             >
-              Save {!props.file ? "as" : ""}
+              Save {!file ? "as" : ""}
             </DropdownMenu.Item>
-            <DropdownMenu.Separator />
             {file && path && (
-              <DropdownMenu.Item
-                color="red"
-                onClick={() => setDeleteOpen(true)}
-              >
-                Delete
-              </DropdownMenu.Item>
+              <>
+                <DropdownMenu.Separator />
+                <DropdownMenu.Item
+                  color="red"
+                  onClick={() => setDeleteOpen(true)}
+                >
+                  Delete
+                </DropdownMenu.Item>
+              </>
             )}
           </DropdownMenu.Content>
         </DropdownMenu.Root>
@@ -171,6 +208,28 @@ export function CodeApp(props: {
           background: theme === "dark" ? "#1e1e1e" : "#fff",
         }}
       />
+      <button
+        data-returnfocus="true"
+        style={{
+          opacity: 0,
+          position: "absolute",
+          top: 0,
+          left: 0,
+          pointerEvents: "none",
+        }}
+        onFocus={(e) => {
+          e.preventDefault();
+          if (editorRef.current) {
+            editorRef.current.focus();
+          } else {
+            setTimeout(() => {
+              if (editorRef.current) {
+                editorRef.current.focus();
+              }
+            }, 500);
+          }
+        }}
+      />
       <Editor
         height="calc(100% - 2.5rem)"
         width="100%"
@@ -178,6 +237,7 @@ export function CodeApp(props: {
         theme={theme === "dark" ? "vs-dark" : "light"}
         defaultLanguage="html"
         defaultValue={value}
+        wrapperProps={{ "data-returnfocus": true }}
         value={value}
         onChange={(v) => setValue(v ?? "")}
         onMount={(editor) => {
@@ -208,28 +268,34 @@ function SaveAsDialog(props: {
         <Dialog.Description color="gray" size="1">
           Choose a location to save the file
         </Dialog.Description>
-        <Flex
-          direction="column"
-          gap="3"
-          style={{ background: "var(--gray-1)", minHeight: 250 }}
-          p="1"
+        <Card
+          style={{
+            background: "var(--gray-1)",
+            minHeight: 250,
+            display: "grid",
+            gridTemplateRows: "1fr min-content",
+            gridTemplateColumns: "1fr",
+            border: "1px solid var(--gray-3)",
+          }}
+          size="1"
           my="3"
         >
-          <div style={{ flexGrow: 1 }}>
-            <Explorer
-              initialPath={path}
-              onPathChange={setPath}
-              disableFiles
-            />
-          </div>
+          <Explorer
+            initialPath={path}
+            onPathChange={setPath}
+            disableFiles
+          />
           <label
             style={{
               display: "flex",
               flexDirection: "column",
               gap: "var(--space-2)",
               padding: "var(--space-2)",
+              flexGrow: 0,
+              paddingTop: "0",
             }}
           >
+            <Separator size="4" mt="0" />
             <Text size="1" color="gray">
               File name
             </Text>
@@ -240,7 +306,7 @@ function SaveAsDialog(props: {
               placeholder="New file"
             />
           </label>
-        </Flex>
+        </Card>
         <Flex gap="3" mt="4" justify="end">
           <Dialog.Close>
             <Button variant="soft" color="gray">
