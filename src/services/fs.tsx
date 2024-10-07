@@ -1,8 +1,8 @@
 import { CameraIcon, GlobeIcon } from "@radix-ui/react-icons";
-import { createCodeWindow } from "../components/Code/Code.window";
+import { createCodeWindow } from "../components/apps/Code/Code.window";
+import { createTerminalWindow } from "../components/apps/Terminal/Terminal.window";
+import { WebBrowser } from "../components/apps/WebBrowser/WebBrowser";
 import { ImageViewer } from "../components/ImageViewer/ImageViewer";
-import { createTerminalWindow } from "../components/Terminal/Terminal.window";
-import { WebBrowser } from "../components/WebBrowser/WebBrowser";
 import {
   FsFile,
   FsFolder,

@@ -52,7 +52,7 @@ export function MultiTaskBar() {
     <>
       <ContextMenu.Root>
         <ContextMenu.Trigger>
-          <Box style={{ background: "var(--gray-4)" }}>
+          <Box style={{ background: "var(--gray-2)" }}>
             <Flex>
               {windows.map((win) => {
                 const maxLength = 20;

@@ -4,11 +4,11 @@ import {
   findNodeByPath,
   isFile,
   openFile,
-} from "../../../services/fs";
+} from "../../../../services/fs";
 import {
   launcherSchema,
   useFileSystemStore,
-} from "../../../stores/fs";
+} from "../../../../stores/fs";
 import { Command, DirNotFound } from "../constants";
 import { quotableRestArgs } from "../utils";
 

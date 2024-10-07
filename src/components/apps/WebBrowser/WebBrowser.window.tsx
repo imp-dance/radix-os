@@ -1,5 +1,5 @@
 import { GlobeIcon } from "@radix-ui/react-icons";
-import { createWindow } from "../../stores/window";
+import { createWindow } from "../../../stores/window";
 import { WebBrowser } from "./WebBrowser";
 
 export const createWebBrowserWindow = (link?: string) =>

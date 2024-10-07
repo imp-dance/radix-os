@@ -13,8 +13,8 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { findNodeByPath, isFolder } from "../../services/fs";
-import { useFileSystemStore } from "../../stores/fs";
+import { findNodeByPath, isFolder } from "../../../services/fs";
+import { useFileSystemStore } from "../../../stores/fs";
 import { Command, helpText } from "./constants";
 import { parseFs } from "./modules/fs";
 import { quotableRestArgs } from "./utils";

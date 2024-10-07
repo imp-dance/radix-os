@@ -177,14 +177,14 @@ function App() {
                   left="5"
                   top="5"
                   height="calc(50% - var(--space-7))"
-                  width="calc(50% - var(--space-5) * 2)"
+                  width="calc(45% - var(--space-5) * 2)"
                 />
                 <Dropzone
                   id="bottomleft"
                   left="5"
                   bottom="8"
                   height="calc(50% - var(--space-7))"
-                  width="calc(50% - var(--space-5) * 2)"
+                  width="calc(45% - var(--space-5) * 2)"
                 />
               </>
             )}
@@ -195,14 +195,14 @@ function App() {
                   right="5"
                   top="5"
                   height="calc(50% - var(--space-7))"
-                  width="calc(50% - var(--space-5) * 2)"
+                  width="calc(45% - var(--space-5) * 2)"
                 />
                 <Dropzone
                   id="bottomright"
                   right="5"
                   bottom="8"
                   height="calc(50% - var(--space-7))"
-                  width="calc(50% - var(--space-5) * 2)"
+                  width="calc(45% - var(--space-5) * 2)"
                 />
               </>
             )}

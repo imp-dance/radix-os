@@ -34,14 +34,14 @@ import {
   isFolder,
   openFile,
   parsePath,
-} from "../../services/fs";
+} from "../../../services/fs";
 import {
   FsNode,
   Launcher,
   useFileSystemStore,
-} from "../../stores/fs";
-import { useWindowStore } from "../../stores/window";
-import { createTerminalWindow } from "../Terminal/Terminal.window";
+} from "../../../stores/fs";
+import { useWindowStore } from "../../../stores/window";
+import { createTerminalWindow } from "../../apps/Terminal/Terminal.window";
 
 export function Explorer({
   initialPath = "",

@@ -1,14 +1,7 @@
 import { useEffect } from "react";
 import { useWindowStore } from "../stores/window";
 
-export function useKeydown({
-  key,
-  callback,
-  windowId,
-  metaKey,
-  altKey,
-  deps = [],
-}: {
+type KeydownOpts = {
   key: string;
   callback: (e: KeyboardEvent) => void;
   metaKey?: boolean;
@@ -16,9 +9,22 @@ export function useKeydown({
   ctrlKey?: boolean;
   shiftKey?: boolean;
   windowId?: symbol;
+  disabled?: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   deps?: any[];
-}) {
+  dep?: string;
+};
+
+export function useKeydown({
+  key,
+  callback,
+  windowId,
+  metaKey,
+  altKey,
+  shiftKey,
+  ctrlKey,
+  deps = [],
+}: KeydownOpts) {
   const activeWindow = useWindowStore(
     (state) => state.activeWindow
   );
@@ -30,8 +36,8 @@ export function useKeydown({
         (!windowId || isActive) &&
         (!metaKey || e.metaKey) &&
         (!altKey || e.altKey) &&
-        (!e.shiftKey || e.shiftKey) &&
-        (!e.ctrlKey || e.ctrlKey)
+        (!shiftKey || e.shiftKey) &&
+        (!ctrlKey || e.ctrlKey)
       ) {
         e.preventDefault();
         e.stopPropagation();
@@ -45,4 +51,52 @@ export function useKeydown({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, callback, isActive, metaKey, windowId, ...deps]);
+}
+
+export function useKeydowns(...listeners: Array<KeydownOpts>) {
+  const dependency =
+    listeners.reduce(
+      (acc, listener) =>
+        acc +
+        listener.key +
+        listener.shiftKey?.toString() +
+        listener.ctrlKey?.toString() +
+        listener.altKey?.toString() +
+        listener.metaKey?.toString() +
+        listener.disabled?.toString() +
+        (listener.dep ?? "_nodep"),
+      ""
+    ) + listeners.length.toString();
+
+  useEffect(() => {
+    const handlers = listeners.map((listener) => {
+      const handler = (e: KeyboardEvent) => {
+        if (
+          e.key.toLowerCase() === listener.key.toLowerCase() &&
+          (!listener.windowId ||
+            listener.windowId ===
+              useWindowStore.getState().activeWindow?.id) &&
+          (!listener.metaKey || e.metaKey) &&
+          (!listener.altKey || e.altKey) &&
+          (!listener.shiftKey || e.shiftKey) &&
+          (!listener.ctrlKey || e.ctrlKey) &&
+          !listener.disabled
+        ) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          listener.callback(e);
+        }
+      };
+      window.addEventListener("keydown", handler);
+      return handler;
+    });
+
+    return () => {
+      handlers.forEach((handler) =>
+        window.removeEventListener("keydown", handler)
+      );
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dependency]);
 }

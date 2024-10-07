@@ -1,6 +1,6 @@
 import { Link } from "@radix-ui/themes";
 import { useWindowStore } from "../../stores/window";
-import { createWebBrowserWindow } from "../WebBrowser/WebBrowser.window";
+import { createWebBrowserWindow } from "../apps/WebBrowser/WebBrowser.window";
 
 type Props = Parameters<typeof Link>[0];
 

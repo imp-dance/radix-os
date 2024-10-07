@@ -30,7 +30,7 @@ export function WebBrowser(props: {
   }, [props.launchConfig]);
   return (
     <Flex direction="column" gap="0" style={{ height: "100%" }}>
-      <Flex align="center">
+      <Flex align="center" gap="2">
         <TextField.Root
           disabled={
             props.launchConfig !== undefined && !isLinked
@@ -41,8 +41,9 @@ export function WebBrowser(props: {
               : props.launchConfig?.title ?? url
           }
           onChange={(e) => setUrl(e.target.value)}
-          style={{ width: "100%" }}
+          style={{ width: "100%", borderRadius: "0" }}
           variant="classic"
+          color="indigo"
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               setRedirect(url);

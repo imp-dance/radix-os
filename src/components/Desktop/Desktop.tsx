@@ -29,11 +29,11 @@ import {
   createWindow,
   useWindowStore,
 } from "../../stores/window";
-import { createCodeWindow } from "../Code/Code.window";
-import { createExplorerWindow } from "../Explorer/Explorer.window";
+import { createCodeWindow } from "../apps/Code/Code.window";
+import { createExplorerWindow } from "../apps/Explorer/Explorer.window";
+import { createTerminalWindow } from "../apps/Terminal/Terminal.window";
+import { WebBrowser } from "../apps/WebBrowser/WebBrowser";
 import { createSettingsWindow } from "../Settings/Settings.window";
-import { createTerminalWindow } from "../Terminal/Terminal.window";
-import { WebBrowser } from "../WebBrowser/WebBrowser";
 import appIconStyles from "./appicon.module.css";
 
 const gridSize = 64; // pixels
