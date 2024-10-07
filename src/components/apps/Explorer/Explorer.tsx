@@ -284,9 +284,7 @@ export function Explorer({
                             }
                             item={child}
                             path={`${path}/${child.name}`}
-                            selected={selected.includes(
-                              `${path}/${child.name}`
-                            )}
+                            selected={selected}
                             isDragging={
                               selected.includes(
                                 `${path}/${child.name}`
@@ -482,7 +480,7 @@ function ExplorerItem(props: {
   onClick?: () => void;
   path: string;
   onRename: () => void;
-  selected?: boolean;
+  selected?: string[];
   onSelect?: (opts: {
     shiftKey: boolean;
     metaKey: boolean;
@@ -510,6 +508,14 @@ function ExplorerItem(props: {
   const isFavorite = favourites.some(
     (f) => parsePath(f) === parsePath(props.path)
   );
+  const isSelected = props.selected?.includes(props.path);
+
+  const getTargets = () => {
+    if (!props.selected || props.selected?.length === 0)
+      return [props.path];
+    return props.selected;
+  };
+
   return (
     <ContextMenu.Root>
       <ContextMenu.Trigger>
@@ -523,7 +529,7 @@ function ExplorerItem(props: {
             background: droppable.isOver
               ? "rgba(0,0,0,0.25)"
               : undefined,
-            outline: props.selected
+            outline: isSelected
               ? "2px solid var(--focus-8)"
               : "none",
             outlineOffset: "-1px",
@@ -622,7 +628,7 @@ function ExplorerItem(props: {
         <ContextMenu.Separator />
         <ContextMenu.Item
           onClick={() => {
-            remove(props.path);
+            getTargets().forEach(remove);
           }}
           color="crimson"
         >
