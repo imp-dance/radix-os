@@ -1,7 +1,34 @@
 # RadixOS
 
-An in-browser operating system simulator built using the Radix design system.
+An in-browser operating system simulation built using the Radix design system.
 
 * **[Live demo](https://imp-dance.github.io/radix-os/)**
 
-![Screenshot 2024-10-01 at 01 29 37](https://github.com/user-attachments/assets/c1e954b5-dd44-441d-8bd4-486daa5154d5)
+![Screenshot 2024-10-06 at 18 18 09](https://github.com/user-attachments/assets/c9a063f4-bee0-45ec-95c6-bb39f621baf3)
+
+## Tools and technologies
+
+This project uses
+
+* [`vite`](https://vitejs.dev/)
+* [`react`](https://react.dev)
+* [`@monaco-editor/react`](https://github.com/suren-atoyan/monaco-react)
+* [`@radix-ui/themes`](https://www.radix-ui.com/)
+* [`@radix-ui/react-icons`](https://www.radix-ui.com/icons)
+* [`dnd-kit`](https://dndkit.com/)
+* [`zustand`](https://zustand.docs.pmnd.rs/)
+
+## Launch locally
+
+Assuming you have node installed
+
+```shell
+# clone repo
+git clone git@github.com:imp-dance/radix-os.git
+# navigate into folder
+cd radix-os
+# install dependencies
+npm install
+# launch dev server
+npm run dev
+```
