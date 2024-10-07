@@ -174,17 +174,29 @@ function CustomizeTab() {
         <Heading size="1" color="gray">
           Background
         </Heading>
-        <Grid columns="4" gap="3" style={{ minWidth: 420 }}>
+        <Grid
+          columns="4"
+          gap="0"
+          style={{ minWidth: 420, background: "var(--gray-1)" }}
+        >
           {(
             [
               "gray",
+              "cyan",
+              "blue",
+              "indigo",
               "crimson",
               "pink",
+              "plum",
               "violet",
               "teal",
+              "jade",
               "green",
-              "orange",
+              "grass",
+              "gold",
+              "bronze",
               "yellow",
+              "amber",
             ] as const
           ).map((color) => (
             <Badge

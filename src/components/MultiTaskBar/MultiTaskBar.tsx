@@ -65,10 +65,14 @@ export function MultiTaskBar() {
                     <ContextMenu.Root>
                       <ContextMenu.Trigger>
                         <Button
-                          color="gray"
+                          color={
+                            activeWindow?.id === win.id
+                              ? "indigo"
+                              : "gray"
+                          }
                           variant={
                             activeWindow?.id === win.id
-                              ? "outline"
+                              ? "soft"
                               : "soft"
                           }
                           style={{ borderRadius: 0 }}
@@ -82,12 +86,16 @@ export function MultiTaskBar() {
                                   (id) => id !== win.id
                                 )
                               );
-                            } else {
+                            } else if (
+                              activeWindow?.id === win.id
+                            ) {
                               setMinimizedWindows((prev) => [
                                 ...prev,
                                 win.id,
                               ]);
                               clearActiveWindow();
+                            } else {
+                              bringToFront(win);
                             }
                           }}
                         >

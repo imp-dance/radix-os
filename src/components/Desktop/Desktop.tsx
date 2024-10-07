@@ -200,8 +200,8 @@ export function Desktop() {
               background: bg.startsWith("data:")
                 ? `url(${bg})`
                 : `linear-gradient(
-    -180deg,
-    var(--${bg}-2) 0%,
+    -270deg,
+    var(--${bg}-4) 0%,
     var(--${bg}-3) 100%
   )`,
               backgroundSize: bg.startsWith("data:")
