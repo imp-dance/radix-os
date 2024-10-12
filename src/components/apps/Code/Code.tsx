@@ -271,9 +271,6 @@ export function CodeApp(props: {
         value={value}
         onChange={(v) => setValue(v ?? "")}
         onMount={(editor) => {
-          editor.getSupportedActions().forEach((value) => {
-            console.log(value);
-          });
           editorRef.current = editor;
         }}
         options={{
