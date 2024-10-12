@@ -92,3 +92,10 @@ code {
   outline: 2px solid var(--focus-8);
   outline-offset: -1px;
 }
+
+.show-on-hover {
+  opacity: 0;
+  &:hover {
+    opacity: 0.5;
+  }
+}

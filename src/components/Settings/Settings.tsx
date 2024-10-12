@@ -132,6 +132,9 @@ export function Settings(props: {
 
 function CustomizeTab() {
   const settingsStore = useSettingsStore();
+  const imgBg = settingsStore.bg.startsWith("data:")
+    ? settingsStore.bg
+    : undefined;
   return (
     <Tabs.Content value="customize">
       <Flex p="2" direction="column" gap="3">
@@ -227,6 +230,7 @@ function CustomizeTab() {
           onChange={(img) => {
             settingsStore.setBg(img);
           }}
+          value={imgBg}
         />
       </Flex>
     </Tabs.Content>

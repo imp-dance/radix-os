@@ -118,3 +118,46 @@ export function openFile(
   state.addWindow(newWindow);
   state.bringToFront(newWindow);
 }
+
+export function parseRelativePath(cd: string, nd: string) {
+  if (nd.startsWith("/")) {
+    return nd;
+  }
+  const segments = cd.split("/").filter(Boolean);
+  const nextSegments = nd.split("/").filter(Boolean);
+  nextSegments.forEach((segment) => {
+    if (segment === "..") {
+      if (segments.length === 0) return;
+      segments.pop();
+    } else {
+      segments.push(segment);
+    }
+  });
+  return segments.join("/");
+}
+
+export function joinQuotedArgs(args: string[]) {
+  const quote = ["'", '"', "`"];
+  const nextArgs: string[] = [];
+  let argBuilder: string | null = null;
+  args.forEach((arg) => {
+    const hasStartQuote = quote.some((quoteSymbol) =>
+      arg.startsWith(quoteSymbol)
+    );
+    const hasEndQuote = quote.some((quoteSymbol) =>
+      arg.endsWith(quoteSymbol)
+    );
+    if (hasStartQuote && argBuilder === null) {
+      argBuilder = arg.slice(1);
+    } else if (hasEndQuote && argBuilder !== null) {
+      argBuilder += ` ${arg.slice(0, -1)}`;
+      nextArgs.push(argBuilder);
+      argBuilder = null;
+    } else if (argBuilder !== null) {
+      argBuilder += ` ${arg}`;
+    } else {
+      nextArgs.push(arg);
+    }
+  });
+  return nextArgs;
+}

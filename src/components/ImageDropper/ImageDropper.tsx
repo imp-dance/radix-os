@@ -3,7 +3,9 @@ import { useState } from "react";
 
 export function ImageDropper(props: {
   onChange: (base64img: string) => void;
+  value?: string;
 }) {
+  const [preview, setPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
   function getDataUrl(file: File): Promise<string> {
@@ -11,6 +13,7 @@ export function ImageDropper(props: {
       const reader = new FileReader();
       reader.onload = () => {
         resolve(reader.result as string);
+        setPreview(reader.result as string);
       };
       reader.readAsDataURL(file);
     });
@@ -21,11 +24,18 @@ export function ImageDropper(props: {
       style={{
         display: "block",
         padding: "var(--space-3)",
-        border: isDragging
-          ? "2px dotted var(--indigo-5)"
-          : "2px dotted var(--gray-5)",
-        background: isDragging ? "var(--gray-1)" : "transparent",
+        outline:
+          isDragging || preview || props.value
+            ? "2px dotted var(--indigo-5)"
+            : "2px dotted var(--gray-5)",
+        background: props.value
+          ? `url(${props.value})`
+          : isDragging
+          ? "var(--gray-1)"
+          : "transparent",
+        backgroundSize: "cover",
         textAlign: "center",
+        cursor: "pointer",
       }}
       onDragEnter={() => setIsDragging(true)}
       onDragLeave={() => setIsDragging(false)}
@@ -54,7 +64,7 @@ export function ImageDropper(props: {
       }}
     >
       <Text size="1" color="indigo" weight="medium">
-        Drop image here
+        Select or drop image
       </Text>
       <input
         type="file"

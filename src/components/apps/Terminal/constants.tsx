@@ -13,7 +13,7 @@ export function DirNotFound(props: { dir?: string }) {
 
 export function Command(props: { command: string }) {
   return (
-    <Code size="1" variant="ghost" color="indigo">
+    <Code size="1" variant="ghost" color="grass">
       <Flex align="center" gap="2">
         <ArrowRightIcon
           style={{ width: "1em", height: "1em" }}
@@ -24,7 +24,8 @@ export function Command(props: { command: string }) {
   );
 }
 
-export const helpText = `help                       - Show this help message
+export const helpText = `Available commands:
+help                       - Show this help message
 echo [...text]             - Print text to the terminal
 clear                      - Clear the terminal 
 
@@ -37,4 +38,6 @@ fs [path] -R [name]        - Rename a file or folder
 fs [path] -O [launcher?]   - Open a file
 fs [path] -L [launcher]    - Set a file's default launcher
 fs [path] --ll             - List a file's available launchers
-fs [path] --ex [launcher]  - Make file executable in given launcher`;
+fs [path] --ex [launcher]  - Make file executable in given launcher
+
+Relative paths are supported. Use quotes for paths with spaces.`;

@@ -13,11 +13,15 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { findNodeByPath, isFolder } from "../../../services/fs";
+import {
+  findNodeByPath,
+  isFolder,
+  joinQuotedArgs,
+  parseRelativePath,
+} from "../../../services/fs";
 import { useFileSystemStore } from "../../../stores/fs";
 import { Command, helpText } from "./constants";
 import { parseFs } from "./modules/fs";
-import { quotableRestArgs } from "./utils";
 
 export function Terminal(props: { initialPath?: string }) {
   const currentCommandIndex = useRef(0);
@@ -66,7 +70,8 @@ export function Terminal(props: { initialPath?: string }) {
   const parseInput = (input: string) => {
     prevCommands.current.push(input);
     const parts = input.split(" ");
-    const [command, ...args] = parts;
+    const [command, ...args_] = parts;
+    const args = joinQuotedArgs(args_);
     if (command === "") return pushOutput(<></>);
     switch (command) {
       case "echo": {
@@ -138,12 +143,14 @@ export function Terminal(props: { initialPath?: string }) {
             </Code>
           );
         }
-        createFolder(name);
+        createFolder(
+          parseRelativePath(path.current.join("/"), name)
+        );
         pushOutput(<Command command={`mkdir ${name}`} />);
         break;
       }
       case "mv": {
-        const [from, to] = args;
+        let [from, to] = args;
         if (!from || !to) {
           return pushOutput(
             <Code size="1" variant="soft" color="crimson">
@@ -151,69 +158,41 @@ export function Terminal(props: { initialPath?: string }) {
             </Code>
           );
         }
+        from = parseRelativePath(path.current.join("/"), from);
+        to = parseRelativePath(path.current.join("/"), to);
+        const fromNode = findNodeByPath(from, tree);
+        const toNode = findNodeByPath(to, tree);
+        if (!fromNode) {
+          return dirNotFound(from);
+        }
+        if (!toNode) {
+          return dirNotFound(to);
+        }
         move(from, to);
         pushOutput(<Command command={`mv ${from} ${to}`} />);
         break;
       }
       case "fs": {
-        return parseFs({ pushOutput, args });
+        return parseFs({
+          pushOutput,
+          args,
+          currentPath: path.current.join("/"),
+        });
       }
       case "cd": {
-        const nextPath = quotableRestArgs(args);
-        if (!nextPath) {
-          path.current = ["Home"];
-          return pushOutput(
-            <Command command={`cd ${args[1]}`} />
-          );
+        const parsedNextPath = parseRelativePath(
+          path.current.join("/"),
+          args[0]
+        );
+        const newNode = findNodeByPath(parsedNextPath, tree);
+        if (!newNode) {
+          return dirNotFound(parsedNextPath);
         }
-        if (nextPath === "..") {
-          if (path.current.length > 1) {
-            path.current.pop();
-          }
-          return pushOutput(
-            <Command command={`cd ${nextPath}`} />
-          );
+        if (!isFolder(newNode)) {
+          return notAFolder();
         }
-        try {
-          if (nextPath.startsWith("/")) {
-            let newState = path.current;
-            if (nextPath === "/") {
-              newState = ["Home"];
-            } else {
-              newState = nextPath.split("/").filter(Boolean);
-            }
-            if (
-              newState.length === 1 &&
-              newState[0] !== "Home"
-            ) {
-              return dirNotFound(nextPath);
-            }
-            const node = findNodeByPath(
-              newState.join("/"),
-              tree
-            );
-            if (!node || !isFolder(node)) {
-              return dirNotFound(nextPath);
-            }
-            path.current = newState;
-            return pushOutput(
-              <Command command={`cd ${nextPath}`} />
-            );
-          }
-          const nextNode = findNodeByPath(
-            `${path.current.join("/")}/${nextPath}`,
-            tree
-          );
-          if (isFolder(nextNode)) {
-            path.current.push(nextPath);
-            pushOutput(<Command command={`cd ${nextPath}`} />);
-          } else {
-            return notAFolder();
-          }
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (_e) {
-          dirNotFound(nextPath);
-        }
+        path.current = parsedNextPath.split("/").filter(Boolean);
+        pushOutput(<Command command={`cd ${args[0]}`} />);
         break;
       }
     }

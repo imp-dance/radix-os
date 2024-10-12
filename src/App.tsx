@@ -178,6 +178,7 @@ function App() {
                   top="5"
                   height="calc(50% - var(--space-7))"
                   width="calc(45% - var(--space-5) * 2)"
+                  showOnHover
                 />
                 <Dropzone
                   id="bottomleft"
@@ -185,6 +186,7 @@ function App() {
                   bottom="8"
                   height="calc(50% - var(--space-7))"
                   width="calc(45% - var(--space-5) * 2)"
+                  showOnHover
                 />
               </>
             )}
@@ -196,6 +198,7 @@ function App() {
                   top="5"
                   height="calc(50% - var(--space-7))"
                   width="calc(45% - var(--space-5) * 2)"
+                  showOnHover
                 />
                 <Dropzone
                   id="bottomright"
@@ -203,6 +206,7 @@ function App() {
                   bottom="8"
                   height="calc(50% - var(--space-7))"
                   width="calc(45% - var(--space-5) * 2)"
+                  showOnHover
                 />
               </>
             )}
@@ -227,6 +231,7 @@ function Dropzone(props: {
   height: string;
   onDragEnter?: () => void;
   onDragLeave?: () => void;
+  showOnHover?: boolean;
 }) {
   const isInside = useRef(false);
   const droppable = useDroppable({
@@ -251,6 +256,7 @@ function Dropzone(props: {
       left={props.left}
       width={props.width}
       height={props.height}
+      className={props.showOnHover ? "show-on-hover" : ""}
       style={{
         background: droppable.isOver
           ? "var(--gray-9)"

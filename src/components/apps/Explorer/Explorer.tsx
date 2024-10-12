@@ -836,7 +836,10 @@ function RenameFileDialog(props: {
               color="indigo"
               onClick={() => {
                 if (!inputRef.current) return;
-                renameFile(props.path, inputRef.current.value);
+                renameFile(
+                  props.path,
+                  inputRef.current.value.split("/")[0]
+                );
                 inputRef.current.value = "";
                 props.onOpenChange(false);
               }}

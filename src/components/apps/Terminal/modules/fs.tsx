@@ -4,6 +4,7 @@ import {
   findNodeByPath,
   isFile,
   openFile,
+  parseRelativePath,
 } from "../../../../services/fs";
 import {
   launcherSchema,
@@ -15,9 +16,11 @@ import { quotableRestArgs } from "../utils";
 export function parseFs({
   pushOutput,
   args,
+  currentPath,
 }: {
   pushOutput: (...output: ReactNode[]) => void;
   args: string[];
+  currentPath: string;
 }) {
   const {
     tree,
@@ -25,7 +28,9 @@ export function parseFs({
     setDefaultLauncher,
     makeExecutableWith,
   } = useFileSystemStore.getState();
-  const [path, flag, ...restArgs] = args;
+  // eslint-disable-next-line prefer-const
+  let [path, flag, ...restArgs] = args;
+  path = parseRelativePath(currentPath, path);
   const node = findNodeByPath(path, tree);
   if (!node) {
     return pushOutput(<DirNotFound dir={path} />);
@@ -37,6 +42,14 @@ export function parseFs({
         pushOutput(
           <Code size="1" variant="soft" color="crimson">
             fs -R needs a name as argument
+          </Code>
+        );
+        break;
+      }
+      if (name.includes("/")) {
+        pushOutput(
+          <Code size="1" variant="soft" color="crimson">
+            Name cannot contain "/"
           </Code>
         );
         break;
