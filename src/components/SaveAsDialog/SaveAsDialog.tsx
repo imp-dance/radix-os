@@ -18,7 +18,8 @@ export function SaveAsDialog(props: {
   const [path, setPath] = useState("");
   const [fileName, setFileName] = useState("");
 
-  const isValid = path !== undefined && fileName;
+  const isValid =
+    path !== undefined && fileName && !fileName.includes("/");
   return (
     <Dialog.Root open={props.open} onOpenChange={props.setOpen}>
       <Dialog.Content size="2">
@@ -77,7 +78,9 @@ export function SaveAsDialog(props: {
               color="green"
               onClick={() => {
                 props.setOpen(false);
-                props.onPathCreate(`${path}/${fileName}`);
+                props.onPathCreate(
+                  `${path}/${fileName.split("/")[0]}`
+                );
               }}
               disabled={!isValid}
             >
