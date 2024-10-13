@@ -1,6 +1,5 @@
 import {
   DndContext,
-  Modifier,
   MouseSensor,
   useSensor,
 } from "@dnd-kit/core";
@@ -10,8 +9,8 @@ import { MultiTaskBar } from "./components/MultiTaskBar/MultiTaskBar";
 import { WindowManager } from "./components/WindowManager/WindowManager";
 import { WindowTiling } from "./components/WindowTiling/WindowTiling";
 import { useKeydown } from "./hooks/useKeyboard";
-import { restrictToBoundingRect } from "./lib/dnd-kit/restrictToBoundingRect";
-import { handleWindowDrop } from "./services/window";
+import { restrictToDesktopEdges } from "./lib/dnd-kit/restrictToBoundingRect";
+import { handleWindowDrop, tabWindow } from "./services/window";
 import { useWindowStore } from "./stores/window";
 
 function App() {
@@ -28,23 +27,7 @@ function App() {
     key: "Tab",
     altKey: true,
     callback: (e) => {
-      const state = useWindowStore.getState();
-      const activeWindow = state.activeWindow;
-      if (!activeWindow) return;
-      const index = state.windows.findIndex(
-        (win) => win.id === activeWindow.id
-      );
-      const nextIndex = e.shiftKey ? index - 1 : index + 1;
-      const nextWindow = state.windows[nextIndex];
-      if (!nextWindow) {
-        state.bringToFront(
-          state.windows[
-            e.shiftKey ? state.windows.length - 1 : 0
-          ]
-        );
-      } else {
-        state.bringToFront(nextWindow);
-      }
+      tabWindow(e.shiftKey ? "backward" : "forward");
     },
     deps: [],
   });
@@ -85,18 +68,3 @@ function App() {
 }
 
 export default App;
-
-const restrictToDesktopEdges: Modifier = ({
-  containerNodeRect,
-  draggingNodeRect,
-  transform,
-}) => {
-  if (!draggingNodeRect || !containerNodeRect) {
-    return transform;
-  }
-  return restrictToBoundingRect(
-    transform,
-    draggingNodeRect,
-    document.getElementById("desktop")!.getBoundingClientRect()
-  );
-};

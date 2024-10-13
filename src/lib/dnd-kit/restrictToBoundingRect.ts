@@ -1,4 +1,4 @@
-import type { ClientRect } from "@dnd-kit/core";
+import type { ClientRect, Modifier } from "@dnd-kit/core";
 import type { Transform } from "@dnd-kit/utilities";
 
 export function restrictToBoundingRect(
@@ -32,3 +32,18 @@ export function restrictToBoundingRect(
 
   return value;
 }
+
+export const restrictToDesktopEdges: Modifier = ({
+  containerNodeRect,
+  draggingNodeRect,
+  transform,
+}) => {
+  if (!draggingNodeRect || !containerNodeRect) {
+    return transform;
+  }
+  return restrictToBoundingRect(
+    transform,
+    draggingNodeRect,
+    document.getElementById("desktop")!.getBoundingClientRect()
+  );
+};

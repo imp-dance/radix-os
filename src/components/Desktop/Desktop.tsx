@@ -1,5 +1,6 @@
 import {
   DndContext,
+  DragOverlay,
   Modifier,
   MouseSensor,
   useDraggable,
@@ -9,7 +10,6 @@ import {
   createSnapModifier,
   restrictToParentElement,
 } from "@dnd-kit/modifiers";
-import { CSS } from "@dnd-kit/utilities";
 import {
   CardStackIcon,
   CodeIcon,
@@ -22,6 +22,7 @@ import {
   CSSProperties,
   ReactNode,
   useCallback,
+  useEffect,
   useState,
 } from "react";
 import { useSettingsStore } from "../../stores/settings";
@@ -29,6 +30,7 @@ import {
   createWindow,
   useWindowStore,
 } from "../../stores/window";
+import { throttle } from "../../utils";
 import { createCodeWindow } from "../apps/Code/Code.window";
 import { createExplorerWindow } from "../apps/Explorer/Explorer.window";
 import { createTerminalWindow } from "../apps/Terminal/Terminal.window";
@@ -192,6 +194,16 @@ export function Desktop() {
         });
       }}
     >
+      <DragOverlay wrapperElement="div" adjustScale={false}>
+        <div
+          style={{
+            width: 50,
+            height: 50,
+            background: "rgba(0,0,0,0.1)",
+            zIndex: -1,
+          }}
+        />
+      </DragOverlay>
       <ContextMenu.Root>
         <ContextMenu.Trigger>
           <div
@@ -259,17 +271,40 @@ function Application(props: {
   onClick: () => void;
   position: { x: number; y: number };
 }) {
+  const [mousePosition, setMousePosition] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
   const draggable = useDraggable({
     id: props.id,
   });
   const style = {
-    left: props.position.x,
-    top: props.position.y,
-    opacity: draggable.isDragging ? 0.5 : 1,
-    transform: CSS.Transform.toString(draggable.transform),
+    left: draggable.isDragging
+      ? mousePosition?.x ?? props.position.x
+      : props.position.x,
+    top: draggable.isDragging
+      ? mousePosition?.y ?? props.position.y
+      : props.position.y,
+
+    // transform: CSS.Transform.toString(draggable.transform),
   } as CSSProperties;
+
+  useEffect(() => {
+    if (draggable.isDragging) {
+      const listener = throttle((e: MouseEvent) => {
+        setMousePosition({ x: e.clientX, y: e.clientY });
+      }, 50);
+      document.body.addEventListener("mousemove", listener);
+      return () => {
+        document.body.removeEventListener("mousemove", listener);
+        setMousePosition(null);
+      };
+    } else {
+      setMousePosition(null);
+    }
+  }, [draggable.isDragging]);
   return (
-    <Tooltip content={props.title}>
+    <Tooltip content={props.title} side="bottom">
       <Button
         ref={draggable.setNodeRef}
         className={appIconStyles.appicon}

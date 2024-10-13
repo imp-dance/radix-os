@@ -92,3 +92,26 @@ export function handleWindowDrop(over: string, window: Window) {
       break;
   }
 }
+
+export function tabWindow(
+  direction: "backward" | "forward" = "forward"
+) {
+  const state = useWindowStore.getState();
+  const activeWindow = state.activeWindow;
+  if (!activeWindow) return;
+  const index = state.windows.findIndex(
+    (win) => win.id === activeWindow.id
+  );
+  const nextIndex =
+    direction === "backward" ? index - 1 : index + 1;
+  const nextWindow = state.windows[nextIndex];
+  if (!nextWindow) {
+    state.bringToFront(
+      state.windows[
+        direction === "backward" ? state.windows.length - 1 : 0
+      ]
+    );
+  } else {
+    state.bringToFront(nextWindow);
+  }
+}
