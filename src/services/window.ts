@@ -1,4 +1,4 @@
-import { useWindowStore } from "../stores/window";
+import { useWindowStore, Window } from "../stores/window";
 
 export function setWindowDimensions(
   key: string,
@@ -34,4 +34,61 @@ export function setWindowDimensions(
     winEl.style.top = parseVal(dim.y);
   }
   useWindowStore.getState().invalidateWindows();
+}
+
+export function handleWindowDrop(over: string, window: Window) {
+  const halfWidth = document.body.clientWidth / 2 + "px";
+  const halfHeight =
+    document.getElementById("desktop")!.clientHeight / 2 + "px";
+
+  switch (over) {
+    case "dropzone-left":
+      setWindowDimensions(window.key, {
+        width: halfWidth,
+        height: "100%",
+        x: "0px",
+        y: "0px",
+      });
+      break;
+    case "dropzone-topleft":
+      setWindowDimensions(window.key, {
+        width: halfWidth,
+        height: halfHeight,
+        x: "0px",
+        y: "0px",
+      });
+      break;
+    case "dropzone-bottomleft":
+      setWindowDimensions(window.key, {
+        width: halfWidth,
+        height: halfHeight,
+        x: "0px",
+        y: halfHeight,
+      });
+      break;
+    case "dropzone-right":
+      setWindowDimensions(window.key, {
+        width: halfWidth,
+        height: "100%",
+        x: halfWidth,
+        y: "0px",
+      });
+      break;
+    case "dropzone-topright":
+      setWindowDimensions(window.key, {
+        width: halfWidth,
+        height: halfHeight,
+        x: halfWidth,
+        y: "0px",
+      });
+      break;
+    case "dropzone-bottomright":
+      setWindowDimensions(window.key, {
+        width: halfWidth,
+        height: halfHeight,
+        x: halfWidth,
+        y: halfHeight,
+      });
+      break;
+  }
 }

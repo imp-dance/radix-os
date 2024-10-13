@@ -19,6 +19,13 @@ export type Window = {
 
 type WindowStore = {
   windows: Window[];
+  windowOrder: symbol[];
+  activeWindow: Window | null;
+  minimizedWindows: symbol[];
+  isDragging: boolean;
+  setDragging: (dragging: boolean) => void;
+  minimizeWindow: (win: Window) => void;
+  minimizeAll: () => void;
   addWindow: (win: Window) => void;
   removeWindow: (win: Window) => void;
   setWindowPosition: (win: Window, x: number, y: number) => void;
@@ -27,8 +34,6 @@ type WindowStore = {
     width: number,
     height: number
   ) => void;
-  activeWindow: Window | null;
-  windowOrder: symbol[];
   bringToFront: (win: Window) => void;
   clearActiveWindow: () => void;
   invalidateWindows: () => void;
@@ -37,6 +42,29 @@ type WindowStore = {
 
 export const useWindowStore = create<WindowStore>((set) => ({
   windows: [] as Window[],
+  minimizedWindows: [],
+  isDragging: false,
+  setDragging: (dragging) => set({ isDragging: dragging }),
+  minimizeAll: () =>
+    set((state) => ({
+      minimizedWindows: state.windows.map((w) => w.id),
+      activeWindow: null,
+    })),
+  minimizeWindow: (win) =>
+    set((state) => {
+      return {
+        minimizedWindows: [
+          ...state.minimizedWindows.filter(
+            (id) => id !== win.id
+          ),
+          win.id,
+        ],
+        activeWindow:
+          win.id === state.activeWindow?.id
+            ? null
+            : state.activeWindow,
+      };
+    }),
   addWindow: (win) =>
     set((state) => {
       if (state.windows.find((w) => w.id === win.id)) {
@@ -91,6 +119,9 @@ export const useWindowStore = create<WindowStore>((set) => ({
         win.id,
       ],
       activeWindow: win,
+      minimizedWindows: state.minimizedWindows.filter(
+        (id) => id !== win.id
+      ),
     })),
   clearActiveWindow: () =>
     set(() => ({

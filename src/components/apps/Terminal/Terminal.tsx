@@ -16,12 +16,12 @@ import React, {
 import {
   findNodeByPath,
   isFolder,
-  joinQuotedArgs,
   parseRelativePath,
 } from "../../../services/fs";
 import { useFileSystemStore } from "../../../stores/fs";
 import { Command, helpText } from "./constants";
 import { parseFs } from "./modules/fs";
+import { joinQuotedArgs } from "./utils";
 
 export function Terminal(props: { initialPath?: string }) {
   const currentCommandIndex = useRef(0);

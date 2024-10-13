@@ -9,28 +9,17 @@ import {
 import React, { memo, useState } from "react";
 import { useKeydown } from "../../hooks/useKeyboard";
 import { useWindowStore } from "../../stores/window";
-import { Window } from "../Window/Window";
 
 export function MultiTaskBar() {
-  const [minimizedWindows, setMinimizedWindows] = useState<
-    symbol[]
-  >([]);
-  const windowOrder = useWindowStore(
-    (state) => state.windowOrder
-  );
-  const bringToFront = useWindowStore(
-    (state) => state.bringToFront
-  );
-  const windows = useWindowStore((state) => state.windows);
-  const removeWindow = useWindowStore(
-    (state) => state.removeWindow
-  );
-  const activeWindow = useWindowStore(
-    (state) => state.activeWindow
-  );
-  const clearActiveWindow = useWindowStore(
-    (state) => state.clearActiveWindow
-  );
+  const {
+    bringToFront,
+    windows,
+    removeWindow,
+    activeWindow,
+    minimizeWindow,
+    minimizedWindows,
+    minimizeAll,
+  } = useWindowStore();
 
   const closeActiveWindow = () => {
     if (activeWindow) removeWindow(activeWindow);
@@ -81,19 +70,10 @@ export function MultiTaskBar() {
                               minimizedWindows.includes(win.id);
                             if (isMinimized) {
                               bringToFront(win);
-                              setMinimizedWindows((prev) =>
-                                prev.filter(
-                                  (id) => id !== win.id
-                                )
-                              );
                             } else if (
                               activeWindow?.id === win.id
                             ) {
-                              setMinimizedWindows((prev) => [
-                                ...prev,
-                                win.id,
-                              ]);
-                              clearActiveWindow();
+                              minimizeWindow(win);
                             } else {
                               bringToFront(win);
                             }
@@ -116,13 +96,10 @@ export function MultiTaskBar() {
                           onClick={() => {
                             const wasMini =
                               minimizedWindows.includes(win.id);
-                            setMinimizedWindows((p) =>
-                              p.includes(win.id)
-                                ? p.filter((id) => id !== win.id)
-                                : [...p, win.id]
-                            );
                             if (wasMini) {
                               bringToFront(win);
+                            } else {
+                              minimizeWindow(win);
                             }
                           }}
                         >
@@ -142,7 +119,7 @@ export function MultiTaskBar() {
         <ContextMenu.Content size="1">
           <ContextMenu.Item
             onClick={() => {
-              setMinimizedWindows(windows.map((win) => win.id));
+              minimizeAll();
             }}
           >
             Show desktop
@@ -156,36 +133,6 @@ export function MultiTaskBar() {
           </ContextMenu.Item>
         </ContextMenu.Content>
       </ContextMenu.Root>
-      {windowOrder.map((winId) => {
-        const win = windows.find((win) => win.id === winId);
-        if (!win) return null;
-        return (
-          <Window
-            key={win.key}
-            window={win}
-            active={activeWindow?.id === win.id}
-            minimized={minimizedWindows.includes(win.id)}
-            onMinimize={() => {
-              if (activeWindow?.id === win.id) {
-                const nextWindow = windows.find(
-                  (w) =>
-                    w.id !== win.id &&
-                    !minimizedWindows.includes(w.id)
-                );
-                if (nextWindow) {
-                  bringToFront(nextWindow);
-                } else {
-                  clearActiveWindow();
-                }
-              }
-              setMinimizedWindows((prev) => [...prev, win.id]);
-            }}
-            onFocused={() => {
-              bringToFront(win);
-            }}
-          />
-        );
-      })}
     </>
   );
 }
