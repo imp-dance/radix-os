@@ -40,9 +40,10 @@ export function handleWindowDrop(over: string, window: Window) {
   const halfWidth = document.body.clientWidth / 2 + "px";
   const halfHeight =
     document.getElementById("desktop")!.clientHeight / 2 + "px";
+  const id = over.replace("dropzone-", "");
 
-  switch (over) {
-    case "dropzone-left":
+  switch (id) {
+    case "left":
       setWindowDimensions(window.key, {
         width: halfWidth,
         height: "100%",
@@ -50,7 +51,7 @@ export function handleWindowDrop(over: string, window: Window) {
         y: "0px",
       });
       break;
-    case "dropzone-topleft":
+    case "topleft":
       setWindowDimensions(window.key, {
         width: halfWidth,
         height: halfHeight,
@@ -58,7 +59,7 @@ export function handleWindowDrop(over: string, window: Window) {
         y: "0px",
       });
       break;
-    case "dropzone-bottomleft":
+    case "bottomleft":
       setWindowDimensions(window.key, {
         width: halfWidth,
         height: halfHeight,
@@ -66,7 +67,7 @@ export function handleWindowDrop(over: string, window: Window) {
         y: halfHeight,
       });
       break;
-    case "dropzone-right":
+    case "right":
       setWindowDimensions(window.key, {
         width: halfWidth,
         height: "100%",
@@ -74,7 +75,7 @@ export function handleWindowDrop(over: string, window: Window) {
         y: "0px",
       });
       break;
-    case "dropzone-topright":
+    case "topright":
       setWindowDimensions(window.key, {
         width: halfWidth,
         height: halfHeight,
@@ -82,7 +83,7 @@ export function handleWindowDrop(over: string, window: Window) {
         y: "0px",
       });
       break;
-    case "dropzone-bottomright":
+    case "bottomright":
       setWindowDimensions(window.key, {
         width: halfWidth,
         height: halfHeight,

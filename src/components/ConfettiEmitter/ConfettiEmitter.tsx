@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Confetti from "react-confetti";
+import { useKeySequence } from "../../hooks/useKeyboard";
 
-export function ConfettiEmitter() {
-  const [shown, setShown] = useState(false);
-
-  useEffect(() => {
-    const reset = [
+const useKonamiSequence = (cb: () => void) =>
+  useKeySequence(
+    [
       "ArrowUp",
       "ArrowUp",
       "ArrowDown",
@@ -16,26 +15,15 @@ export function ConfettiEmitter() {
       "ArrowRight",
       "b",
       "a",
-    ];
-    let sequence = [...reset];
-    const listener = (e: KeyboardEvent) => {
-      if (e.key === sequence[0]) {
-        sequence.shift();
-        if (sequence.length === 0) {
-          setShown(true);
-          sequence = [...reset];
-        }
-      } else {
-        sequence = [...reset];
-      }
-    };
-    window.addEventListener("keydown", listener);
-    return () => {
-      window.removeEventListener("keydown", listener);
-    };
-  }, []);
+    ],
+    cb
+  );
 
-  return shown ? (
+export function ConfettiEmitter() {
+  const [isAnimating, setAnimating] = useState(false);
+  useKonamiSequence(() => setAnimating(true));
+
+  return !isAnimating ? null : (
     <Confetti
       width={document.body.clientWidth}
       height={document.body.clientHeight}
@@ -54,7 +42,7 @@ export function ConfettiEmitter() {
         "#b658c4",
       ]}
       recycle={false}
-      onConfettiComplete={() => setShown(false)}
+      onConfettiComplete={() => setAnimating(false)}
     />
-  ) : null;
+  );
 }

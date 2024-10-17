@@ -100,3 +100,28 @@ export function useKeydowns(...listeners: Array<KeydownOpts>) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dependency]);
 }
+
+export function useKeySequence(
+  sequence: string[],
+  callback: () => void
+) {
+  return useEffect(() => {
+    let currentSequence = [...sequence];
+    const listener = (e: KeyboardEvent) => {
+      if (e.key === currentSequence[0]) {
+        currentSequence.shift();
+        if (currentSequence.length === 0) {
+          callback();
+          currentSequence = [...sequence];
+        }
+      } else {
+        currentSequence = [...sequence];
+      }
+    };
+    window.addEventListener("keydown", listener);
+    return () => {
+      window.removeEventListener("keydown", listener);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sequence.join("||")]);
+}

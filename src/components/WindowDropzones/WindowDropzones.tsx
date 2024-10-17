@@ -3,7 +3,7 @@ import { Box } from "@radix-ui/themes";
 import { useEffect, useRef, useState } from "react";
 import { useWindowStore } from "../../stores/window";
 
-export function WindowTiling() {
+export function WindowDropzones() {
   const [hoverTile, setHoverTile] = useState("");
   const shiftHeld = useKeyHeld("Shift");
   const isDragging = useWindowStore((s) => s.isDragging);

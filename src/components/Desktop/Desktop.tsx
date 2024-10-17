@@ -36,7 +36,7 @@ import { createExplorerWindow } from "../apps/Explorer/Explorer.window";
 import { createTerminalWindow } from "../apps/Terminal/Terminal.window";
 import { WebBrowser } from "../apps/WebBrowser/WebBrowser";
 import { createSettingsWindow } from "../Settings/Settings.window";
-import appIconStyles from "./appicon.module.css";
+import desktopStyles from "./Desktop.module.css";
 
 const gridSize = 64; // pixels
 const gridPad = 16;
@@ -285,15 +285,13 @@ function Application(props: {
     top: draggable.isDragging
       ? mousePosition?.y ?? props.position.y
       : props.position.y,
-
-    // transform: CSS.Transform.toString(draggable.transform),
   } as CSSProperties;
 
   useEffect(() => {
     if (draggable.isDragging) {
       const listener = throttle((e: MouseEvent) => {
         setMousePosition({ x: e.clientX, y: e.clientY });
-      }, 50);
+      }, 20);
       document.body.addEventListener("mousemove", listener);
       return () => {
         document.body.removeEventListener("mousemove", listener);
@@ -303,11 +301,12 @@ function Application(props: {
       setMousePosition(null);
     }
   }, [draggable.isDragging]);
+
   return (
     <Tooltip content={props.title} side="bottom">
       <Button
         ref={draggable.setNodeRef}
-        className={appIconStyles.appicon}
+        className={desktopStyles.appicon}
         variant="soft"
         color="gray"
         style={style}

@@ -1,7 +1,9 @@
+import { useKeydown } from "../../hooks/useKeyboard";
+import { tabWindow } from "../../services/window";
 import { useWindowStore } from "../../stores/window";
 import { Window } from "../Window/Window";
 
-export function WindowManager() {
+export function WindowRenderer() {
   const {
     windows,
     minimizedWindows,
@@ -11,6 +13,15 @@ export function WindowManager() {
     minimizeWindow,
     windowOrder,
   } = useWindowStore();
+
+  useKeydown({
+    key: "Tab",
+    altKey: true,
+    callback: (e) => {
+      tabWindow(e.shiftKey ? "backward" : "forward");
+    },
+    deps: [],
+  });
 
   return (
     <>
