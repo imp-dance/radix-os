@@ -2,11 +2,17 @@ import Editor from "@monaco-editor/react";
 import { Flex } from "@radix-ui/themes";
 import { useRef, useState } from "react";
 import {
-  findNodeByPath,
+  useCreateFileMutation,
+  useFileSystemQuery,
+  useRemoveFileMutation,
+  useUpdateFileMutation,
+} from "../../../api/fs/fs-api";
+import {
+  getParentPath,
   parsePath,
   pathToName,
 } from "../../../services/fs";
-import { FsFile, useFileSystemStore } from "../../../stores/fs";
+import { FsFile } from "../../../stores/fs";
 import { useSettingsStore } from "../../../stores/settings";
 import { useWindowStore } from "../../../stores/window";
 import { ConfirmDialog } from "../../ConfirmDialog/ConfirmDialog";
@@ -34,28 +40,42 @@ export function CodeApp(props: {
   const file = props.file ?? createdFile;
   const path = props.path ?? createdPath;
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const fs = useFileSystemStore((s) => s.tree);
   const [value, setValue] = useState(file?.data ?? "");
   const editorRef = useRef<EditorType | null>(null);
   const theme = useSettingsStore((s) => s.theme);
-  const save = useFileSystemStore((s) => s.updateFile);
-  const deleteFile = useFileSystemStore((s) => s.remove);
-  const newFile = useFileSystemStore((s) => s.createFile);
+  const updateFileMutation = useUpdateFileMutation();
+  const createFileMutation = useCreateFileMutation();
+  const deleteFileMutation = useRemoveFileMutation();
+  const nodeQuery = useFileSystemQuery(path ?? "");
   const windows = useWindowStore((s) => s.windows);
   const win = windows.find((win) => win.id === props.windowId);
   const removeWindow = useWindowStore((s) => s.removeWindow);
-  const node = path ? findNodeByPath(path, fs) : null;
+  const node =
+    path && nodeQuery.isSuccess ? nodeQuery.data : null;
   const touched = node
     ? node && "data" in node && node.data !== value
     : value !== "";
 
   const requestSave = () => {
-    if (path) return save(path, value);
+    if (path) {
+      return updateFileMutation.mutate({
+        path,
+        file: { data: value },
+      });
+    }
     setCreateDialogOpen(true);
   };
 
-  const createFile = (path: string) => {
-    newFile(path, value);
+  const createFile = async (path: string) => {
+    const parent = getParentPath(path);
+    const name = pathToName(path);
+    await createFileMutation.mutateAsync({
+      path: parent,
+      file: {
+        name,
+        data: value,
+      },
+    });
     const winState = useWindowStore.getState();
     const winObj = winState.windows.find(
       (w) => w.id === props.windowId
@@ -220,8 +240,8 @@ export function CodeApp(props: {
         setOpen={setDeleteOpen}
         title="Delete file"
         description="Are you sure you want to delete this file?"
-        onConfirm={() => {
-          deleteFile(parsePath(path!));
+        onConfirm={async () => {
+          await deleteFileMutation.mutateAsync(parsePath(path!));
           if (win) removeWindow(win);
         }}
         confirmText="Delete file"

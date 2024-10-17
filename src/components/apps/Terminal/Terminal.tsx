@@ -14,11 +14,17 @@ import React, {
   useState,
 } from "react";
 import {
+  useCreateDirMutation,
+  useFileSystemQuery,
+  useMoveMutation,
+  useUpdateFileMutation,
+} from "../../../api/fs/fs-api";
+import {
   findNodeByPath,
   isFolder,
   parseRelativePath,
 } from "../../../services/fs";
-import { useFileSystemStore } from "../../../stores/fs";
+import { FsFolder } from "../../../stores/fs";
 import { Command, helpText } from "./constants";
 import { parseFs } from "./modules/fs";
 import { joinQuotedArgs } from "./utils";
@@ -27,9 +33,11 @@ export function Terminal(props: { initialPath?: string }) {
   const currentCommandIndex = useRef(0);
   const prevCommands = useRef<string[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const tree = useFileSystemStore((s) => s.tree);
-  const move = useFileSystemStore((s) => s.move);
-  const createFolder = useFileSystemStore((s) => s.createFolder);
+  const treeQuery = useFileSystemQuery("");
+  const tree = treeQuery.data ?? null;
+  const moveMutation = useMoveMutation();
+  const createFolderMutation = useCreateDirMutation();
+  const updateFile = useUpdateFileMutation();
   const path = useRef<string[]>(
     props.initialPath?.split("/").filter(Boolean) ?? ["Home"]
   );
@@ -68,6 +76,7 @@ export function Terminal(props: { initialPath?: string }) {
   }
 
   const parseInput = (input: string) => {
+    if (!tree) return null;
     prevCommands.current.push(input);
     const parts = input.split(" ");
     const [command, ...args_] = parts;
@@ -143,10 +152,13 @@ export function Terminal(props: { initialPath?: string }) {
             </Code>
           );
         }
-        createFolder(
-          parseRelativePath(path.current.join("/"), name)
-        );
-        pushOutput(<Command command={`mkdir ${name}`} />);
+        createFolderMutation
+          .mutateAsync(
+            parseRelativePath(path.current.join("/"), name)
+          )
+          .then(() => {
+            pushOutput(<Command command={`mkdir ${name}`} />);
+          });
         break;
       }
       case "mv": {
@@ -168,8 +180,11 @@ export function Terminal(props: { initialPath?: string }) {
         if (!toNode) {
           return dirNotFound(to);
         }
-        move(from, to);
-        pushOutput(<Command command={`mv ${from} ${to}`} />);
+        moveMutation
+          .mutateAsync({ fromPath: from, toPath: to })
+          .then(() => {
+            pushOutput(<Command command={`mv ${from} ${to}`} />);
+          });
         break;
       }
       case "fs": {
@@ -177,6 +192,9 @@ export function Terminal(props: { initialPath?: string }) {
           pushOutput,
           args,
           currentPath: path.current.join("/"),
+          updateFile: (path, file) =>
+            updateFile.mutateAsync({ path, file }),
+          tree: tree as FsFolder,
         });
       }
       case "cd": {
@@ -205,6 +223,8 @@ export function Terminal(props: { initialPath?: string }) {
     });
     currentCommandIndex.current = prevCommands.current.length;
   }, [output.length]);
+
+  if (!tree) return null;
 
   return (
     <Box

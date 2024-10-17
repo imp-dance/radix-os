@@ -1,4 +1,5 @@
 import { CameraIcon, GlobeIcon } from "@radix-ui/react-icons";
+import { createContext, useContext } from "react";
 import { createCodeWindow } from "../components/apps/Code/Code.window";
 import { createTerminalWindow } from "../components/apps/Terminal/Terminal.window";
 import { WebBrowser } from "../components/apps/WebBrowser/WebBrowser";
@@ -10,6 +11,36 @@ import {
   Launcher,
 } from "../stores/fs";
 import { createWindow, useWindowStore } from "../stores/window";
+
+export type FsIntegration = {
+  readDir: (path: string) => Promise<FsNode | null>;
+  makeDir: (path: string) => Promise<boolean>;
+  makeFile: (
+    path: string,
+    file: { name: string } & Partial<FsFile>
+  ) => Promise<boolean>;
+  move: (from: string, to: string) => Promise<boolean>;
+  updateFile: (
+    path: string,
+    file: Partial<FsFile>
+  ) => Promise<boolean>;
+  removeFile: (path: string) => Promise<boolean>;
+};
+
+export const fsContext = createContext<FsIntegration | null>(
+  null
+);
+
+export const FsProvider = fsContext.Provider;
+
+export const useFs = () => {
+  const context = useContext(fsContext);
+  if (context === null)
+    throw new Error(
+      "RadixOS mounted outside file system context"
+    );
+  return context;
+};
 
 export function findNode(
   name: string,

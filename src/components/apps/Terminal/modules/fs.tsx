@@ -7,8 +7,10 @@ import {
   parseRelativePath,
 } from "../../../../services/fs";
 import {
+  FsFile,
+  FsFolder,
+  Launcher,
   launcherSchema,
-  useFileSystemStore,
 } from "../../../../stores/fs";
 import { Command, DirNotFound } from "../constants";
 import { quotableRestArgs } from "../utils";
@@ -17,17 +19,18 @@ export function parseFs({
   pushOutput,
   args,
   currentPath,
+  updateFile,
+  tree,
 }: {
   pushOutput: (...output: ReactNode[]) => void;
   args: string[];
   currentPath: string;
+  tree: FsFolder;
+  updateFile: (
+    path: string,
+    file: Partial<FsFile>
+  ) => Promise<boolean>;
 }) {
-  const {
-    tree,
-    renameFile: rename,
-    setDefaultLauncher,
-    makeExecutableWith,
-  } = useFileSystemStore.getState();
   // eslint-disable-next-line prefer-const
   let [path, flag, ...restArgs] = args;
   path = parseRelativePath(currentPath, path);
@@ -35,6 +38,37 @@ export function parseFs({
   if (!node) {
     return pushOutput(<DirNotFound dir={path} />);
   }
+  const setDefaultLauncher = (
+    path: string,
+    launcher: Launcher
+  ) => {
+    const node = findNodeByPath(path, tree);
+    if (!node || !isFile(node)) return null;
+    updateFile(path, {
+      launcher: [
+        launcher,
+        ...node.launcher.filter((l) => l !== launcher),
+      ],
+    });
+  };
+  const makeExecutableWith = (
+    path: string,
+    launcher: Launcher
+  ) => {
+    const node = findNodeByPath(path, tree);
+    if (!node || !isFile(node)) return null;
+    updateFile(path, {
+      launcher: [
+        ...node.launcher.filter((l) => l !== launcher),
+        launcher,
+      ],
+    });
+  };
+  const rename = (path: string, name: string) => {
+    const node = findNodeByPath(path, tree);
+    if (!node || !isFile(node)) return null;
+    updateFile(path, { name });
+  };
   switch (flag) {
     case "-R": {
       const name = quotableRestArgs(restArgs);

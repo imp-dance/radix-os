@@ -17,7 +17,7 @@ body {
   display: grid;
 }
 
-#app {
+#radixos > div {
   height: 100%;
   display: grid;
   grid-template-rows: auto 2rem;
@@ -36,9 +36,6 @@ body {
     var(--pink-3) 0%,
     var(--pink-5) 100%
   );
-}
-
-#app {
 }
 
 body,

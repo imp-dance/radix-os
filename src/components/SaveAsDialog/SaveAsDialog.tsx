@@ -13,7 +13,7 @@ import { Explorer } from "../apps/Explorer/Explorer";
 export function SaveAsDialog(props: {
   open: boolean;
   setOpen: (open: boolean) => void;
-  onPathCreate: (path: string) => void;
+  onPathCreate: (path: string) => Promise<void>;
 }) {
   const [path, setPath] = useState("");
   const [fileName, setFileName] = useState("");
@@ -77,10 +77,11 @@ export function SaveAsDialog(props: {
               variant="solid"
               color="green"
               onClick={() => {
-                props.setOpen(false);
-                props.onPathCreate(
-                  `${path}/${fileName.split("/")[0]}`
-                );
+                props
+                  .onPathCreate(
+                    `${path}/${fileName.split("/")[0]}`
+                  )
+                  .then(() => props.setOpen(false));
               }}
               disabled={!isValid}
             >

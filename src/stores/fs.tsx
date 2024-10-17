@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import {
   findNodeByPath,
+  FsIntegration,
   getParentPath,
   isFile,
   isFolder,
@@ -43,8 +44,11 @@ export type FileSystemStore = {
   move: (from: string, to: string) => void;
   remove: (path: string) => void;
   createFolder: (path: string) => void;
-  createFile: (path: string, content?: string) => void;
-  updateFile: (path: string, data: string) => void;
+  createFile: (
+    path: string,
+    file: { name: string } & Partial<FsFile>
+  ) => void;
+  updateFile: (path: string, file: Partial<FsFile>) => void;
   renameFile: (path: string, name: string) => void;
   addFolderToFavourites: (path: string) => void;
   removeFolderFromFavourites: (path: string) => void;
@@ -102,21 +106,18 @@ export const useFileSystemStore = create(
           });
           return { ...state, tree: { ...newState.tree } };
         }),
-      createFile: (path, content) =>
+      createFile: (path, file) =>
         set((state) => {
           const newState = { ...state };
-          const parent = findNodeByPath(
-            getParentPath(path),
-            newState.tree
-          );
+          const parent = findNodeByPath(path, newState.tree);
           if (!isFolder(parent)) {
             return state;
           }
           parent.children.push({
-            name: pathToName(path),
-            data: content ?? "",
-            launcher: ["code"],
-            title: "New file",
+            name: file.name,
+            data: file.data ?? "",
+            launcher: file.launcher ?? ["code"],
+            title: file.title ?? "New file",
           });
           return { ...state, tree: { ...newState.tree } };
         }),
@@ -195,14 +196,27 @@ export const useFileSystemStore = create(
           ];
           return { tree: { ...newTree } };
         }),
-      updateFile: (path: string, data: string) =>
+      updateFile: (path, file) =>
         set((state) => {
           const newTree = { ...state.tree };
-          const node = findNodeByPath(path, newTree);
-          if (!isFile(node)) {
+          const parent = findNodeByPath(
+            getParentPath(path),
+            newTree
+          );
+          if (!isFolder(parent)) {
             return state;
           }
-          node.data = data;
+          const child = parent.children.find(
+            (n) => n.name === pathToName(path)
+          );
+          if (!child) {
+            return state;
+          }
+          const index = parent.children.indexOf(child);
+          parent.children[index] = {
+            ...parent.children[index],
+            ...file,
+          };
           return { tree: { ...newTree } };
         }),
 
@@ -254,3 +268,69 @@ export const useFileSystemStore = create(
     }
   )
 );
+
+export const fsZustandIntegration: FsIntegration = {
+  makeDir: (path) =>
+    new Promise((resolve) => {
+      const { createFolder } = useFileSystemStore.getState();
+      try {
+        createFolder(path);
+        resolve(true);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (_err) {
+        resolve(false);
+      }
+    }),
+  makeFile: (path, file) =>
+    new Promise((resolve) => {
+      const { createFile } = useFileSystemStore.getState();
+      try {
+        createFile(path, file);
+        return resolve(true);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (err) {
+        return resolve(false);
+      }
+    }),
+  move: (from, to) =>
+    new Promise((resolve) => {
+      const { move } = useFileSystemStore.getState();
+      try {
+        move(from, to);
+        return resolve(true);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (err) {
+        return resolve(false);
+      }
+    }),
+  readDir: (path) =>
+    new Promise((resolve) => {
+      const { tree } = useFileSystemStore.getState();
+      if (!path) {
+        return resolve(tree);
+      }
+      return resolve(findNodeByPath(path, tree));
+    }),
+  updateFile: (path, file) =>
+    new Promise((resolve) => {
+      const { updateFile } = useFileSystemStore.getState();
+      try {
+        updateFile(path, file);
+        return resolve(true);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (err) {
+        return resolve(false);
+      }
+    }),
+  removeFile: (path) =>
+    new Promise((resolve) => {
+      const { remove } = useFileSystemStore.getState();
+      try {
+        remove(path);
+        return resolve(true);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (err) {
+        return resolve(false);
+      }
+    }),
+};

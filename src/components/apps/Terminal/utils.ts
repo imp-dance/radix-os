@@ -33,6 +33,12 @@ export function joinQuotedArgs(args: string[]) {
       startQuote = quote.find((quoteSymbol) =>
         arg.startsWith(quoteSymbol)
       )!;
+      if (argBuilder.endsWith(startQuote)) {
+        // one word
+        nextArgs.push(argBuilder.slice(0, -1));
+        argBuilder = null;
+        startQuote = null;
+      }
     } else if (hasEndQuote && argBuilder !== null) {
       argBuilder += ` ${arg.slice(0, -1)}`;
       nextArgs.push(argBuilder);

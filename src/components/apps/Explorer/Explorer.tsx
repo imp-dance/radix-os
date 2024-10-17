@@ -29,6 +29,14 @@ import {
 } from "@radix-ui/themes";
 import React, { ReactNode, useRef, useState } from "react";
 import {
+  useCreateDirMutation,
+  useCreateFileMutation,
+  useFileSystemQuery,
+  useMoveMutation,
+  useRemoveFileMutation,
+  useUpdateFileMutation,
+} from "../../../api/fs/fs-api";
+import {
   findNodeByPath,
   isFile,
   isFolder,
@@ -72,22 +80,24 @@ export function Explorer({
   );
   const [renameFileOpen, setRenameFileOpen] = useState(false);
   const [renamingNode, setRenamingNode] = useState<string>("");
-  const tree = useFileSystemStore((s) => s.tree);
+  const treeQuery = useFileSystemQuery("");
+  const tree = treeQuery.data ?? null;
   const favourites = useFileSystemStore(
     (s) => s.favouriteFolders
   );
-  const move = useFileSystemStore((s) => s.move);
+  const moveMutation = useMoveMutation();
   const [path, _setPath] = useState(initialPath);
 
   const steps = path.split("/").filter(Boolean);
   const currentFolder = steps.reduce((acc, step) => {
-    if (!("children" in acc)) return acc as FsNode;
+    if (!acc || !("children" in acc)) return acc as FsNode;
     return acc.children.find((c) => c.name === step)!;
   }, tree as FsNode);
 
-  let sortedChildren = isFolder(currentFolder)
-    ? [...currentFolder.children]
-    : [];
+  let sortedChildren =
+    currentFolder && isFolder(currentFolder)
+      ? [...currentFolder.children]
+      : [];
   if (sortDir) {
     sortedChildren = sortedChildren.sort((a, b) =>
       sortDir === "asc"
@@ -116,11 +126,19 @@ export function Explorer({
         if (!over) return;
         if (parsePath(active) === parsePath(over)) return;
         if (selected.length > 1) {
-          selected.forEach((s) => {
-            move(s, over);
-          });
+          Promise.all(
+            selected.map((s) =>
+              moveMutation.mutateAsync({
+                fromPath: s,
+                toPath: over,
+              })
+            )
+          );
         } else {
-          move(`${active}`, `${over}`);
+          moveMutation.mutateAsync({
+            fromPath: active,
+            toPath: over,
+          });
         }
       }}
       onDragStart={() => {
@@ -274,7 +292,7 @@ export function Explorer({
                       </Box>
                     </DragOverlay>
                   )}
-                  {isFolder(currentFolder)
+                  {currentFolder && isFolder(currentFolder)
                     ? sortedChildren.map((child, i) => {
                         return (
                           <ExplorerItem
@@ -401,11 +419,18 @@ function FavouriteItem(props: {
   onRename: () => void;
   disabled?: boolean;
 }) {
-  const tree = useFileSystemStore((s) => s.tree);
+  const treeQuery = useFileSystemQuery("");
+  const deleteMutation = useRemoveFileMutation();
+  const removeFolderFromFavourites = useFileSystemStore(
+    (s) => s.removeFolderFromFavourites
+  );
+  const tree = treeQuery.data ?? null;
   const droppable = useDroppable({
     id: removeStartingSlash(props.favourite),
     disabled: props.disabled,
   });
+
+  if (!tree) return null;
   return (
     <ContextMenu.Root>
       <ContextMenu.Trigger>
@@ -442,9 +467,7 @@ function FavouriteItem(props: {
         {props.favourite !== "Home" && (
           <ContextMenu.Item
             onClick={() => {
-              useFileSystemStore
-                .getState()
-                .removeFolderFromFavourites(props.favourite);
+              removeFolderFromFavourites(props.favourite);
             }}
           >
             Remove from favourites
@@ -453,9 +476,7 @@ function FavouriteItem(props: {
         {props.favourite !== "Home" && (
           <ContextMenu.Item
             onClick={() => {
-              useFileSystemStore
-                .getState()
-                .remove(props.favourite);
+              deleteMutation.mutate(props.favourite);
             }}
             color="crimson"
           >
@@ -495,7 +516,7 @@ function ExplorerItem(props: {
   const draggable = useDraggable({
     id: removeStartingSlash(props.path),
   });
-  const remove = useFileSystemStore((s) => s.remove);
+  const deleteMutation = useRemoveFileMutation();
   const addToFavourites = useFileSystemStore(
     (s) => s.addFolderToFavourites
   );
@@ -628,7 +649,9 @@ function ExplorerItem(props: {
         <ContextMenu.Separator />
         <ContextMenu.Item
           onClick={() => {
-            getTargets().forEach(remove);
+            Promise.all(
+              getTargets().map((t) => deleteMutation.mutate(t))
+            );
           }}
           color="crimson"
         >
@@ -680,7 +703,7 @@ function CreateFolderDialog(props: {
   path: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const createFolder = useFileSystemStore((s) => s.createFolder);
+  const createFolderMutation = useCreateDirMutation();
   return (
     <Dialog.Root
       open={props.open}
@@ -714,13 +737,16 @@ function CreateFolderDialog(props: {
               variant="solid"
               color="indigo"
               onClick={() => {
-                createFolder(
-                  `${props.path}/${
-                    inputRef.current?.value ?? "New folder"
-                  }`
-                );
-                inputRef.current!.value = "New folder";
-                props.onOpenChange(false);
+                createFolderMutation
+                  .mutateAsync(
+                    `${props.path}/${
+                      inputRef.current?.value ?? "New folder"
+                    }`
+                  )
+                  .then(() => {
+                    inputRef.current!.value = "New folder";
+                    props.onOpenChange(false);
+                  });
               }}
             >
               Create folder
@@ -738,7 +764,7 @@ function CreateFileDialog(props: {
   path: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const createFile = useFileSystemStore((s) => s.createFile);
+  const createFileMutation = useCreateFileMutation();
   return (
     <Dialog.Root
       open={props.open}
@@ -772,13 +798,18 @@ function CreateFileDialog(props: {
               variant="solid"
               color="indigo"
               onClick={() => {
-                createFile(
-                  `${props.path}/${
-                    inputRef.current?.value ?? "New file"
-                  }`
-                );
-                inputRef.current!.value = "New file";
-                props.onOpenChange(false);
+                createFileMutation
+                  .mutateAsync({
+                    path: props.path,
+                    file: {
+                      name:
+                        inputRef.current?.value ?? "New file",
+                    },
+                  })
+                  .then(() => {
+                    inputRef.current!.value = "New file";
+                    props.onOpenChange(false);
+                  });
               }}
             >
               Create file
@@ -795,9 +826,14 @@ function RenameFileDialog(props: {
   onOpenChange: (open: boolean) => void;
   path: string;
 }) {
-  const tree = useFileSystemStore((s) => s.tree);
+  const treeQuery = useFileSystemQuery("");
+  const tree = treeQuery.data ?? null;
   const inputRef = useRef<HTMLInputElement>(null);
-  const renameFile = useFileSystemStore((s) => s.renameFile);
+  const updateFile = useUpdateFileMutation();
+  const renameFile = (path: string, name: string) => {
+    updateFile.mutate({ path, file: { name } });
+  };
+  if (!tree) return null;
   const node = findNodeByPath(props.path, tree);
   if (!node) {
     return null;
