@@ -29,6 +29,7 @@ import {
 } from "@radix-ui/themes";
 import React, {
   ReactNode,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -430,18 +431,24 @@ function FavouriteItem(props: {
   onRename: () => void;
   disabled?: boolean;
 }) {
-  const treeQuery = useFileSystemQuery("");
+  const favQuery = useFileSystemQuery(props.favourite);
   const deleteMutation = useRemoveFileMutation();
   const removeFolderFromFavourites = useFavouriteFolderStore(
     (s) => s.removeFolderFromFavourites
   );
-  const tree = treeQuery.data ?? null;
+  const favouriteNode = favQuery.data ?? null;
   const droppable = useDroppable({
     id: removeStartingSlash(props.favourite),
     disabled: props.disabled,
   });
 
-  if (!tree) return null;
+  useEffect(() => {
+    if (favQuery.isError) {
+      removeFolderFromFavourites(props.favourite);
+    }
+  }, [favQuery.isError]);
+
+  if (!favouriteNode) return null;
   return (
     <ContextMenu.Root>
       <ContextMenu.Trigger>
@@ -460,8 +467,7 @@ function FavouriteItem(props: {
           onClick={() => props.onClick()}
           ref={droppable.setNodeRef}
         >
-          {findNodeByPath(props.favourite, tree)?.name ??
-            props.favourite}
+          {favouriteNode.name ?? props.favourite}
         </Button>
       </ContextMenu.Trigger>
       <ContextMenu.Content size="1">

@@ -231,7 +231,7 @@ export const fsZustandIntegration: FsIntegration = {
     new Promise((resolve) => {
       const { tree } = useFileSystemStore.getState();
       const target = !path ? tree : findNodeByPath(path, tree);
-      return resolve(target);
+      return resolve(target ?? null);
     }),
   updateFile: (path, file) =>
     new Promise((resolve) => {
