@@ -27,7 +27,12 @@ import {
   Text,
   TextField,
 } from "@radix-ui/themes";
-import React, { ReactNode, useRef, useState } from "react";
+import React, {
+  ReactNode,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   useCreateDirMutation,
   useCreateFileMutation,
@@ -43,11 +48,8 @@ import {
   openFile,
   parsePath,
 } from "../../../services/fs";
-import {
-  FsNode,
-  Launcher,
-  useFileSystemStore,
-} from "../../../stores/fs";
+import { useFavouriteFolderStore } from "../../../stores/explorer";
+import { FsNode, Launcher } from "../../../stores/fs";
 import { useWindowStore } from "../../../stores/window";
 import { createTerminalWindow } from "../../apps/Terminal/Terminal.window";
 
@@ -82,7 +84,7 @@ export function Explorer({
   const [renamingNode, setRenamingNode] = useState<string>("");
   const treeQuery = useFileSystemQuery("");
   const tree = treeQuery.data ?? null;
-  const favourites = useFileSystemStore(
+  const favourites = useFavouriteFolderStore(
     (s) => s.favouriteFolders
   );
   const moveMutation = useMoveMutation();
@@ -94,17 +96,26 @@ export function Explorer({
     return acc.children.find((c) => c.name === step)!;
   }, tree as FsNode);
 
-  let sortedChildren =
-    currentFolder && isFolder(currentFolder)
-      ? [...currentFolder.children]
-      : [];
-  if (sortDir) {
-    sortedChildren = sortedChildren.sort((a, b) =>
+  const sortedChildren = useMemo(() => {
+    if (!currentFolder) return [];
+    if (!isFolder(currentFolder)) return [];
+    return [...currentFolder.children].sort((a, b) =>
       sortDir === "asc"
         ? a.name.localeCompare(b.name)
         : b.name.localeCompare(a.name)
     );
-  }
+  }, [
+    sortDir,
+    steps.join(""),
+    treeQuery.isFetching,
+    currentFolder?.name,
+    currentFolder && isFolder(currentFolder)
+      ? currentFolder.children.length
+      : 0,
+    currentFolder && isFolder(currentFolder)
+      ? currentFolder.children.map((c) => c.name).join("  ")
+      : "",
+  ]);
 
   const setPath = (
     newPath: string | ((prev: string) => string)
@@ -421,7 +432,7 @@ function FavouriteItem(props: {
 }) {
   const treeQuery = useFileSystemQuery("");
   const deleteMutation = useRemoveFileMutation();
-  const removeFolderFromFavourites = useFileSystemStore(
+  const removeFolderFromFavourites = useFavouriteFolderStore(
     (s) => s.removeFolderFromFavourites
   );
   const tree = treeQuery.data ?? null;
@@ -517,15 +528,11 @@ function ExplorerItem(props: {
     id: removeStartingSlash(props.path),
   });
   const deleteMutation = useRemoveFileMutation();
-  const addToFavourites = useFileSystemStore(
-    (s) => s.addFolderToFavourites
-  );
-  const removeFromFavourites = useFileSystemStore(
-    (s) => s.removeFolderFromFavourites
-  );
-  const favourites = useFileSystemStore(
-    (s) => s.favouriteFolders
-  );
+  const {
+    addFolderToFavourites: addToFavourites,
+    removeFolderFromFavourites: removeFromFavourites,
+    favouriteFolders: favourites,
+  } = useFavouriteFolderStore();
   const isFavorite = favourites.some(
     (f) => parsePath(f) === parsePath(props.path)
   );

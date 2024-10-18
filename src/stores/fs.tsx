@@ -5,11 +5,11 @@ import {
   findNodeByPath,
   FsIntegration,
   getParentPath,
-  isFile,
   isFolder,
   parsePath,
   pathToName,
 } from "../services/fs";
+import { useFavouriteFolderStore } from "./explorer";
 import { initialTree } from "./fs.constants";
 
 export const FS_LS_KEY = "fs";
@@ -49,12 +49,6 @@ export type FileSystemStore = {
     file: { name: string } & Partial<FsFile>
   ) => void;
   updateFile: (path: string, file: Partial<FsFile>) => void;
-  renameFile: (path: string, name: string) => void;
-  addFolderToFavourites: (path: string) => void;
-  removeFolderFromFavourites: (path: string) => void;
-  favouriteFolders: string[];
-  setDefaultLauncher: (path: string, launcher: Launcher) => void;
-  makeExecutableWith: (path: string, launcher: Launcher) => void;
 };
 
 // TODO: Zod validation
@@ -63,33 +57,6 @@ export const useFileSystemStore = create(
   persist<FileSystemStore>(
     (set) => ({
       tree: initialTree,
-      favouriteFolders: [
-        "Home",
-        "Home/Documents",
-        "Home/Images",
-      ],
-      addFolderToFavourites: (path) =>
-        set((state) => {
-          if (!state.favouriteFolders.includes(path)) {
-            return {
-              ...state,
-              favouriteFolders: [
-                ...state.favouriteFolders,
-                path,
-              ],
-            };
-          }
-          return state;
-        }),
-      removeFolderFromFavourites: (path) =>
-        set((state) => {
-          return {
-            ...state,
-            favouriteFolders: state.favouriteFolders.filter(
-              (f) => f !== path
-            ),
-          };
-        }),
       createFolder: (path) =>
         set((state) => {
           const newState = { ...state };
@@ -124,7 +91,10 @@ export const useFileSystemStore = create(
       move: (from, to) =>
         set((state) => {
           const newTree = { ...state.tree };
-          let newFavourites = [...state.favouriteFolders];
+          let newFavourites = [
+            ...useFavouriteFolderStore.getState()
+              .favouriteFolders,
+          ];
           const fromNode = findNodeByPath(from, newTree);
           const toNode = findNodeByPath(to, newTree);
           const fromParentNode = findNodeByPath(
@@ -151,10 +121,12 @@ export const useFileSystemStore = create(
                 : f
             );
           }
+          useFavouriteFolderStore
+            .getState()
+            .setFavourites(newFavourites);
 
           return {
             tree: { ...newTree },
-            favouriteFolders: [...newFavourites],
           };
         }),
       remove: (path) =>
@@ -171,30 +143,20 @@ export const useFileSystemStore = create(
               (c) => c.name !== pathToName(path)
             ),
           ];
+          const { setFavourites, favouriteFolders } =
+            useFavouriteFolderStore.getState();
+
+          setFavourites(
+            favouriteFolders.filter(
+              (f) => parsePath(f) !== parsePath(path)
+            )
+          );
 
           return {
-            favouriteFolders: [
-              ...state.favouriteFolders.filter(
-                (f) => parsePath(f) !== parsePath(path)
-              ),
-            ],
             tree: {
               ...newTree,
             },
           };
-        }),
-      setDefaultLauncher: (path: string, launcher: Launcher) =>
-        set((state) => {
-          const newTree = { ...state.tree };
-          const node = findNodeByPath(path, newTree);
-          if (!isFile(node)) {
-            return state;
-          }
-          node.launcher = [
-            launcher,
-            ...node.launcher.filter((l) => l !== launcher),
-          ];
-          return { tree: { ...newTree } };
         }),
       updateFile: (path, file) =>
         set((state) => {
@@ -219,43 +181,6 @@ export const useFileSystemStore = create(
           };
           return { tree: { ...newTree } };
         }),
-
-      renameFile: (path: string, name: string) =>
-        set((state) => {
-          const newState = { ...state };
-          const node = findNodeByPath(path, newState.tree);
-          node.name = name;
-          if (
-            newState.favouriteFolders.some(
-              (f) => parsePath(f) === parsePath(path)
-            )
-          ) {
-            newState.favouriteFolders =
-              newState.favouriteFolders.map((f) =>
-                parsePath(f) === parsePath(path)
-                  ? `${getParentPath(path)}/${name}`
-                  : f
-              );
-          }
-          return {
-            favouriteFolders: newState.favouriteFolders,
-            tree: { ...newState.tree },
-          };
-        }),
-      makeExecutableWith: (path: string, launcher: Launcher) =>
-        set((state) => {
-          const newState = { ...state };
-          const node = findNodeByPath(path, newState.tree);
-          if (!isFile(node)) return state;
-          if (launcherSchema.safeParse(launcher).error) {
-            return state;
-          }
-          node.launcher = [
-            ...node.launcher.filter((l) => l !== launcher),
-            launcher,
-          ];
-          return { tree: { ...newState.tree } };
-        }),
     }),
     {
       name: FS_LS_KEY,
@@ -263,7 +188,6 @@ export const useFileSystemStore = create(
       partialize: (state) =>
         ({
           tree: state.tree,
-          favouriteFolders: state.favouriteFolders,
         } as FileSystemStore),
     }
   )
@@ -306,10 +230,8 @@ export const fsZustandIntegration: FsIntegration = {
   readDir: (path) =>
     new Promise((resolve) => {
       const { tree } = useFileSystemStore.getState();
-      if (!path) {
-        return resolve(tree);
-      }
-      return resolve(findNodeByPath(path, tree));
+      const target = !path ? tree : findNodeByPath(path, tree);
+      return resolve(target);
     }),
   updateFile: (path, file) =>
     new Promise((resolve) => {
