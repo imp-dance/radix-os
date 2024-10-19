@@ -29,7 +29,7 @@ export type Launcher = z.infer<typeof launcherSchema>;
 
 export type FsFile = {
   name: string;
-  launcher: Launcher[];
+  launcher: string[];
   data: string;
   title: string;
 };

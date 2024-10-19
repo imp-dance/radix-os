@@ -1,9 +1,9 @@
 import { Code } from "@radix-ui/themes";
 import { ReactNode } from "react";
+import { useUntypedAppContext } from "../../../../integration/setupApps";
 import {
   findNodeByPath,
   isFile,
-  openFile,
   parseRelativePath,
 } from "../../../../services/fs";
 import {
@@ -21,11 +21,13 @@ export function parseFs({
   currentPath,
   updateFile,
   tree,
+  openFile,
 }: {
   pushOutput: (...output: ReactNode[]) => void;
   args: string[];
   currentPath: string;
   tree: FsFolder;
+  openFile: ReturnType<typeof useUntypedAppContext>["openFile"];
   updateFile: (
     path: string,
     file: Partial<FsFile>
@@ -113,7 +115,7 @@ export function parseFs({
           </Code>
         );
       }
-      openFile(node, path, launcher as "code");
+      openFile({ file: node, path }, { launcher });
       return pushOutput(
         <Command command={`fs ${path} -O ${launcher ?? ""}`} />
       );

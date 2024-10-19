@@ -42,17 +42,26 @@ import {
   useRemoveFileMutation,
   useUpdateFileMutation,
 } from "../../../api/fs/fs-api";
+import { useUntypedAppContext } from "../../../integration/setupApps";
 import {
   findNodeByPath,
   isFile,
   isFolder,
-  openFile,
   parsePath,
 } from "../../../services/fs";
 import { useFavouriteFolderStore } from "../../../stores/explorer";
 import { FsNode, Launcher } from "../../../stores/fs";
-import { useWindowStore } from "../../../stores/window";
-import { createTerminalWindow } from "../../apps/Terminal/Terminal.window";
+import {
+  RadixOsAppComponent,
+  useWindowStore,
+} from "../../../stores/window";
+
+export const ExplorerApp: RadixOsAppComponent = (props) => (
+  <Explorer
+    windowId={props.appWindow.id}
+    initialPath={props.file?.file?.data}
+  />
+);
 
 export function Explorer({
   initialPath = "",
@@ -65,6 +74,7 @@ export function Explorer({
   onPathChange?: (path: string) => void;
   disableFiles?: boolean;
 }) {
+  const { openFile } = useUntypedAppContext();
   const mouseSensor = useSensor(MouseSensor, {
     activationConstraint: {
       distance: 10,
@@ -412,8 +422,15 @@ export function Explorer({
             <ContextMenu.Item
               onClick={(e) => {
                 e.stopPropagation();
-                const { addWindow } = useWindowStore.getState();
-                addWindow(createTerminalWindow(path));
+                openFile({
+                  file: {
+                    data: path,
+                    launcher: ["terminal"],
+                    name: path,
+                    title: path,
+                  },
+                  path,
+                });
               }}
             >
               Open in terminal
@@ -526,6 +543,7 @@ function ExplorerItem(props: {
   isDragging?: boolean;
   disabled?: boolean;
 }) {
+  const { openFile } = useUntypedAppContext();
   const droppable = useDroppable({
     id: removeStartingSlash(props.path),
     disabled: isFile(props.item) || props.isDragging,
@@ -585,7 +603,7 @@ function ExplorerItem(props: {
             props.onClick?.();
             if (isFile(props.item)) {
               e.stopPropagation();
-              openFile(props.item, props.path);
+              openFile({ file: props.item, path: props.path });
             }
           }}
           onClick={(e) => {
@@ -600,7 +618,7 @@ function ExplorerItem(props: {
               props.onClick?.();
               if (isFile(props.item)) {
                 e.stopPropagation();
-                openFile(props.item, props.path);
+                openFile({ file: props.item, path: props.path });
               }
             }
           }}
@@ -614,7 +632,9 @@ function ExplorerItem(props: {
         >
           {isFolder(props.item) && <FileIcon />}
           {isFile(props.item) &&
-            launcherToIcon[props.item.launcher[0]]}
+            launcherToIcon[
+              (props.item.launcher[0] as "code") ?? "code"
+            ]}
           {props.item.name}
         </Button>
       </ContextMenu.Trigger>
@@ -631,10 +651,14 @@ function ExplorerItem(props: {
                   onClick={(e) => {
                     e.stopPropagation();
                     if (isFile(props.item))
-                      openFile(props.item, props.path, launcher);
+                      openFile(
+                        { file: props.item, path: props.path },
+                        { launcher }
+                      );
                   }}
                 >
-                  {launcherToLabel[launcher]}{" "}
+                  {launcherToLabel[launcher as "code"] ??
+                    launcher}{" "}
                   {i === 0 && "(default)"}
                 </ContextMenu.Item>
               ))}

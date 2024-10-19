@@ -1,16 +1,5 @@
-import { CameraIcon, GlobeIcon } from "@radix-ui/react-icons";
 import { createContext, useContext } from "react";
-import { createCodeWindow } from "../components/apps/Code/Code.window";
-import { createTerminalWindow } from "../components/apps/Terminal/Terminal.window";
-import { WebBrowser } from "../components/apps/WebBrowser/WebBrowser";
-import { ImageViewer } from "../components/ImageViewer/ImageViewer";
-import {
-  FsFile,
-  FsFolder,
-  FsNode,
-  Launcher,
-} from "../stores/fs";
-import { createWindow, useWindowStore } from "../stores/window";
+import { FsFile, FsFolder, FsNode } from "../stores/fs";
 
 export type FsIntegration = {
   readDir: (path: string) => Promise<FsNode | null>;
@@ -104,50 +93,6 @@ export function parsePath(path: string) {
     path = path.substring(5);
   }
   return path;
-}
-
-export function openFile(
-  file: FsFile,
-  path: string,
-  launcher?: Launcher
-) {
-  const state = useWindowStore.getState();
-  let newWindow;
-  switch (launcher ?? file.launcher[0]!) {
-    case "code":
-      newWindow = createCodeWindow({ path, file });
-      break;
-    case "web":
-      newWindow = createWindow({
-        title: "Web Browser",
-        content: (
-          <WebBrowser
-            launchConfig={{
-              data: file.data,
-              title: `Home:/${path}`,
-            }}
-          />
-        ),
-        initialHeight: 600,
-        initialWidth: 500,
-        icon: <GlobeIcon />,
-      });
-      break;
-    case "terminal":
-      newWindow = createTerminalWindow(file.data);
-      break;
-    case "image":
-      newWindow = createWindow({
-        content: <ImageViewer src={file.data} />,
-        title: file.name,
-        icon: <CameraIcon />,
-        initialHeight: 500,
-        initialWidth: 500,
-      });
-  }
-  if (!newWindow) return;
-  state.addWindow(newWindow);
-  state.bringToFront(newWindow);
 }
 
 export function parseRelativePath(cd: string, nd: string) {

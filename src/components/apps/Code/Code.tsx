@@ -7,6 +7,7 @@ import {
   useRemoveFileMutation,
   useUpdateFileMutation,
 } from "../../../api/fs/fs-api";
+import { useUntypedAppContext } from "../../../integration/setupApps";
 import {
   getParentPath,
   parsePath,
@@ -14,21 +15,20 @@ import {
 } from "../../../services/fs";
 import { FsFile } from "../../../stores/fs";
 import { useSettingsStore } from "../../../stores/settings";
-import { useWindowStore } from "../../../stores/window";
+import {
+  RadixOsAppComponent,
+  useWindowStore,
+} from "../../../stores/window";
 import { ConfirmDialog } from "../../ConfirmDialog/ConfirmDialog";
 import { MenuBar } from "../../MenuBar/MenuBar";
 import { SaveAsDialog } from "../../SaveAsDialog/SaveAsDialog";
-import { createCodeWindow } from "./Code.window";
 
 type EditorType = Parameters<
   NonNullable<Parameters<typeof Editor>[0]["onMount"]>
 >[0];
 
-export function CodeApp(props: {
-  file?: FsFile;
-  path?: string;
-  windowId: symbol;
-}) {
+export const CodeApp: RadixOsAppComponent = (props) => {
+  const { launch } = useUntypedAppContext();
   const [createdFile, setCreatedFile] = useState<FsFile | null>(
     null
   );
@@ -37,8 +37,8 @@ export function CodeApp(props: {
   );
   const [createDialogOpen, setCreateDialogOpen] =
     useState(false);
-  const file = props.file ?? createdFile;
-  const path = props.path ?? createdPath;
+  const file = props.file?.file ?? createdFile;
+  const path = props.file?.path ?? createdPath;
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [value, setValue] = useState(file?.data ?? "");
   const editorRef = useRef<EditorType | null>(null);
@@ -48,7 +48,9 @@ export function CodeApp(props: {
   const deleteFileMutation = useRemoveFileMutation();
   const nodeQuery = useFileSystemQuery(path ?? "");
   const windows = useWindowStore((s) => s.windows);
-  const win = windows.find((win) => win.id === props.windowId);
+  const win = windows.find(
+    (win) => win.id === props.appWindow.id
+  );
   const removeWindow = useWindowStore((s) => s.removeWindow);
   const node =
     path && nodeQuery.isSuccess ? nodeQuery.data : null;
@@ -78,7 +80,7 @@ export function CodeApp(props: {
     });
     const winState = useWindowStore.getState();
     const winObj = winState.windows.find(
-      (w) => w.id === props.windowId
+      (w) => w.id === props.appWindow.id
     );
     if (winObj) {
       winState.setTitle(winObj, pathToName(path));
@@ -102,7 +104,7 @@ export function CodeApp(props: {
       }}
     >
       <MenuBar
-        windowId={props.windowId}
+        windowId={props.appWindow.id}
         menu={[
           {
             label: "File",
@@ -111,8 +113,7 @@ export function CodeApp(props: {
               {
                 label: "New file",
                 onClick: () => {
-                  const winState = useWindowStore.getState();
-                  winState.addWindow(createCodeWindow({}));
+                  launch("code");
                 },
                 shortcut: {
                   key: "N",
@@ -300,4 +301,4 @@ export function CodeApp(props: {
       />
     </Flex>
   );
-}
+};

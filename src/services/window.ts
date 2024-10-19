@@ -1,4 +1,7 @@
-import { useWindowStore, Window } from "../stores/window";
+import {
+  RadixOsAppWindow,
+  useWindowStore,
+} from "../stores/window";
 
 export function setWindowDimensions(
   key: string,
@@ -36,7 +39,10 @@ export function setWindowDimensions(
   useWindowStore.getState().invalidateWindows();
 }
 
-export function handleWindowDrop(over: string, window: Window) {
+export function handleWindowDrop(
+  over: string,
+  window: RadixOsAppWindow
+) {
   const halfWidth = document.body.clientWidth / 2 + "px";
   const halfHeight =
     document.getElementById("desktop")!.clientHeight / 2 + "px";
@@ -116,3 +122,5 @@ export function tabWindow(
     state.bringToFront(nextWindow);
   }
 }
+
+export type Application = {};

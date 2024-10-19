@@ -25,17 +25,9 @@ import {
   useEffect,
   useState,
 } from "react";
+import { useUntypedAppContext } from "../../integration/setupApps";
 import { useSettingsStore } from "../../stores/settings";
-import {
-  createWindow,
-  useWindowStore,
-} from "../../stores/window";
 import { throttle } from "../../utils";
-import { createCodeWindow } from "../apps/Code/Code.window";
-import { createExplorerWindow } from "../apps/Explorer/Explorer.window";
-import { createTerminalWindow } from "../apps/Terminal/Terminal.window";
-import { WebBrowser } from "../apps/WebBrowser/WebBrowser";
-import { createSettingsWindow } from "../Settings/Settings.window";
 import desktopStyles from "./Desktop.module.css";
 
 const gridSize = 64; // pixels
@@ -57,7 +49,7 @@ const padModifier: Modifier = (args) => {
 
 export function Desktop() {
   const bg = useSettingsStore((s) => s.bg);
-  const addWindow = useWindowStore((s) => s.addWindow);
+  const { launch, openFile } = useUntypedAppContext();
   const [dragTarget, setDragTarget] = useState<string | null>(
     null
   );
@@ -72,7 +64,7 @@ export function Desktop() {
       title: "Explorer",
       id: "explorer",
       onClick: () => {
-        addWindow(createExplorerWindow());
+        launch("explorer");
       },
       position: {
         x: gridPad,
@@ -84,7 +76,7 @@ export function Desktop() {
       title: "Settings",
       id: "settings",
       onClick: () => {
-        addWindow(createSettingsWindow());
+        launch("settings");
       },
       position: {
         x: gridPad,
@@ -96,7 +88,7 @@ export function Desktop() {
       title: "Terminal",
       id: "terminal",
       onClick: () => {
-        addWindow(createTerminalWindow());
+        launch("terminal");
       },
       position: {
         x: gridPad,
@@ -108,7 +100,7 @@ export function Desktop() {
       title: "Code",
       id: "code",
       onClick: () => {
-        addWindow(createCodeWindow({}));
+        launch("code");
       },
       position: {
         x: gridPad,
@@ -121,15 +113,7 @@ export function Desktop() {
       title: "Web Browser",
       id: "webbrowser",
       onClick: () => {
-        addWindow(
-          createWindow({
-            content: <WebBrowser />,
-            title: "Web Browser",
-            icon: <GlobeIcon />,
-            initialHeight: 600,
-            initialWidth: 800,
-          })
-        );
+        launch("web");
       },
       position: {
         x: gridPad,
@@ -232,28 +216,60 @@ export function Desktop() {
         <ContextMenu.Content size="1">
           <ContextMenu.Item
             onClick={() => {
-              addWindow(createSettingsWindow("customize"));
+              openFile({
+                file: {
+                  data: "customize",
+                  launcher: ["settings"],
+                  name: "settings",
+                  title: "Settings",
+                },
+                path: "customize",
+              });
             }}
           >
             Customize
           </ContextMenu.Item>
           <ContextMenu.Item
             onClick={() => {
-              addWindow(createSettingsWindow("storage"));
+              openFile({
+                file: {
+                  data: "storage",
+                  launcher: ["settings"],
+                  name: "settings",
+                  title: "Settings",
+                },
+                path: "storage",
+              });
             }}
           >
             Storage
           </ContextMenu.Item>
           <ContextMenu.Item
             onClick={() => {
-              addWindow(createSettingsWindow("shortcuts"));
+              openFile({
+                file: {
+                  data: "shortcuts",
+                  launcher: ["settings"],
+                  name: "settings",
+                  title: "Settings",
+                },
+                path: "shortcuts",
+              });
             }}
           >
             View shortcuts
           </ContextMenu.Item>
           <ContextMenu.Item
             onClick={() => {
-              addWindow(createSettingsWindow("about"));
+              openFile({
+                file: {
+                  data: "about",
+                  launcher: ["settings"],
+                  name: "settings",
+                  title: "Settings",
+                },
+                path: "about",
+              });
             }}
           >
             About

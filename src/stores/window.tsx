@@ -1,11 +1,25 @@
 import { ReactNode } from "react";
 import { create } from "zustand";
+import { FsFile } from "./fs";
 
-export type Window = {
+export type RadixOsAppComponent = (props: {
+  appWindow: RadixOsAppWindow;
+  file?: { file: FsFile; path: string };
+}) => ReactNode;
+
+export type RadixOsApp<T extends string> = {
+  appId: T;
+  component: RadixOsAppComponent;
+  defaultWindowSettings: Partial<
+    Omit<RadixOsAppWindow, "content" | "id" | "key">
+  >;
+};
+
+export type RadixOsAppWindow = {
   id: symbol;
   key: string;
-  title: string;
   content: ReactNode;
+  title: string;
   icon: ReactNode;
   x: number;
   y: number;
@@ -18,30 +32,34 @@ export type Window = {
 };
 
 type WindowStore = {
-  windows: Window[];
+  windows: RadixOsAppWindow[];
   windowOrder: symbol[];
-  activeWindow: Window | null;
+  activeWindow: RadixOsAppWindow | null;
   minimizedWindows: symbol[];
   isDragging: boolean;
   setDragging: (dragging: boolean) => void;
-  minimizeWindow: (win: Window) => void;
+  minimizeWindow: (win: RadixOsAppWindow) => void;
   minimizeAll: () => void;
-  addWindow: (win: Window) => void;
-  removeWindow: (win: Window) => void;
-  setWindowPosition: (win: Window, x: number, y: number) => void;
+  addWindow: (win: RadixOsAppWindow) => void;
+  removeWindow: (win: RadixOsAppWindow) => void;
+  setWindowPosition: (
+    win: RadixOsAppWindow,
+    x: number,
+    y: number
+  ) => void;
   setWindowSize: (
-    win: Window,
+    win: RadixOsAppWindow,
     width: number,
     height: number
   ) => void;
-  bringToFront: (win: Window) => void;
+  bringToFront: (win: RadixOsAppWindow) => void;
   clearActiveWindow: () => void;
   invalidateWindows: () => void;
-  setTitle: (win: Window, title: string) => void;
+  setTitle: (win: RadixOsAppWindow, title: string) => void;
 };
 
 export const useWindowStore = create<WindowStore>((set) => ({
-  windows: [] as Window[],
+  windows: [] as RadixOsAppWindow[],
   minimizedWindows: [],
   isDragging: false,
   setDragging: (dragging) => set({ isDragging: dragging }),
@@ -142,8 +160,8 @@ export const useWindowStore = create<WindowStore>((set) => ({
 let incrementer = 0;
 
 export const createWindow = (
-  arg: Omit<Partial<Window>, "id">
-): Window => ({
+  arg: Omit<Partial<RadixOsAppWindow>, "id">
+): RadixOsAppWindow => ({
   key: `window${incrementer++}`,
   id: Symbol("window"),
   title: "",
@@ -160,7 +178,7 @@ export const createWindow = (
 });
 
 const determinePosition = (
-  window: Omit<Partial<Window>, "id">
+  window: Omit<Partial<RadixOsAppWindow>, "id">
 ) => {
   const width = window.initialWidth ?? window.maxWidth ?? 0;
   const height = window.initialHeight ?? window.maxHeight ?? 0;

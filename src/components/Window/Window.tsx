@@ -19,12 +19,12 @@ import { useEffect, useRef, useState } from "react";
 import { setWindowDimensions } from "../../services/window";
 import {
   useWindowStore,
-  type Window,
+  type RadixOsAppWindow,
 } from "../../stores/window";
 import { ErrorBoundary } from "../ErrorBoundary/ErrorBoundary";
 
-export function Window(props: {
-  window: Window;
+export function AppWindow(props: {
+  window: RadixOsAppWindow;
   active?: boolean;
   minimized?: boolean;
   onMinimize?: () => void;

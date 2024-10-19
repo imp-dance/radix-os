@@ -6,15 +6,18 @@ import { WindowDropzones } from "./components/WindowDropzones/WindowDropzones";
 import { WindowRenderer } from "./components/WindowRenderer/WindowRenderer";
 import { Providers } from "./Providers";
 import { FsIntegration } from "./services/fs";
+import { RadixOsApp } from "./stores/window";
 
-function RadixOS(props: {
-  applications?: Array<unknown>;
+function RadixOS<T extends string>(props: {
+  applications?: readonly RadixOsApp<T>[];
   fs: FsIntegration;
 }) {
-  //
   return (
     <div id="radixos">
-      <Providers fs={props.fs}>
+      <Providers
+        fs={props.fs}
+        applications={props.applications ?? []}
+      >
         <WindowDragManager>
           <Desktop />
           <MultiTaskBar />

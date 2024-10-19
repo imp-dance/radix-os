@@ -1,44 +1,34 @@
 import { Flex, TextField } from "@radix-ui/themes";
 import { useEffect, useRef, useState } from "react";
+import { RadixOsAppComponent } from "../../../stores/window";
 
-export function WebBrowser(props: {
-  launchConfig?: {
-    data: string;
-    title: string;
-  };
-}) {
+export const WebBrowser: RadixOsAppComponent = (props) => {
   const frameRef = useRef<HTMLIFrameElement>(null);
   const isLinked =
-    props.launchConfig !== undefined &&
-    props.launchConfig.data.startsWith("http");
+    props.file !== undefined &&
+    props.file.file.data.startsWith("http");
   const [redirect, setRedirect] = useState("");
   const [url, setUrl] = useState(
-    isLinked
-      ? props.launchConfig!.data
-      : props.launchConfig?.title ?? "https://haakon.dev"
+    isLinked ? props.file?.file.data! : "https://haakon.dev"
   );
 
   useEffect(() => {
     const iframe = frameRef.current;
     if (!iframe) return;
-    if (!props.launchConfig) return;
+    if (!props.file) return;
     if (!iframe.contentWindow) return;
     if (isLinked) return;
     iframe.contentWindow.document.open();
-    iframe.contentWindow.document.write(props.launchConfig.data);
+    iframe.contentWindow.document.write(props.file.file.data);
     iframe.contentWindow.document.close();
-  }, [props.launchConfig]);
+  }, [props.file, isLinked]);
   return (
     <Flex direction="column" gap="0" style={{ height: "100%" }}>
       <Flex align="center" gap="2">
         <TextField.Root
-          disabled={
-            props.launchConfig !== undefined && !isLinked
-          }
+          disabled={props.file !== undefined && !isLinked}
           value={
-            isLinked
-              ? props.launchConfig?.data
-              : props.launchConfig?.title ?? url
+            isLinked ? props.file?.file.data : props.file?.path
           }
           onChange={(e) => setUrl(e.target.value)}
           style={{ width: "100%", borderRadius: "0" }}
@@ -46,7 +36,7 @@ export function WebBrowser(props: {
           color="indigo"
           onKeyDown={(e) => {
             if (e.key === "Enter") {
-              setRedirect(url);
+              setRedirect(url!);
             }
           }}
           size="1"
@@ -54,12 +44,12 @@ export function WebBrowser(props: {
       </Flex>
       <iframe
         ref={frameRef}
-        key={redirect ?? props.launchConfig?.title}
+        key={redirect ?? props.file?.path}
         src={
           isLinked
-            ? props.launchConfig!.data
+            ? props.file?.file.data!
             : redirect ||
-              (props.launchConfig ? "#" : "https://haakon.dev")
+              (props.file ? "#" : "https://haakon.dev")
         }
         style={{
           flex: 1,
@@ -71,4 +61,4 @@ export function WebBrowser(props: {
       />
     </Flex>
   );
-}
+};

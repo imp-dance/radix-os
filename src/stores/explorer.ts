@@ -4,11 +4,6 @@ import { createJSONStorage, persist } from "zustand/middleware";
 
 export const FS_FAV_LS_KEY = "fs_fav";
 
-export type FsFolder = {
-  name: string;
-  children: FsNode[];
-};
-
 export const launcherSchema = z.enum([
   "code",
   "web",
@@ -17,15 +12,6 @@ export const launcherSchema = z.enum([
 ]);
 
 export type Launcher = z.infer<typeof launcherSchema>;
-
-export type FsFile = {
-  name: string;
-  launcher: Launcher[];
-  data: string;
-  title: string;
-};
-
-export type FsNode = FsFolder | FsFile;
 
 export type FileSystemStore = {
   addFolderToFavourites: (path: string) => void;

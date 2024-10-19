@@ -1,7 +1,7 @@
 import { useKeydown } from "../../hooks/useKeyboard";
 import { tabWindow } from "../../services/window";
 import { useWindowStore } from "../../stores/window";
-import { Window } from "../Window/Window";
+import { AppWindow } from "../Window/Window";
 
 export function WindowRenderer() {
   const {
@@ -29,7 +29,7 @@ export function WindowRenderer() {
         const win = windows.find((win) => win.id === winId);
         if (!win) return null;
         return (
-          <Window
+          <AppWindow
             key={win.key}
             window={win}
             active={activeWindow?.id === win.id}

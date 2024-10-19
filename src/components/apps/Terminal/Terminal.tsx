@@ -19,17 +19,20 @@ import {
   useMoveMutation,
   useUpdateFileMutation,
 } from "../../../api/fs/fs-api";
+import { useUntypedAppContext } from "../../../integration/setupApps";
 import {
   findNodeByPath,
   isFolder,
   parseRelativePath,
 } from "../../../services/fs";
 import { FsFolder } from "../../../stores/fs";
+import { RadixOsAppComponent } from "../../../stores/window";
 import { Command, helpText } from "./constants";
 import { parseFs } from "./modules/fs";
 import { joinQuotedArgs } from "./utils";
 
-export function Terminal(props: { initialPath?: string }) {
+export const Terminal: RadixOsAppComponent = (props) => {
+  const { openFile } = useUntypedAppContext();
   const currentCommandIndex = useRef(0);
   const prevCommands = useRef<string[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -38,8 +41,9 @@ export function Terminal(props: { initialPath?: string }) {
   const moveMutation = useMoveMutation();
   const createFolderMutation = useCreateDirMutation();
   const updateFile = useUpdateFileMutation();
+  const initialPath = props.file?.file?.data;
   const path = useRef<string[]>(
-    props.initialPath?.split("/").filter(Boolean) ?? ["Home"]
+    initialPath?.split("/").filter(Boolean) ?? ["Home"]
   );
   const [output, setOutput] = useState<ReactNode[]>([
     <Code size="1">Type "help" to get started</Code>,
@@ -195,6 +199,7 @@ export function Terminal(props: { initialPath?: string }) {
           updateFile: (path, file) =>
             updateFile.mutateAsync({ path, file }),
           tree: tree as FsFolder,
+          openFile,
         });
       }
       case "cd": {
@@ -305,4 +310,4 @@ export function Terminal(props: { initialPath?: string }) {
       </Flex>
     </Box>
   );
-}
+};
