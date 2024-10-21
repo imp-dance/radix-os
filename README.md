@@ -2,6 +2,14 @@
 
 An in-browser operating system simulation built using the Radix design system.
 
+#### TOC
+
+1. [Documentation](#documentation)
+2. [Live demo](#live-demo)
+3. [Setup](#setup)
+4. [Tools and technologies](#tools-and-technologies)
+5. [Launch demo locally](#launch-demo-locally)
+
 ## [Documentation](https://radix-os.netlify.app/)
 
 Read the docs for more information on how to implement Radix OS into your project, using React and the npm package `radix-os`.
@@ -11,6 +19,49 @@ See a [working example](https://stackblitz.com/edit/radix-os?file=src%2FApp.tsx)
 ## **[Live demo](https://imp-dance.github.io/radix-os/)**
 
 ![Screenshot 2024-10-06 at 18 18 09](https://github.com/user-attachments/assets/c9a063f4-bee0-45ec-95c6-bb39f621baf3)
+
+
+## Setup
+
+### Installation
+
+1. If you don't have radix ui themes installed already, install this first:
+
+```
+npm i @radix-ui/themes @radix-ui/react-icons
+```
+
+2. Then install Radix OS:
+
+```
+npm i radix-os
+```
+
+### Quick setup
+
+```tsx title="lib/radix-os.ts"
+import {
+  fsZustandIntegration,
+  setupApps,
+  createUseAppLauncher
+} from "radix-os;
+
+export const applications = setupApps();
+export const useAppLauncher = createUseAppLauncher(applications);
+```
+
+```tsx title="App.tsx"
+import '@radix-ui/themes/styles.css';
+import {
+  RadixOS,
+  fsZustandIntegration
+} from "radix-os;
+import { applications } from "./lib/radix-os";
+
+export default function App(){
+  return <RadixOS fs={fsZustandIntegration} applications={applications} />
+}
+```
 
 ## Tools and technologies
 
