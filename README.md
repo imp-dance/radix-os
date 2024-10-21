@@ -44,7 +44,7 @@ import {
   fsZustandIntegration,
   setupApps,
   createUseAppLauncher
-} from "radix-os;
+} from "radix-os";
 
 export const applications = setupApps();
 export const useAppLauncher = createUseAppLauncher(applications);
