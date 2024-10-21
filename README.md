@@ -22,7 +22,7 @@ This project uses
 * [`dnd-kit`](https://dndkit.com/)
 * [`zustand`](https://zustand.docs.pmnd.rs/)
 
-## Launch locally
+## Launch demo locally
 
 Assuming you have node installed
 
