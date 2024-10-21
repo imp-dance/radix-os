@@ -6,7 +6,9 @@ An in-browser operating system simulation built using the Radix design system.
 
 Read the docs for more information on how to implement Radix OS into your project, using the React and the npm package `radix-os`.
 
-- **[Live demo](https://imp-dance.github.io/radix-os/)**
+See a [working example](https://stackblitz.com/edit/radix-os?file=src%2FApp.tsx) of Radix OS on Stackblitz.
+
+## **[Live demo](https://imp-dance.github.io/radix-os/)**
 
 ![Screenshot 2024-10-06 at 18 18 09](https://github.com/user-attachments/assets/c9a063f4-bee0-45ec-95c6-bb39f621baf3)
 
