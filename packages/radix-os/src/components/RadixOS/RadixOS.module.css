@@ -1,0 +1,8 @@
+.radixOs {
+  & > div {
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto 2rem;
+    background: var(--gray-5);
+  }
+}

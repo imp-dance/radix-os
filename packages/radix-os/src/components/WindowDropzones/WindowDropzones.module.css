@@ -1,0 +1,6 @@
+.showOnHover {
+  opacity: 0;
+  &:hover {
+    opacity: 0.5;
+  }
+}

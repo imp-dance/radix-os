@@ -1,0 +1,55 @@
+@keyframes rxosFadeIn {
+  from {
+    opacity: 0;
+  }
+}
+
+.rxos-appicon {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  position: absolute !important;
+}
+
+.rxos-desktop {
+  display: flex;
+  flex-wrap: wrap;
+  position: relative;
+  min-width: 910px;
+  padding: var(--space-3);
+  gap: var(--space-3);
+  background: linear-gradient(
+    -180deg,
+    var(--gray-3) 0%,
+    var(--gray-5) 100%
+  );
+}
+
+.rxos-radixOs {
+  & > div {
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto 2rem;
+    background: var(--gray-5);
+  }
+}
+
+.rxos-svgContainer svg {
+  width: 100%;
+  height: auto;
+}
+
+.rxos-showOnHover {
+  opacity: 0;
+  &:hover {
+    opacity: 0.5;
+  }
+}
+
+.rxos-editor {
+  filter: saturate(0.5);
+}
