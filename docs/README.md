@@ -1,41 +1,49 @@
-# Website
+# Radix OS
 
-This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
+Radix OS is a operating system simulated on the web, with a modular file system that can be swapped out with any async source, able to run your own custom built applications. Designed to be flexible and easily extendable so it can fit your needs.
+
+Check out the [documentation](https://radix-os.netlify.app) for more in depth guides.
+
+[![Preview](/sh.jpg)](https://imp-dance.github.io/radix-os/)
+
+## Getting started
 
 ### Installation
 
-```
-$ yarn
-```
-
-### Local Development
+1. If you don't have radix ui themes installed already, install this first:
 
 ```
-$ yarn start
+npm i @radix-ui/themes @radix-ui/react-icons
 ```
 
-This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
-
-### Build
+2. Then install Radix OS:
 
 ```
-$ yarn build
+npm i radix-os
 ```
 
-This command generates static content into the `build` directory and can be served using any static contents hosting service.
+### Quick setup
 
-### Deployment
+```tsx title="lib/radix-os.ts"
+import {
+  fsZustandIntegration,
+  setupApps,
+  createUseAppLauncher
+} from "radix-os;
 
-Using SSH:
-
-```
-$ USE_SSH=true yarn deploy
-```
-
-Not using SSH:
-
-```
-$ GIT_USER=<Your GitHub username> yarn deploy
+export const applications = setupApps();
+export const useAppLauncher = createUseAppLauncher(applications);
 ```
 
-If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
+```tsx title="App.tsx"
+import '@radix-ui/themes/styles.css';
+import {
+  RadixOS,
+  fsZustandIntegration
+} from "radix-os;
+import { applications } from "./lib/radix-os";
+
+export default function App(){
+  return <RadixOS fs={fsZustandIntegration} applications={applications} />
+}
+```
