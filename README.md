@@ -55,7 +55,7 @@ import '@radix-ui/themes/styles.css';
 import {
   RadixOS,
   fsZustandIntegration
-} from "radix-os;
+} from "radix-os";
 import { applications } from "./lib/radix-os";
 
 export default function App(){
