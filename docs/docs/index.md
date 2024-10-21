@@ -38,13 +38,14 @@ export const useAppLauncher = createUseAppLauncher(applications);
 ```
 
 ```tsx title="App.tsx"
+import '@radix-ui/themes/styles.css';
 import {
   RadixOS,
   fsZustandIntegration
 } from "radix-os;
 import { applications } from "./lib/radix-os";
 
-export function App(){
+export default function App(){
   return <RadixOS fs={fsZustandIntegration} applications={applications} />
 }
 ```
