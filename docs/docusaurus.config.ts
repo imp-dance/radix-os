@@ -79,7 +79,7 @@ const config: Config = {
           items: [
             {
               label: "Home",
-              to: "/docs",
+              to: "/",
             },
             {
               label: "File system",
