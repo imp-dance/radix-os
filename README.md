@@ -4,7 +4,7 @@ An in-browser operating system simulation built using the Radix design system.
 
 ## [Documentation](https://radix-os.netlify.app/)
 
-Read the docs for more information on how to implement Radix OS into your project, using the React and the npm package `radix-os`.
+Read the docs for more information on how to implement Radix OS into your project, using React and the npm package `radix-os`.
 
 See a [working example](https://stackblitz.com/edit/radix-os?file=src%2FApp.tsx) of Radix OS on Stackblitz.
 
@@ -24,7 +24,7 @@ This project uses
 - [`dnd-kit`](https://dndkit.com/)
 - [`zustand`](https://zustand.docs.pmnd.rs/)
 
-## Launch locally
+## Launch demo locally
 
 Assuming you have node installed
 
