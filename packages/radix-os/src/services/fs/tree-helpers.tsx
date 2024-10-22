@@ -1,35 +1,4 @@
-import { createContext, useContext } from "react";
-import { FsFile, FsFolder, FsNode } from "../stores/fs";
-
-export type FsIntegration = {
-  readDir: (path: string) => Promise<FsNode | null>;
-  makeDir: (path: string) => Promise<boolean>;
-  makeFile: (
-    path: string,
-    file: { name: string } & Partial<FsFile>
-  ) => Promise<boolean>;
-  move: (from: string, to: string) => Promise<boolean>;
-  updateFile: (
-    path: string,
-    file: Partial<FsFile>
-  ) => Promise<boolean>;
-  removeFile: (path: string) => Promise<boolean>;
-};
-
-export const fsContext = createContext<FsIntegration | null>(
-  null
-);
-
-export const FsProvider = fsContext.Provider;
-
-export const useFs = () => {
-  const context = useContext(fsContext);
-  if (context === null)
-    throw new Error(
-      "RadixOS mounted outside file system context"
-    );
-  return context;
-};
+import { FsFile, FsFolder, FsNode } from "../../stores/fs";
 
 export function findNode(
   name: string,

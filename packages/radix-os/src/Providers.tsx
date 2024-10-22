@@ -1,12 +1,15 @@
 import { Theme } from "@radix-ui/themes";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactNode, useMemo, useRef } from "react";
+import { queryClient } from "./lib/react-query/client";
 import {
   AppContextProvider,
   UseAppLauncherReturn,
-} from "./integration/setupApps";
-import { queryClient } from "./lib/react-query/client";
-import { FsIntegration, FsProvider } from "./services/fs";
+} from "./services/applications/launcher";
+import {
+  FsIntegration,
+  FsProvider,
+} from "./services/fs/fs-integration";
 import { useSettingsStore } from "./stores/settings";
 import {
   createWindow,
@@ -14,10 +17,15 @@ import {
   useWindowStore,
 } from "./stores/window";
 
+type AccentColor = Parameters<typeof Theme>[0]["accentColor"];
+type Radius = Parameters<typeof Theme>[0]["radius"];
+
 export function Providers(props: {
   children: ReactNode;
   fs: FsIntegration;
   applications: readonly RadixOsApp<string>[];
+  accentColor?: AccentColor;
+  radius?: Radius;
 }) {
   const uniqueAppRef = useRef<Record<string, symbol>>({});
   const settingsStore = useSettingsStore();
@@ -58,12 +66,14 @@ export function Providers(props: {
       },
     } as UseAppLauncherReturn<string>;
   }, [props.applications]);
+
   return (
     <Theme
       appearance={settingsStore.theme}
-      accentColor="indigo"
-      style={{ height: "100%" }}
       panelBackground={settingsStore.panelBackground}
+      accentColor={props.accentColor ?? "indigo"}
+      style={{ height: "100%" }}
+      radius={props.radius}
     >
       <AppContextProvider value={contextValue}>
         <FsProvider value={props.fs}>

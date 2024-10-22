@@ -19,10 +19,8 @@ import {
   useEffect,
   useState,
 } from "react";
-import {
-  DesktopShortcut,
-  useUntypedAppContext,
-} from "../../integration/setupApps";
+import { DesktopShortcut } from "../../services/applications/desktop-shortcuts";
+import { useUntypedAppContext } from "../../services/applications/launcher";
 import { useSettingsStore } from "../../stores/settings";
 import { RadixOsApp } from "../../stores/window";
 import { throttle } from "../../utils";

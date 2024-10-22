@@ -3,7 +3,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { useFs } from "../../services/fs";
+import { useFs } from "../../services/fs/fs-integration";
 import { FsFile } from "../../stores/fs";
 
 export const useFileSystemQuery = (path: string) => {

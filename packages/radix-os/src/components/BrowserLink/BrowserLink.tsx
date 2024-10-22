@@ -1,5 +1,5 @@
 import { Link } from "@radix-ui/themes";
-import { useUntypedAppContext } from "../../integration/setupApps";
+import { useUntypedAppContext } from "../../services/applications/launcher";
 import { useWindowStore } from "../../stores/window";
 
 type Props = Parameters<typeof Link>[0];

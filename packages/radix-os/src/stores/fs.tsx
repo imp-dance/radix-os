@@ -7,7 +7,7 @@ import {
   isFolder,
   parsePath,
   pathToName,
-} from "../services/fs";
+} from "../services/fs/tree-helpers";
 import { useFavouriteFolderStore } from "./explorer";
 import { initialTree } from "./fs.constants";
 

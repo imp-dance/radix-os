@@ -19,12 +19,12 @@ import {
   useMoveMutation,
   useUpdateFileMutation,
 } from "../../../api/fs/fs-api";
-import { useUntypedAppContext } from "../../../integration/setupApps";
+import { useUntypedAppContext } from "../../../services/applications/launcher";
 import {
   findNodeByPath,
   isFolder,
   parseRelativePath,
-} from "../../../services/fs";
+} from "../../../services/fs/tree-helpers";
 import { FsFolder } from "../../../stores/fs";
 import { RadixOsAppComponent } from "../../../stores/window";
 import { Command, helpText } from "./constants";

@@ -8,6 +8,14 @@ Radix OS is a operating system simulated on the web, with a modular file system 
 
 [![Preview](/sh.jpg)](https://imp-dance.github.io/radix-os/)
 
+## Features
+
+- Window management
+- Modular file system
+- Customizable UI
+- Keyboard shortcuts
+- System UI components
+
 ## Getting started
 
 ### Installation
@@ -15,7 +23,7 @@ Radix OS is a operating system simulated on the web, with a modular file system 
 1. If you don't have radix ui themes installed already, install this first:
 
 ```
-npm i @radix-ui/themes @radix-ui/react-icons
+npm i @radix-ui/themes
 ```
 
 2. Then install Radix OS:
@@ -23,6 +31,8 @@ npm i @radix-ui/themes @radix-ui/react-icons
 ```
 npm i radix-os
 ```
+
+We also recommend that you install `@radix-ui/react-icons` if you plan on extending the OS with your own applications.
 
 ### Quick setup
 

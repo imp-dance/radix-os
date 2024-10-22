@@ -24,12 +24,10 @@ export const useAppLauncher = createUseAppLauncher(applications);
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <div style={{ height: 700 }}>
-      <RadixOS
-        fs={fsZustandIntegration}
-        applications={applications}
-        desktopShortcuts={[]}
-      />
-    </div>
+    <RadixOS
+      fs={fsZustandIntegration}
+      applications={applications}
+      desktopShortcuts={[]}
+    />
   </StrictMode>
 );

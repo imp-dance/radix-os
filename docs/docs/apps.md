@@ -10,29 +10,18 @@ Applications in RadixOS are components that are mounted in controlled windows, w
 
 There are 5 apps by default that come with RadixOS:
 
-| Name        | `appId`    | Description                                |
-| ----------- | ---------- | ------------------------------------------ |
-| Terminal    | `terminal` | Can modify and read file system            |
-| Explorer    | `explorer` | Can modify and read file system            |
-| Web Browser | `web`      | Can launch html files and navigate to urls |
-| Code        | `code`     | Monaco editor for code and text            |
-| Settings    | `settings` | System customization and formatting        |
+| Name         | `appId`    | Description                                | Launch interface  |
+| ------------ | ---------- | ------------------------------------------ | ----------------- |
+| Terminal     | `terminal` | Can modify and read file system            | Path              |
+| Explorer     | `explorer` | Can modify and read file system            | Path              |
+| Web Browser  | `web`      | Can launch html files and navigate to urls | URL or HTML       |
+| Code         | `code`     | Monaco editor for code and text            | Text              |
+| Settings     | `settings` | System customization and formatting        | Tab-id            |
+| Image Viewer | `image`    | Can open images                            | data:image or SVG |
 
 ## Creating your own applications
 
-:::info Use @radix-ui/themes
-
-> We recommend that you install and utilize `@radix-ui/themes` when designing your own applications to match the design system already implemented.
-
-```shell
-npm i @radix-ui/themes
-```
-
-You do not need to add the css file or `Theme` component, is this is handled internally in `RadixOS`.
-
-:::
-
-You can create apps like such:
+You can create apps by using `createApp`:
 
 ```tsx title="SomeApp.tsx"
 export const SomeApp = createApp((props) => {
@@ -40,7 +29,7 @@ export const SomeApp = createApp((props) => {
 });
 ```
 
-In the component, you have access to the following props:
+In the component passed to `createApp`, you have access to the following props:
 
 - **`appWindow`**: The window object that the app is mounted in
   - Contains readable properties for things like the window id and position
@@ -78,6 +67,11 @@ function App() {
 }
 ```
 
+:::warning
+Do not call `setupApps` inside a React component, as this will cause excessive rerendering. If you have to, make sure to properly memoize the value.
+
+:::
+
 You can now launch the application from within other applications by utilizing `useAppLauncher`, which should be type-safe as well:
 
 ```tsx
@@ -86,27 +80,59 @@ const { launch } = useAppLauncher();
 launch("some-app", { ...settings });
 ```
 
-### Available Hooks
+## Application Hooks
 
 The app components are mounted inside `RadixOS`, which gives them access to a few hooks to control the operating system.
 
-#### `useFs`
+### `useFs`
 
-This hook gives you access to the file system integration and methods such as `readDir`.
+This hook gives you access to the file system integration methods.
 
-#### `useAppLauncher`
+```typescript
+type FsIntegration = {
+  readDir: (path: string) => Promise<FsNode | null>;
+  makeDir: (path: string) => Promise<boolean>;
+  makeFile: (
+    path: string,
+    file: {
+      name: string;
+    } & Partial<FsFile>
+  ) => Promise<boolean>;
+  move: (from: string, to: string) => Promise<boolean>;
+  updateFile: (
+    path: string,
+    file: Partial<FsFile>
+  ) => Promise<boolean>;
+  removeFile: (path: string) => Promise<boolean>;
+};
+```
+
+### `useAppLauncher`
 
 This hook will let you launch applications and open files from within your own applications.
 
-#### `useSettingsStore`
+    * `launch(appId, settings)` - Launches given app in new window with given settings
+    * `open(file, settings)` - Opens a file with appropriate launcher and settings
 
-Gives you direct access to the zustand settings store.
+### `useAppWindow`
 
-#### `useWindowStore`
+Exposes methods you can run on a given app window.
 
-Gives you direct access to the zustand window store, allowing you to interact with open windows.
+    * `close` Closes the window
+    * `bringToFront` - Un-minimizes window and focuses it
+    * `minimize` - Minimizes window
+    * `setTitle(title)` - Sets window title
+    * `setDimensions(dim)` - Sets window dimensions (x/y/w/h)
 
-## Overwrite default components
+### `useSettingsStore`
+
+Gives you direct access to the internal zustand settings store.
+
+### `useWindowStore`
+
+Gives you direct access to the internal zustand window store, allowing you to interact with open windows.
+
+## Overwriting default components
 
 You may overwrite existing applications by giving your own applications matching appIds.
 

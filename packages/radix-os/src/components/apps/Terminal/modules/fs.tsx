@@ -1,16 +1,15 @@
 import { Code } from "@radix-ui/themes";
 import { ReactNode } from "react";
-import { useUntypedAppContext } from "../../../../integration/setupApps";
+import { useUntypedAppContext } from "../../../../services/applications/launcher";
 import {
   findNodeByPath,
   isFile,
   parseRelativePath,
-} from "../../../../services/fs";
+} from "../../../../services/fs/tree-helpers";
 import {
   FsFile,
   FsFolder,
   Launcher,
-  launcherSchema,
 } from "../../../../stores/fs";
 import { Command, DirNotFound } from "../constants";
 import { quotableRestArgs } from "../utils";
@@ -189,15 +188,15 @@ export function parseFs({
           </Code>
         );
       }
-      const launcher = launcherSchema.safeParse(restArgs[0]);
-      if (!launcher.success) {
+      const launcher = restArgs[0];
+      if (!launcher) {
         return pushOutput(
           <Code size="1" variant="soft" color="crimson">
-            Not a valid launcher
+            No launcher supplied
           </Code>
         );
       }
-      makeExecutableWith(path, launcher.data);
+      makeExecutableWith(path, launcher as "code");
       return pushOutput(
         <Command command={`fs ${path} --ex ${restArgs[0]}`} />
       );

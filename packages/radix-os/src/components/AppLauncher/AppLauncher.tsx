@@ -2,7 +2,7 @@ import { Button, Card, Flex, TextField } from "@radix-ui/themes";
 import { useRef, useState } from "react";
 import { useClickOutside } from "../../hooks/useClickOutside";
 import { useKeydown } from "../../hooks/useKeyboard";
-import { useUntypedAppContext } from "../../integration/setupApps";
+import { useUntypedAppContext } from "../../services/applications/launcher";
 import { RadixOsApp } from "../../stores/window";
 
 export function AppLauncher(props: {

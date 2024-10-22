@@ -7,12 +7,12 @@ import {
   useRemoveFileMutation,
   useUpdateFileMutation,
 } from "../../../api/fs/fs-api";
-import { useUntypedAppContext } from "../../../integration/setupApps";
+import { useUntypedAppContext } from "../../../services/applications/launcher";
 import {
   getParentPath,
   parsePath,
   pathToName,
-} from "../../../services/fs";
+} from "../../../services/fs/tree-helpers";
 import { FsFile } from "../../../stores/fs";
 import { useSettingsStore } from "../../../stores/settings";
 import {

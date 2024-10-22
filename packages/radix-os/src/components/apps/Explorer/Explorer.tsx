@@ -42,13 +42,13 @@ import {
   useRemoveFileMutation,
   useUpdateFileMutation,
 } from "../../../api/fs/fs-api";
-import { useUntypedAppContext } from "../../../integration/setupApps";
+import { useUntypedAppContext } from "../../../services/applications/launcher";
 import {
   findNodeByPath,
   isFile,
   isFolder,
   parsePath,
-} from "../../../services/fs";
+} from "../../../services/fs/tree-helpers";
 import { useFavouriteFolderStore } from "../../../stores/explorer";
 import { FsNode, Launcher } from "../../../stores/fs";
 import {
