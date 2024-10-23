@@ -1,12 +1,10 @@
 import { InfoCircledIcon } from "@radix-ui/react-icons";
 import {
   AlertDialog,
-  Badge,
   Button,
   Callout,
   Code,
   Flex,
-  Grid,
   Heading,
   Kbd,
   Switch,
@@ -22,10 +20,11 @@ import {
 import { RadixOsAppComponent } from "../../../stores/window";
 import { BrowserLink } from "../../BrowserLink/BrowserLink";
 import { ImageDropper } from "../../ImageDropper/ImageDropper";
+import { RadixColorPicker } from "../../RadixColorPicker/RadixColorPicker";
 
 export const Settings: RadixOsAppComponent = (props) => {
   const initialTab =
-    (props.file?.file?.data as "customize") ?? "customize";
+    (props.file?.file?.data as "customize") ?? "about";
   const [tab, setTab] = useState<
     "customize" | "storage" | "shortcuts" | "about"
   >(initialTab);
@@ -43,11 +42,45 @@ export const Settings: RadixOsAppComponent = (props) => {
       style={{ height: "calc(100% - 3rem)" }}
     >
       <Tabs.List mb="1">
+        <Tabs.Trigger value="about">About</Tabs.Trigger>
         <Tabs.Trigger value="customize">Customize</Tabs.Trigger>
         <Tabs.Trigger value="storage">Storage</Tabs.Trigger>
         <Tabs.Trigger value="shortcuts">Shortcuts</Tabs.Trigger>
-        <Tabs.Trigger value="about">About</Tabs.Trigger>
       </Tabs.List>
+      <Tabs.Content value="about" style={{ height: "100%" }}>
+        <Flex p="2" direction="column" gap="3" height="100%">
+          <Text size="2" color="gray">
+            RadixOS is an open source project built using{" "}
+            <Code>React</Code>, <Code>Radix</Code>,{" "}
+            <Code>Zustand</Code> & <Code>dnd kit</Code>.
+          </Text>
+          <Text size="2" color="gray">
+            The file system and settings are stored in{" "}
+            <Code>localStorage</Code>.
+          </Text>
+          <Text size="2" color="gray">
+            Written in 2024.
+          </Text>
+          <Text size="1" color="gray" mt="auto">
+            Made by{" "}
+            <BrowserLink
+              target="_blank"
+              href="https://haakon.dev"
+            >
+              Håkon Underbakke
+            </BrowserLink>{" "}
+            (
+            <BrowserLink
+              target="_blank"
+              color="gray"
+              href="https://ryfylke.dev"
+            >
+              Ryfylke React AS
+            </BrowserLink>
+            )
+          </Text>
+        </Flex>
+      </Tabs.Content>
       <CustomizeTab />
       <StorageTab />
       <Tabs.Content value="shortcuts">
@@ -93,40 +126,6 @@ export const Settings: RadixOsAppComponent = (props) => {
           </Flex>
         </Flex>
       </Tabs.Content>
-      <Tabs.Content value="about" style={{ height: "100%" }}>
-        <Flex p="2" direction="column" gap="3" height="100%">
-          <Text size="2" color="gray">
-            RadixOS is an open source project built using{" "}
-            <Code>React</Code>, <Code>Radix</Code>,{" "}
-            <Code>Zustand</Code> & <Code>dnd kit</Code>.
-          </Text>
-          <Text size="2" color="gray">
-            The file system and settings are stored in{" "}
-            <Code>localStorage</Code>.
-          </Text>
-          <Text size="2" color="gray">
-            Written in 2024.
-          </Text>
-          <Text size="1" color="gray" mt="auto">
-            Made by{" "}
-            <BrowserLink
-              target="_blank"
-              href="https://haakon.dev"
-            >
-              Håkon Underbakke
-            </BrowserLink>{" "}
-            (
-            <BrowserLink
-              target="_blank"
-              color="gray"
-              href="https://ryfylke.dev"
-            >
-              Ryfylke React AS
-            </BrowserLink>
-            )
-          </Text>
-        </Flex>
-      </Tabs.Content>
     </Tabs.Root>
   );
 };
@@ -139,6 +138,9 @@ function CustomizeTab() {
   return (
     <Tabs.Content value="customize">
       <Flex p="2" direction="column" gap="3">
+        <Heading size="1" color="gray">
+          Options
+        </Heading>
         <Text
           as="label"
           size="1"
@@ -173,57 +175,18 @@ function CustomizeTab() {
             }
             onCheckedChange={settingsStore.togglePanelBackground}
           />
-          Translucency
+          Translucent windows
         </Text>
         <Heading size="1" color="gray">
           Background
         </Heading>
-        <Grid
-          columns="4"
-          gap="0"
-          style={{ minWidth: 420, background: "var(--gray-1)" }}
-        >
-          {(
-            [
-              "gray",
-              "cyan",
-              "blue",
-              "indigo",
-              "crimson",
-              "pink",
-              "plum",
-              "violet",
-              "teal",
-              "jade",
-              "green",
-              "grass",
-              "gold",
-              "bronze",
-              "yellow",
-              "amber",
-            ] as const
-          ).map((color) => (
-            <Badge
-              color={color}
-              key={color}
-              asChild
-              style={{ minWidth: 100 }}
-              variant={
-                color === settingsStore.bg ? "solid" : "soft"
-              }
-              onClick={() => settingsStore.setBg(color)}
-            >
-              <Button
-                style={{
-                  borderRadius: 0,
-                  cursor: "pointer",
-                }}
-              >
-                {color}
-              </Button>
-            </Badge>
-          ))}
-        </Grid>
+        <div>
+          <RadixColorPicker
+            onColorSelected={(clr) => settingsStore.setBg(clr)}
+            selectedColor={settingsStore.bg as "gray"}
+            label="Select color"
+          />
+        </div>
         <Text size="1" color="gray">
           or
         </Text>

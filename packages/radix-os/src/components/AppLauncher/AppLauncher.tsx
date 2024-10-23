@@ -64,7 +64,6 @@ export function AppLauncher(props: {
           ref={ref}
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          color="indigo"
           onKeyDown={(e) => {
             if (e.key === "Escape") {
               close();
@@ -94,9 +93,10 @@ export function AppLauncher(props: {
         />
         {matchingApps.map((app, i) => (
           <Button
-            color={i === selectedIndex ? "indigo" : "gray"}
+            color={i === selectedIndex ? undefined : "gray"}
             variant="soft"
             style={{ textAlign: "left" }}
+            onFocus={close}
             onClick={() => {
               launch(app.appId);
               close();

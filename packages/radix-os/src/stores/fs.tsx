@@ -48,6 +48,10 @@ export type FileSystemStore = {
     file: { name: string } & Partial<FsFile>
   ) => void;
   updateFile: (path: string, file: Partial<FsFile>) => void;
+  setTree: (newTree: {
+    name: "Home";
+    children: FsNode[];
+  }) => void;
 };
 
 // TODO: Zod validation
@@ -56,6 +60,8 @@ export const useFileSystemStore = create(
   persist<FileSystemStore>(
     (set) => ({
       tree: initialTree,
+      setTree: (newTree) =>
+        set((state) => ({ ...state, tree: newTree })),
       createFolder: (path) =>
         set((state) => {
           const newState = { ...state };

@@ -7,14 +7,18 @@ sidebar_position: 2
 Radix OS comes with a preconfigured client-side file system that can be imported and passed directly:
 
 ```tsx
-import { fsZustandIntegration, RadixOS } from "radix-os";
+import { createZustandFsIntegration, RadixOS } from "radix-os";
+
+const fs = createZustandFsIntegration();
 
 createRoot(...).render(
     <StrictMode>
-        <RadixOS fs={fsZustandIntegration} />
+        <RadixOS fs={fs} />
     </StrictMode>
 );
 ```
+
+You can optionally pass an object with `initialTree`, or `onAction` (to listen to actions) to `createZustandFsIntegration`.
 
 ## Create custom integration
 

@@ -56,7 +56,7 @@ export function MultiTaskBar() {
                         <Button
                           color={
                             activeWindow?.id === win.id
-                              ? "indigo"
+                              ? undefined
                               : "gray"
                           }
                           variant={

@@ -26,13 +26,14 @@ npm i radix-os
 
 ```tsx title="lib/radix-os.ts"
 import {
-  fsZustandIntegration,
   setupApps,
-  createUseAppLauncher
+  createUseAppLauncher,
+  createZustandFsIntegration
 } from "radix-os;
 
-export const applications = setupApps();
 export const useAppLauncher = createUseAppLauncher(applications);
+export const applications = setupApps();
+export const fs = createZustandFsIntegration();
 ```
 
 ```tsx title="App.tsx"
@@ -41,9 +42,9 @@ import {
   RadixOS,
   fsZustandIntegration
 } from "radix-os;
-import { applications } from "./lib/radix-os";
+import { applications, fs } from "./lib/radix-os";
 
 export default function App(){
-  return <RadixOS fs={fsZustandIntegration} applications={applications} />
+  return <RadixOS fs={fs} applications={applications} />
 }
 ```

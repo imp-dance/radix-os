@@ -42,7 +42,7 @@ To add your custom application to the operating system and make it launchable, s
 ```tsx title="App.tsx"
 import { SomeApp } from "./SomeApp";
 
-const applications = setupApps(
+const applications = setupApps([
   {
     appId: "some-app",
     appName: "Some App",
@@ -52,8 +52,8 @@ const applications = setupApps(
   {
     appId: "some-other-app",
     /* ... */
-  }
-);
+  },
+]);
 
 const useAppLauncher = createUseAppLauncher(applications);
 
@@ -137,7 +137,7 @@ Gives you direct access to the internal zustand window store, allowing you to in
 You may overwrite existing applications by giving your own applications matching appIds.
 
 ```tsx
-const applications = setupApps(
+const applications = setupApps([
   {
     appId: "code",
     component: CustomCodeComponent,
@@ -147,6 +147,6 @@ const applications = setupApps(
     appId: "explorer",
     component: CustomExplorerComponent,
     defaultWindowSettings: {},
-  }
-);
+  },
+]);
 ```

@@ -24,10 +24,23 @@ export const setupApps = <
     ? DefaultApps
     : TProvided | DefaultApps
 >(
-  ...apps: RadixAppList<TProvided>
+  apps: RadixAppList<TProvided>,
+  options?: {
+    defaultAppsOnDesktop?: DefaultApps[];
+  }
 ): RadixAppList<TActual> => {
   const applications = Object.values(
-    [...defaultApps, ...(apps ?? [])].reduce((acc, item) => {
+    [
+      ...defaultApps.map((app) => ({
+        ...app,
+        addToDesktop: options?.defaultAppsOnDesktop
+          ? options.defaultAppsOnDesktop.includes(
+              app.appId as "explorer"
+            )
+          : app.addToDesktop,
+      })),
+      ...(apps ?? []),
+    ].reduce((acc, item) => {
       acc[item.appId] = item as RadixAppList<TActual>[number];
       return acc;
     }, {} as Record<string, RadixAppList<TActual>[number]>)

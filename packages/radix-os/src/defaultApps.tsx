@@ -83,6 +83,7 @@ export const defaultApps = [
     component: ImageViewer,
     appId: "image",
     appName: "Image Viewer",
+    addToDesktop: false,
     defaultWindowSettings: {
       title: "Image Viewer",
       icon: <ImageIcon />,

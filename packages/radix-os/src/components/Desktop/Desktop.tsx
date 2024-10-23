@@ -269,6 +269,8 @@ function Application(props: {
     top: draggable.isDragging
       ? mousePosition?.y ?? props.position.y
       : props.position.y,
+    transform: draggable.isDragging ? `scale(0.9)` : undefined,
+    transition: "transform 0.15s ease-out",
   } as CSSProperties;
 
   useEffect(() => {

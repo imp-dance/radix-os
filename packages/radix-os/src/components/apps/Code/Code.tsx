@@ -21,6 +21,7 @@ import {
 } from "../../../stores/window";
 import { ConfirmDialog } from "../../ConfirmDialog/ConfirmDialog";
 import { MenuBar } from "../../MenuBar/MenuBar";
+import { OpenFileDialog } from "../../OpenFileDialog/OpenFileDialog";
 import { SaveAsDialog } from "../../SaveAsDialog/SaveAsDialog";
 
 type EditorType = Parameters<
@@ -28,6 +29,10 @@ type EditorType = Parameters<
 >[0];
 
 export const CodeApp: RadixOsAppComponent = (props) => {
+  const [openedFile, setOpenedFile] = useState<null | {
+    file: FsFile;
+    path: string;
+  }>(null);
   const { launch } = useUntypedAppContext();
   const [createdFile, setCreatedFile] = useState<FsFile | null>(
     null
@@ -35,10 +40,13 @@ export const CodeApp: RadixOsAppComponent = (props) => {
   const [createdPath, setCreatedPath] = useState<string | null>(
     null
   );
+  const [openDialogOpen, setOpenDialogOpen] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] =
     useState(false);
-  const file = props.file?.file ?? createdFile;
-  const path = props.file?.path ?? createdPath;
+  const file =
+    openedFile?.file ?? props.file?.file ?? createdFile;
+  const path =
+    openedFile?.path ?? props.file?.path ?? createdPath;
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [value, setValue] = useState(file?.data ?? "");
   const editorRef = useRef<EditorType | null>(null);
@@ -103,12 +111,25 @@ export const CodeApp: RadixOsAppComponent = (props) => {
         overflow: "hidden",
       }}
     >
+      {openDialogOpen && (
+        <OpenFileDialog
+          open
+          setOpen={setOpenDialogOpen}
+          onFileOpened={(file, path) => {
+            setOpenedFile({ file, path });
+            setValue(file.data);
+          }}
+          fileDisabled={(file) =>
+            !file.launcher.includes("code")
+          }
+        />
+      )}
       <MenuBar
         windowId={props.appWindow.id}
         menu={[
           {
             label: "File",
-            color: touched ? "indigo" : "gray",
+            color: touched ? "grass" : "gray",
             options: [
               {
                 label: "New file",
@@ -119,6 +140,17 @@ export const CodeApp: RadixOsAppComponent = (props) => {
                   key: "N",
                   modifiers: ["ctrl"],
                   label: "ctrl N",
+                },
+              },
+              {
+                label: "Open file",
+                onClick: () => {
+                  setOpenDialogOpen(true);
+                },
+                shortcut: {
+                  key: "O",
+                  modifiers: ["ctrl"],
+                  label: "ctrl O",
                 },
               },
               {
@@ -133,7 +165,7 @@ export const CodeApp: RadixOsAppComponent = (props) => {
                   label: "ctrl S",
                   dependency: value,
                 },
-                color: touched ? "indigo" : "gray",
+                color: touched ? "grass" : "gray",
               },
               "separator",
               {

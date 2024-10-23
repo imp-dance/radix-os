@@ -50,7 +50,7 @@ import {
   parsePath,
 } from "../../../services/fs/tree-helpers";
 import { useFavouriteFolderStore } from "../../../stores/explorer";
-import { FsNode, Launcher } from "../../../stores/fs";
+import { FsFile, FsNode, Launcher } from "../../../stores/fs";
 import {
   RadixOsAppComponent,
   useWindowStore,
@@ -68,11 +68,15 @@ export function Explorer({
   windowId,
   onPathChange,
   disableFiles,
+  fileDisabled,
+  onRequestOpenFile,
 }: {
   initialPath?: string;
   windowId?: symbol;
   onPathChange?: (path: string) => void;
   disableFiles?: boolean;
+  fileDisabled?: (file: FsFile) => boolean;
+  onRequestOpenFile?: (file: FsFile, path: string) => void;
 }) {
   const { openFile } = useUntypedAppContext();
   const mouseSensor = useSensor(MouseSensor, {
@@ -262,7 +266,7 @@ export function Explorer({
                       )
                     }
                     variant="ghost"
-                    color={sortDir === null ? "gray" : "indigo"}
+                    color={sortDir === null ? "gray" : undefined}
                     size="2"
                     style={{
                       display: "block",
@@ -316,26 +320,41 @@ export function Explorer({
                   )}
                   {currentFolder && isFolder(currentFolder)
                     ? sortedChildren.map((child, i) => {
+                        const isDisabled =
+                          (disableFiles && isFile(child)) ||
+                          (isFile(child) &&
+                            fileDisabled?.(child));
+
+                        const itemIsBeingDragged =
+                          selected.includes(
+                            `${path}/${child.name}`
+                          ) &&
+                          isDragging &&
+                          selected.length > 1;
                         return (
                           <ExplorerItem
                             key={child.name}
-                            disabled={
-                              disableFiles && isFile(child)
-                            }
+                            disabled={isDisabled}
                             item={child}
                             path={`${path}/${child.name}`}
                             selected={selected}
-                            isDragging={
-                              selected.includes(
-                                `${path}/${child.name}`
-                              ) &&
-                              isDragging &&
-                              selected.length > 1
-                            }
+                            isDragging={itemIsBeingDragged}
                             onSelect={({
                               shiftKey,
                               metaKey,
                             }) => {
+                              if (
+                                onRequestOpenFile &&
+                                isFile(child)
+                              ) {
+                                setSelected([
+                                  `${path}/${child.name}`,
+                                ]);
+                                return onRequestOpenFile(
+                                  child,
+                                  `${path}/${child.name}`
+                                );
+                              }
                               setSelected((prev) => {
                                 if (shiftKey) {
                                   const start =
@@ -384,12 +403,25 @@ export function Explorer({
                                 }
                               });
                             }}
-                            onClick={() => {
+                            onClick={(e) => {
                               if (isFolder(child)) {
                                 setPath(
                                   (prev) =>
                                     `${prev}/${child.name}`
                                 );
+                              } else if (isFile(child)) {
+                                e.stopPropagation();
+                                if (onRequestOpenFile) {
+                                  onRequestOpenFile(
+                                    child,
+                                    `${path}/${child.name}`
+                                  );
+                                } else {
+                                  openFile({
+                                    file: child,
+                                    path: `${path}/${child.name}`,
+                                  });
+                                }
                               }
                             }}
                             returnFocus={i === 0 ? true : false}
@@ -532,7 +564,7 @@ const launcherToIcon: Record<Launcher, ReactNode> = {
 function ExplorerItem(props: {
   returnFocus?: boolean;
   item: FsNode;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   path: string;
   onRename: () => void;
   selected?: string[];
@@ -600,11 +632,7 @@ function ExplorerItem(props: {
           color="gray"
           onDoubleClick={(e) => {
             if (props.disabled) return;
-            props.onClick?.();
-            if (isFile(props.item)) {
-              e.stopPropagation();
-              openFile({ file: props.item, path: props.path });
-            }
+            props.onClick?.(e);
           }}
           onClick={(e) => {
             if (props.disabled) return;
@@ -615,11 +643,7 @@ function ExplorerItem(props: {
                 metaKey: e.metaKey,
               });
             } else {
-              props.onClick?.();
-              if (isFile(props.item)) {
-                e.stopPropagation();
-                openFile({ file: props.item, path: props.path });
-              }
+              props.onClick?.(e);
             }
           }}
           disabled={props.disabled}
@@ -716,7 +740,7 @@ function Step(props: {
         droppable.isOver
           ? "amber"
           : props.isCurrent
-          ? "indigo"
+          ? undefined
           : "gray"
       }
       size="1"

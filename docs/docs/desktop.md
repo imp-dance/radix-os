@@ -12,16 +12,23 @@ You can also launch applications by using the command palette, opened with the k
 
 ## Application shortcuts
 
-You can add apps to the desktop by configuring them to be added in `setupApps`:
+You can add apps to the desktop by configuring them to be added in `setupApps`. You can also configure which of the default apps appear in the desktop by passing a second argument.
 
 ```tsx
-const applications = setupApps({
-  appId: "some-app",
-  appName: "Some App",
-  component: SomeApp,
-  addToDesktop: true,
-  defaultWindowSettings: {},
-});
+const applications = setupApps(
+  [
+    {
+      appId: "some-app",
+      appName: "Some App",
+      component: SomeApp,
+      addToDesktop: true,
+      defaultWindowSettings: {},
+    },
+  ],
+  {
+    defaultAppsOnDesktop: ["explorer", "code"],
+  }
+);
 ```
 
 ## Custom shortcuts
@@ -30,11 +37,12 @@ You can also create desktop items that execute any code you want. You add these 
 
 ```tsx
 const applications = setupApps();
+
 const desktopItems = setupDesktopItems({
-  icon: <ReaderIcon />,
-  label: "News",
+  icon: <QuestionMarkCircledIcon />,
+  label: "Boop",
   onClick: () => {
-    /* ... */
+    alert("boop");
   },
 });
 
