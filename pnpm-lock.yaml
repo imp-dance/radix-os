@@ -15,8 +15,8 @@ importers:
         specifier: ^3.1.4
         version: 3.1.4(@types/react-dom@18.3.0)(@types/react@18.3.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       radix-os:
-        specifier: ^0.0.22
-        version: 0.0.22(@types/react-dom@18.3.0)(@types/react@18.3.9)(monaco-editor@0.52.0)
+        specifier: ^0.1.0
+        version: 0.1.0(@types/react-dom@18.3.0)(@types/react@18.3.9)(monaco-editor@0.52.0)
       radix-ui:
         specifier: ^1.0.1
         version: 1.0.1(@types/react-dom@18.3.0)(@types/react@18.3.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -2040,8 +2040,8 @@ packages:
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
-  radix-os@0.0.22:
-    resolution: {integrity: sha512-LuJg4XfvH7jvTWu0SQdPuvp8k+POJFINGoyJ7kGWlV2zoUMhoEiav/Sa80WeMDU5CCJw0Pgc1KygA5fdI2k/mg==}
+  radix-os@0.1.0:
+    resolution: {integrity: sha512-Ko11cYhDrpwHH+HCifq2y0GN4swXDZraRH/rWfdNLtptFkjm4aV+TUSlzQoPi9HPiL2AmuyB/PsUF65syXEMMw==}
 
   radix-ui@1.0.1:
     resolution: {integrity: sha512-qfGibbqtbOlxP3b+1JjbLUc8Q7+e9DL8gFycLtkBkoAQyUkKuHAEBfFUcyG5MaQHjqRuML+YLtt/R1/dUYQafQ==}
@@ -4381,7 +4381,7 @@ snapshots:
 
   queue-microtask@1.2.3: {}
 
-  radix-os@0.0.22(@types/react-dom@18.3.0)(@types/react@18.3.9)(monaco-editor@0.52.0):
+  radix-os@0.1.0(@types/react-dom@18.3.0)(@types/react@18.3.9)(monaco-editor@0.52.0):
     dependencies:
       '@dnd-kit/core': 6.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@dnd-kit/modifiers': 7.0.0(@dnd-kit/core@6.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
