@@ -189,7 +189,6 @@ export function Desktop(props: {
                   data: "customize",
                   launcher: ["settings"],
                   name: "settings",
-                  title: "Settings",
                 },
                 path: "customize",
               });
@@ -204,7 +203,6 @@ export function Desktop(props: {
                   data: "storage",
                   launcher: ["settings"],
                   name: "settings",
-                  title: "Settings",
                 },
                 path: "storage",
               });
@@ -219,7 +217,6 @@ export function Desktop(props: {
                   data: "shortcuts",
                   launcher: ["settings"],
                   name: "settings",
-                  title: "Settings",
                 },
                 path: "shortcuts",
               });
@@ -234,7 +231,6 @@ export function Desktop(props: {
                   data: "about",
                   launcher: ["settings"],
                   name: "settings",
-                  title: "Settings",
                 },
                 path: "about",
               });

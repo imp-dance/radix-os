@@ -13,8 +13,11 @@ Radix OS is a operating system simulated on the web, with a modular file system 
 - Window management
 - Modular file system
 - Customizable UI
+- App launcher
 - Keyboard shortcuts
+- Context menus
 - System UI components
+- Drag 'n drop file upload
 
 ## Getting started
 

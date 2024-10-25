@@ -459,13 +459,21 @@ export function Explorer({
                     data: path,
                     launcher: ["terminal"],
                     name: path,
-                    title: path,
                   },
                   path,
                 });
               }}
             >
               Open in terminal
+            </ContextMenu.Item>
+
+            <ContextMenu.Item
+              onClick={(e) => {
+                e.stopPropagation();
+                treeQuery.refetch();
+              }}
+            >
+              Reload
             </ContextMenu.Item>
           </ContextMenu.Content>
         </ContextMenu.Root>

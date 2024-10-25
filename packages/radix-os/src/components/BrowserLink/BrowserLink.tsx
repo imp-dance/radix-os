@@ -18,7 +18,6 @@ export function BrowserLink(props: Props) {
             data: href,
             launcher: ["web"],
             name: href,
-            title: href,
           },
           path: href,
         });

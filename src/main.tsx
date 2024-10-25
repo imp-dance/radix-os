@@ -39,7 +39,7 @@ createRoot(document.getElementById("root")!).render(
       applications={applications}
       desktopShortcuts={[]}
       radius="none"
-      accentColor="plum"
+      accentColor="bronze"
     />
   </StrictMode>
 );

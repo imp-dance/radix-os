@@ -14,9 +14,12 @@ export function SaveAsDialog(props: {
   open: boolean;
   setOpen: (open: boolean) => void;
   onPathCreate: (path: string) => Promise<void>;
+  initialName?: string;
 }) {
   const [path, setPath] = useState("");
-  const [fileName, setFileName] = useState("");
+  const [fileName, setFileName] = useState(
+    props.initialName ?? ""
+  );
 
   const isValid =
     path !== undefined && fileName && !fileName.includes("/");

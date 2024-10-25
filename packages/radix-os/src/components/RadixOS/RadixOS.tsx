@@ -8,6 +8,7 @@ import { AppLauncher } from "../AppLauncher/AppLauncher";
 import { ConfettiEmitter } from "../ConfettiEmitter/ConfettiEmitter";
 import { Desktop } from "../Desktop/Desktop";
 import { MultiTaskBar } from "../MultiTaskBar/MultiTaskBar";
+import { SystemFileUpload } from "../SystemFileUpload/SystemFileUpload";
 import { WindowDragManager } from "../WindowDragManager/WindowDragManager";
 import { WindowDropzones } from "../WindowDropzones/WindowDropzones";
 import { WindowRenderer } from "../WindowRenderer/WindowRenderer";
@@ -31,6 +32,7 @@ function RadixOS<T extends string>(props: {
         accentColor={props.accentColor}
         radius={props.radius}
       >
+        <SystemFileUpload />
         <WindowDragManager>
           <Desktop
             applications={props.applications}

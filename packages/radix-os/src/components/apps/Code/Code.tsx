@@ -98,7 +98,6 @@ export const CodeApp: RadixOsAppComponent = (props) => {
       data: value,
       launcher: ["code"],
       name: pathToName(path),
-      title: pathToName(path),
     });
   };
 

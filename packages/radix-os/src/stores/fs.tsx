@@ -30,7 +30,6 @@ export type FsFile = {
   name: string;
   launcher: string[];
   data: string;
-  title: string;
 };
 
 export type FsNode = FsFolder | FsFile;
@@ -89,7 +88,6 @@ export const useFileSystemStore = create(
             name: file.name,
             data: file.data ?? "",
             launcher: file.launcher ?? ["code"],
-            title: file.title ?? "New file",
           });
           return { ...state, tree: { ...newState.tree } };
         }),
