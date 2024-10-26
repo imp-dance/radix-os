@@ -77,7 +77,7 @@ This project uses
 
 ## Launch demo locally
 
-Assuming you have node installed
+Assuming you have node and pnpm installed:
 
 ```shell
 # clone repo
@@ -85,7 +85,7 @@ git clone git@github.com:imp-dance/radix-os.git
 # navigate into folder
 cd radix-os
 # install dependencies
-npm install
+pnpm install
 # launch dev server
-npm run dev
+pnpm dev
 ```
