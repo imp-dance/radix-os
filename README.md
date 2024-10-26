@@ -1,91 +1,65 @@
-# RadixOS
+# Radix OS
 
-An in-browser operating system simulation built using the Radix design system.
+Radix OS is an operating system simulated on the web, with a modular file system that can be swapped out with any async source, able to run your own custom built applications. Designed to be flexible and easily extendable so it can fit your needs.
 
-#### TOC
+![Preview](https://radix-os.netlify.app/assets/images/sh-22aa7102bc92ee3fccb90107fe234d72.jpg)
 
-1. [Documentation](#documentation)
-2. [Live demo](#live-demo)
-3. [Setup](#setup)
-4. [Tools and technologies](#tools-and-technologies)
-5. [Launch demo locally](#launch-demo-locally)
+## Features
 
-## [Documentation](https://radix-os.netlify.app/)
+- Window management
+- Modular file system
+- Customizable UI
+- App launcher
+- Keyboard shortcuts
+- Context menus
+- System UI components
+- Drag 'n drop file upload
 
-Read the docs for more information on how to implement Radix OS into your project, using React and the npm package `radix-os`.
-
-See a [working example](https://stackblitz.com/edit/radix-os?file=src%2FApp.tsx) of Radix OS on Stackblitz.
-
-## **[Live demo](https://imp-dance.github.io/radix-os/)**
-
-![Screenshot 2024-10-06 at 18 18 09](https://github.com/user-attachments/assets/c9a063f4-bee0-45ec-95c6-bb39f621baf3)
-
-
-## Setup
+## Getting started
 
 ### Installation
 
-1. If you don't have radix ui themes installed already, install this first:
+If you don't have radix ui themes installed already, install this first:
 
-```
-npm i @radix-ui/themes @radix-ui/react-icons
+```shell
+npm i @radix-ui/themes
 ```
 
-2. Then install Radix OS:
+Then install Radix OS:
 
-```
+```shell
 npm i radix-os
 ```
 
+We also recommend that you install `@radix-ui/react-icons` if you plan on extending the OS with your own applications.
+
 ### Quick setup
 
-```tsx title="lib/radix-os.ts"
+```tsx
+import "@radix-ui/themes/styles.css";
 import {
-  fsZustandIntegration,
+  createZustandFsIntegration,
   setupApps,
-  createUseAppLauncher
-} from "radix-os";
-
-export const applications = setupApps();
-export const useAppLauncher = createUseAppLauncher(applications);
-```
-
-```tsx title="App.tsx"
-import '@radix-ui/themes/styles.css';
-import {
   RadixOS,
-  fsZustandIntegration
 } from "radix-os";
-import { applications } from "./lib/radix-os";
 
-export default function App(){
-  return <RadixOS fs={fsZustandIntegration} applications={applications} />
+// You can provide some optional config to these
+const fs = createZustandFsIntegration();
+const applications = setupApps([]);
+
+export function App() {
+  return (
+    <RadixOS
+      fs={fs}
+      applications={applications}
+      // You can also pass some customization options:
+      radius="none"
+      accentColor="crimson"
+    />
+  );
 }
 ```
 
-## Tools and technologies
+### Documentation
 
-This project uses
-
-- [`vite`](https://vitejs.dev/)
-- [`react`](https://react.dev)
-- [`@monaco-editor/react`](https://github.com/suren-atoyan/monaco-react)
-- [`@radix-ui/themes`](https://www.radix-ui.com/)
-- [`@radix-ui/react-icons`](https://www.radix-ui.com/icons)
-- [`dnd-kit`](https://dndkit.com/)
-- [`zustand`](https://zustand.docs.pmnd.rs/)
-
-## Launch demo locally
-
-Assuming you have node and pnpm installed:
-
-```shell
-# clone repo
-git clone git@github.com:imp-dance/radix-os.git
-# navigate into folder
-cd radix-os
-# install dependencies
-pnpm install
-# launch dev server
-pnpm dev
-```
+To read more about how to create your own applications for the "OS", setting up desktop items and all of the exported utilities - check out [the official docs](https://radix-os.netlify.app/).

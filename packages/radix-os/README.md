@@ -1,50 +1,65 @@
 # Radix OS
 
-Radix OS is a operating system simulated on the web, with a modular file system that can be swapped out with any async source, able to run your own custom built applications. Designed to be flexible and easily extendable so it can fit your needs.
+Radix OS is an operating system simulated on the web, with a modular file system that can be swapped out with any async source, able to run your own custom built applications. Designed to be flexible and easily extendable so it can fit your needs.
 
-Check out the [documentation](https://radix-os.netlify.app) for more in depth guides.
+![Preview](https://radix-os.netlify.app/assets/images/sh-22aa7102bc92ee3fccb90107fe234d72.jpg)
 
-[![Preview](/sh.jpg)](https://imp-dance.github.io/radix-os/)
+## Features
+
+- Window management
+- Modular file system
+- Customizable UI
+- App launcher
+- Keyboard shortcuts
+- Context menus
+- System UI components
+- Drag 'n drop file upload
 
 ## Getting started
 
 ### Installation
 
-1. If you don't have radix ui themes installed already, install this first:
+If you don't have radix ui themes installed already, install this first:
 
-```
-npm i @radix-ui/themes @radix-ui/react-icons
+```shell
+npm i @radix-ui/themes
 ```
 
-2. Then install Radix OS:
+Then install Radix OS:
 
-```
+```shell
 npm i radix-os
 ```
 
+We also recommend that you install `@radix-ui/react-icons` if you plan on extending the OS with your own applications.
+
 ### Quick setup
 
-```tsx title="lib/radix-os.ts"
+```tsx
+import "@radix-ui/themes/styles.css";
 import {
+  createZustandFsIntegration,
   setupApps,
-  createUseAppLauncher,
-  createZustandFsIntegration
-} from "radix-os;
-
-export const useAppLauncher = createUseAppLauncher(applications);
-export const applications = setupApps();
-export const fs = createZustandFsIntegration();
-```
-
-```tsx title="App.tsx"
-import '@radix-ui/themes/styles.css';
-import {
   RadixOS,
-  fsZustandIntegration
-} from "radix-os;
-import { applications, fs } from "./lib/radix-os";
+} from "radix-os";
 
-export default function App(){
-  return <RadixOS fs={fs} applications={applications} />
+// You can provide some optional config to these
+const fs = createZustandFsIntegration();
+const applications = setupApps([]);
+
+export function App() {
+  return (
+    <RadixOS
+      fs={fs}
+      applications={applications}
+      // You can also pass some customization options:
+      radius="none"
+      accentColor="crimson"
+    />
+  );
 }
 ```
+
+### Documentation
+
+To read more about how to create your own applications for the "OS", setting up desktop items and all of the exported utilities - check out [the official docs](https://radix-os.netlify.app/).
