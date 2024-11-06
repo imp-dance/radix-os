@@ -60,7 +60,7 @@ export function Desktop(props: {
       distance: 10,
     },
   });
-  const desktopItems = [
+  const desktopApps = [
     ...props.applications
       .filter((app) => app.addToDesktop)
       .map((app, i) => ({
@@ -72,26 +72,22 @@ export function Desktop(props: {
         }) as (
           appLauncher: UseAppLauncherReturn<string>
         ) => void,
-        position: {
-          x: gridPad,
-          y: i > 0 ? gridSize * i + gridPad : gridPad,
-        },
+        position: computeDesktopItemPosition(i),
       })),
   ];
-  props.shortcuts.forEach((shortcut, i) => {
-    const ind = desktopItems.length + i;
+  const desktopShortcuts = props.shortcuts.map((shortcut, i) => {
+    const ind =
+      desktopApps.length === 0 ? i : desktopApps.length + i;
 
-    desktopItems.push({
+    return {
       icon: <>{shortcut.icon}</>,
       title: shortcut.label,
       id: shortcut.label,
       onClick: shortcut.onClick,
-      position: {
-        x: gridPad,
-        y: ind > 0 ? gridSize * ind + gridPad : gridPad,
-      },
-    });
+      position: computeDesktopItemPosition(ind),
+    };
   });
+  const desktopItems = [...desktopApps, ...desktopShortcuts];
   const [applications, setApplications] = useState(desktopItems);
   const positionDependency = applications.reduce((acc, app) => {
     return (
@@ -306,4 +302,11 @@ function Application(props: {
       </Button>
     </Tooltip>
   );
+}
+
+function computeDesktopItemPosition(i: number) {
+  return {
+    x: gridPad,
+    y: i > 0 ? gridSize * i + gridPad : gridPad,
+  };
 }

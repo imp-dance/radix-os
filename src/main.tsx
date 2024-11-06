@@ -11,22 +11,17 @@ import { createRoot } from "react-dom/client";
 import { ExampleApp } from "./applications/ExampleApp.tsx";
 import "./index.css";
 
-export const applications = setupApps(
-  [
-    {
-      component: ExampleApp,
-      appId: "example-app",
-      appName: "Example App",
-      defaultWindowSettings: {
-        title: "Example App",
-        icon: <QuestionMarkCircledIcon />,
-      },
-    },
-  ],
+export const applications = setupApps([
   {
-    defaultAppsOnDesktop: ["explorer", "settings", "terminal"],
-  }
-);
+    component: ExampleApp,
+    appId: "example-app",
+    appName: "Example App",
+    defaultWindowSettings: {
+      title: "Example App",
+      icon: <QuestionMarkCircledIcon />,
+    },
+  },
+]);
 
 const fs = createZustandFsIntegration({});
 
