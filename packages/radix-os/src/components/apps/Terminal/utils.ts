@@ -52,3 +52,21 @@ export function joinQuotedArgs(args: string[]) {
   });
   return nextArgs;
 }
+
+export function extractFlags(args: string[]) {
+  const flagRecord: Record<string, string> = {};
+
+  args.forEach((arg, index) => {
+    if (arg.startsWith("--")) {
+      const flag = arg.slice(2);
+      const value = args[index + 1];
+      flagRecord[flag] = value;
+    } else if (arg.startsWith("-")) {
+      const flags = arg.slice(1);
+      const value = args[index + 1];
+      flagRecord[flags] = value;
+    }
+  });
+
+  return flagRecord;
+}

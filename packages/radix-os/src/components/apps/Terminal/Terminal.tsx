@@ -8,6 +8,7 @@ import {
   TextField,
 } from "@radix-ui/themes";
 import React, {
+  ComponentProps,
   ReactNode,
   useLayoutEffect,
   useRef,
@@ -29,9 +30,37 @@ import { FsFolder } from "../../../stores/fs";
 import { RadixOsAppComponent } from "../../../stores/window";
 import { Command, helpText } from "./constants";
 import { parseFs } from "./modules/fs";
-import { joinQuotedArgs } from "./utils";
+import { parseOpen } from "./modules/open";
+import { extractFlags, joinQuotedArgs } from "./utils";
 
-export const Terminal: RadixOsAppComponent = (props) => {
+export type TerminalPlugin = {
+  matcher: (command: string, args: string[]) => boolean;
+  exec: (
+    pushOutput: (...output: ReactNode[]) => void,
+    command: string,
+    args: string[]
+  ) => void;
+  /** Continue checking for other commands after exec, even if command is matched */
+  passThrough?: boolean;
+};
+
+function findLeafString(node: ReactNode): string {
+  if (typeof node === "string") return node;
+  if (typeof node === "number") return node.toString();
+  if (Array.isArray(node))
+    return node.map(findLeafString).join("");
+  if (node === null || node === undefined) return "";
+  if (typeof node === "object" && "props" in node) {
+    return findLeafString(node.props.children);
+  }
+  return "";
+}
+
+export const Terminal = (
+  props: ComponentProps<RadixOsAppComponent> & {
+    plugins?: TerminalPlugin[];
+  }
+) => {
   const { openFile } = useUntypedAppContext();
   const currentCommandIndex = useRef(0);
   const prevCommands = useRef<string[]>([]);
@@ -50,6 +79,11 @@ export const Terminal: RadixOsAppComponent = (props) => {
   ]);
 
   function pushOutput(...output: ReactNode[]) {
+    /*const asText = output
+      .map((e) => findLeafString(e))
+      .join("\n")
+      .trim(); */
+
     setOutput((prev) => [...prev, ...output]);
   }
 
@@ -85,8 +119,27 @@ export const Terminal: RadixOsAppComponent = (props) => {
     const parts = input.split(" ");
     const [command, ...args_] = parts;
     const args = joinQuotedArgs(args_);
+    const flags = extractFlags(args);
+    const plugins = props.plugins ?? [];
+    for (const plugin of plugins) {
+      if (plugin.matcher(command, args)) {
+        plugin.exec(pushOutput, command, args);
+        if (!plugin.passThrough) return;
+      }
+    }
     if (command === "") return pushOutput(<></>);
     switch (command) {
+      case "open": {
+        return parseOpen({
+          tree,
+          args,
+          cd: path.current.join("/"),
+          flags,
+          openFile,
+          pushOutput,
+        });
+        break;
+      }
       case "echo": {
         pushOutput(
           <Code
@@ -199,7 +252,6 @@ export const Terminal: RadixOsAppComponent = (props) => {
           updateFile: (path, file) =>
             updateFile.mutateAsync({ path, file }),
           tree: tree as FsFolder,
-          openFile,
         });
       }
       case "cd": {

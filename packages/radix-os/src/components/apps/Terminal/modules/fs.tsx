@@ -1,6 +1,5 @@
 import { Code } from "@radix-ui/themes";
 import { ReactNode } from "react";
-import { useUntypedAppContext } from "../../../../services/applications/launcher";
 import {
   findNodeByPath,
   isFile,
@@ -20,13 +19,11 @@ export function parseFs({
   currentPath,
   updateFile,
   tree,
-  openFile,
 }: {
   pushOutput: (...output: ReactNode[]) => void;
   args: string[];
   currentPath: string;
   tree: FsFolder;
-  openFile: ReturnType<typeof useUntypedAppContext>["openFile"];
   updateFile: (
     path: string,
     file: Partial<FsFile>
@@ -71,7 +68,8 @@ export function parseFs({
     updateFile(path, { name });
   };
   switch (flag) {
-    case "-R": {
+    case "-R":
+    case "-r": {
       const name = quotableRestArgs(restArgs);
       if (!name) {
         pushOutput(
@@ -94,32 +92,8 @@ export function parseFs({
         <Command command={`fs ${path} -R ${name}`} />
       );
     }
-    case "-O": {
-      const launcher = restArgs[0];
-      if (!isFile(node)) {
-        return pushOutput(
-          <Code size="1" variant="soft" color="crimson">
-            Not a file
-          </Code>
-        );
-      }
-      const validLaunchers = node.launcher;
-      if (
-        launcher &&
-        !validLaunchers.includes(launcher as "code")
-      ) {
-        return pushOutput(
-          <Code size="1" variant="soft" color="crimson">
-            Invalid launcher
-          </Code>
-        );
-      }
-      openFile({ file: node, path }, { launcher });
-      return pushOutput(
-        <Command command={`fs ${path} -O ${launcher ?? ""}`} />
-      );
-    }
-    case "-L": {
+    case "-L":
+    case "-l": {
       const launcher = restArgs[0];
       if (!launcher) {
         return pushOutput(
@@ -148,7 +122,8 @@ export function parseFs({
         <Command command={`fs ${path} --L ${launcher}`} />
       );
     }
-    case "--ll": {
+    case "--ll":
+    case "--LL": {
       const node = findNodeByPath(path, tree);
       if (!node) {
         return pushOutput(<DirNotFound dir={path} />);
@@ -176,7 +151,8 @@ export function parseFs({
       );
       break;
     }
-    case "--ex": {
+    case "--ex":
+    case "--EX": {
       const node = findNodeByPath(path, tree);
       if (!node) {
         return pushOutput(<DirNotFound dir={path} />);

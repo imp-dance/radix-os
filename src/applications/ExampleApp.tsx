@@ -9,7 +9,7 @@ export const ExampleApp = createApp((_props) => {
       direction="column"
       gap="3"
       p="3"
-      style={{ textAlign: "center" }}
+      style={{ textAlign: "center", userSelect: "none" }}
     >
       <Heading size="4">You can create custom apps</Heading>
       <Button

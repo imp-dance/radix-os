@@ -24,7 +24,7 @@ export const applications = setupApps(
     },
   ],
   {
-    defaultAppsOnDesktop: ["explorer"],
+    defaultAppsOnDesktop: ["explorer", "settings", "terminal"],
   }
 );
 

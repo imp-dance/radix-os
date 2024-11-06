@@ -33,11 +33,22 @@ mkdir [name]               - Create a new directory
 ls                         - List files in current directory
 cd [path]                  - Change directory
 mv [path1] [path2]         - Move file/folder from [path1] to [path2]
+open [path]                - Open a file
+open --help                - Show help for opening files
 
 fs [path] -R [name]        - Rename a file or folder
-fs [path] -O [launcher?]   - Open a file
 fs [path] -L [launcher]    - Set a file's default launcher
 fs [path] --ll             - List a file's available launchers
 fs [path] --ex [launcher]  - Make file executable in given launcher
 
 Relative paths are supported. Use quotes for paths with spaces.`;
+
+export const openHelpText = `Available flags for command "open":
+--help                     - Show this help message
+-l [launcher]             - Open file with specific launcher
+-x [number]               - Horizontal position of window
+-y [number]               - Vertical position of window
+-w [number]               - Width of window
+-h [number]               - Height of window
+-r [true/false]           - Resizable
+-s [true/false]           - Scrollable`;

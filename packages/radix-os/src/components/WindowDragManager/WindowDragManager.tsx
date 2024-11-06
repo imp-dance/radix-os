@@ -1,6 +1,7 @@
 import {
   DndContext,
   MouseSensor,
+  pointerWithin,
   useSensor,
 } from "@dnd-kit/core";
 import { ReactNode } from "react";
@@ -24,6 +25,7 @@ export function WindowDragManager(props: {
     <DndContext
       modifiers={[restrictToDesktopEdges]}
       sensors={[mouseSensor]}
+      collisionDetection={pointerWithin}
       onDragEnd={(event) => {
         setIsDragging(false);
         const window = windows.find(

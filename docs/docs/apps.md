@@ -19,6 +19,39 @@ There are 5 apps by default that come with RadixOS:
 | Settings     | `settings` | System customization and formatting        | Tab-id            |
 | Image Viewer | `image`    | Can open images                            | data:image or SVG |
 
+### Configuration
+
+You can configure some apps by passing a second argument to `setupApps`:
+
+```tsx
+const apps = setupApps([], {
+  terminalPlugins: [],
+  defaultAppsOnDesktop: ["terminal", "explorer"],
+});
+```
+
+### Terminal plugins
+
+You can pass extra matchers as plugins to the terminal application. This allows you to respond to commands and push output back to the terminal.
+
+```tsx
+const terminalPluginOpen: TerminalPlugin = {
+  matcher: (command) => command === "open",
+  exec: (pushOutput, command, args) => {
+    // do some stuff, then
+    pushOutput(
+      <Code size="sm" variant="soft">
+        Opening "{args.join(" ")}"
+      </Code>
+    );
+  },
+};
+
+const apps = setupApps([], {
+  terminalPlugins: [terminalPluginOpen],
+});
+```
+
 ## Creating your own applications
 
 You can create apps by using `createApp`:
@@ -78,6 +111,14 @@ You can now launch the application from within other applications by utilizing `
 const { launch } = useAppLauncher();
 // ...
 launch("some-app", { ...settings });
+```
+
+### Set default focus element
+
+To configure which element should be focused when the title-bar is clicked, or when the app is initially opened, you can set the following attribute on the HTML element: `data-returnfocus="true"`. Example:
+
+```tsx
+<Button data-returnfocus="true">Call to action</Button>
 ```
 
 ## Application Hooks

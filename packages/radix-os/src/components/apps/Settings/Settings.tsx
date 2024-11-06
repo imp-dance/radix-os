@@ -242,7 +242,6 @@ function StorageTab() {
             </Flex>
           </AlertDialog.Content>
         </AlertDialog.Root>
-
         <AlertDialog.Root>
           <AlertDialog.Trigger>
             <Button color="crimson" variant="outline">
@@ -279,7 +278,39 @@ function StorageTab() {
             </Flex>
           </AlertDialog.Content>
         </AlertDialog.Root>
+        <Text size="1" color="gray">
+          Used space:{" "}
+          {getByteSize(localStorage.getItem(FS_LS_KEY) ?? "")}
+        </Text>
       </Flex>
     </Tabs.Content>
   );
+}
+
+function getByteSize(s: string) {
+  return formatBytes(new Blob([s]).size);
+}
+
+function formatBytes(bytes: number, decimals = 2) {
+  if (!+bytes) return "0 Bytes";
+
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = [
+    "Bytes",
+    "KiB",
+    "MiB",
+    "GiB",
+    "TiB",
+    "PiB",
+    "EiB",
+    "ZiB",
+    "YiB",
+  ];
+
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${
+    sizes[i]
+  }`;
 }

@@ -20,7 +20,10 @@ import {
   useState,
 } from "react";
 import { DesktopShortcut } from "../../services/applications/desktop-shortcuts";
-import { useUntypedAppContext } from "../../services/applications/launcher";
+import {
+  UseAppLauncherReturn,
+  useUntypedAppContext,
+} from "../../services/applications/launcher";
 import { useSettingsStore } from "../../stores/settings";
 import { RadixOsApp } from "../../stores/window";
 import { throttle } from "../../utils";
@@ -64,9 +67,11 @@ export function Desktop(props: {
         icon: app.defaultWindowSettings?.icon ?? <HomeIcon />,
         title: app.appName,
         id: app.appId,
-        onClick: () => {
+        onClick: (() => {
           launch(app.appId);
-        },
+        }) as (
+          appLauncher: UseAppLauncherReturn<string>
+        ) => void,
         position: {
           x: gridPad,
           y: i > 0 ? gridSize * i + gridPad : gridPad,
@@ -248,9 +253,10 @@ function Application(props: {
   icon: ReactNode;
   title: string;
   id: string;
-  onClick: () => void;
+  onClick: (appLauncher: UseAppLauncherReturn<string>) => void;
   position: { x: number; y: number };
 }) {
+  const appLauncher = useUntypedAppContext();
   const [mousePosition, setMousePosition] = useState<{
     x: number;
     y: number;
@@ -294,7 +300,7 @@ function Application(props: {
         style={style}
         {...draggable.attributes}
         {...draggable.listeners}
-        onClick={props.onClick}
+        onClick={() => props.onClick(appLauncher)}
       >
         {props.icon}
       </Button>
