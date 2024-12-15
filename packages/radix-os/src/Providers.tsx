@@ -1,6 +1,6 @@
 import { Theme } from "@radix-ui/themes";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { ReactNode, useMemo, useRef } from "react";
+import { ReactNode, useEffect, useMemo, useRef } from "react";
 import { queryClient } from "./lib/react-query/client";
 import {
   AppContextProvider,
@@ -20,16 +20,22 @@ import {
 type AccentColor = Parameters<typeof Theme>[0]["accentColor"];
 type Radius = Parameters<typeof Theme>[0]["radius"];
 
-export function Providers(props: {
+type ProvidersProps = {
   children: ReactNode;
   fs: FsIntegration;
   applications: readonly RadixOsApp<string>[];
   accentColor?: AccentColor;
   radius?: Radius;
-}) {
+  theme?: "light" | "dark";
+  panelBackground?: "solid" | "translucent";
+};
+
+export function Providers(props: ProvidersProps) {
   const uniqueAppRef = useRef<Record<string, symbol>>({});
   const settingsStore = useSettingsStore();
   const { addWindow, bringToFront } = useWindowStore();
+
+  useSyncPropsWithSettings(props);
 
   const contextValue = useMemo(() => {
     return {
@@ -67,13 +73,21 @@ export function Providers(props: {
     } as UseAppLauncherReturn<string>;
   }, [props.applications]);
 
+  const panelBackground =
+    props.panelBackground ?? settingsStore.panelBackground;
+  const accentColor =
+    props.accentColor ?? settingsStore.accentColor ?? "indigo";
+  const theme = props.theme ?? settingsStore.theme;
+  const radius =
+    props.radius ?? settingsStore.radius ?? "medium";
+
   return (
     <Theme
-      appearance={settingsStore.theme}
-      panelBackground={settingsStore.panelBackground}
-      accentColor={props.accentColor ?? "indigo"}
+      appearance={theme}
+      panelBackground={panelBackground}
+      accentColor={accentColor ?? "indigo"}
+      radius={radius}
       style={{ height: "100%" }}
-      radius={props.radius}
     >
       <AppContextProvider value={contextValue}>
         <FsProvider value={props.fs}>
@@ -84,4 +98,21 @@ export function Providers(props: {
       </AppContextProvider>
     </Theme>
   );
+}
+
+function useSyncPropsWithSettings(props: ProvidersProps) {
+  const settingsStore = useSettingsStore();
+  const relevantKeys = [
+    "theme",
+    "panelBackground",
+    "accentColor",
+    "radius",
+  ];
+  const keys = Object.keys(props)
+    .filter((k) => relevantKeys.includes(k))
+    .filter((k) => Boolean(props[k as "theme"]));
+
+  useEffect(() => {
+    settingsStore.setOverrides(keys as "theme"[]);
+  }, [keys.join("")]);
 }

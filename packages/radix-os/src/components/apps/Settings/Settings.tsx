@@ -7,6 +7,7 @@ import {
   Flex,
   Heading,
   Kbd,
+  Select,
   Switch,
   Tabs,
   Text,
@@ -141,42 +142,102 @@ function CustomizeTab() {
         <Heading size="1" color="gray">
           Options
         </Heading>
-        <Text
-          as="label"
-          size="1"
-          color="gray"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "var(--space-2)",
-          }}
-        >
-          <Switch
+        {!settingsStore.overrides.includes("theme") && (
+          <Text
+            as="label"
             size="1"
-            checked={settingsStore.theme === "dark"}
-            onCheckedChange={settingsStore.toggleTheme}
-          />
-          Dark mode
-        </Text>
-        <Text
-          as="label"
-          size="1"
-          color="gray"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "var(--space-2)",
-          }}
-        >
-          <Switch
+            color="gray"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "var(--space-2)",
+            }}
+          >
+            <Switch
+              size="1"
+              checked={settingsStore.theme === "dark"}
+              onCheckedChange={settingsStore.toggleTheme}
+            />
+            Dark mode
+          </Text>
+        )}
+        {!settingsStore.overrides.includes(
+          "panelBackground"
+        ) && (
+          <Text
+            as="label"
             size="1"
-            checked={
-              settingsStore.panelBackground === "translucent"
-            }
-            onCheckedChange={settingsStore.togglePanelBackground}
-          />
-          Translucent windows
-        </Text>
+            color="gray"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "var(--space-2)",
+            }}
+          >
+            <Switch
+              size="1"
+              checked={
+                settingsStore.panelBackground === "translucent"
+              }
+              onCheckedChange={
+                settingsStore.togglePanelBackground
+              }
+            />
+            Translucent windows
+          </Text>
+        )}
+        {!settingsStore.overrides.includes("radius") && (
+          <Text
+            as="label"
+            size="1"
+            color="gray"
+            style={{
+              display: "flex",
+              alignItems: "flex-start",
+              flexDirection: "column",
+              gap: "var(--space-2)",
+            }}
+          >
+            Radius
+            <Select.Root
+              value={settingsStore.radius ?? "medium"}
+              onValueChange={(value) =>
+                settingsStore.setRadius(value as "small")
+              }
+            >
+              <Select.Trigger variant="soft" />
+              <Select.Content>
+                <Select.Item value="none">None</Select.Item>
+                <Select.Item value="small">Small</Select.Item>
+                <Select.Item value="medium">Medium</Select.Item>
+                <Select.Item value="large">Large</Select.Item>
+                <Select.Item value="full">Full</Select.Item>
+              </Select.Content>
+            </Select.Root>
+          </Text>
+        )}
+        {!settingsStore.overrides.includes("accentColor") && (
+          <Text
+            as="label"
+            size="1"
+            color="gray"
+            style={{
+              display: "flex",
+              alignItems: "flex-start",
+              flexDirection: "column",
+              gap: "var(--space-2)",
+            }}
+          >
+            Accent color
+            <RadixColorPicker
+              onColorSelected={(clr) =>
+                settingsStore.setAccentColor(clr)
+              }
+              selectedColor={settingsStore.accentColor as "gray"}
+              label="Select color"
+            />
+          </Text>
+        )}
         <Heading size="1" color="gray">
           Background
         </Heading>

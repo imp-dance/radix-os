@@ -1,5 +1,9 @@
+import { Theme } from "@radix-ui/themes";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+
+type Radius = "small" | "none" | "medium" | "large" | "full";
+type AccentColor = Parameters<typeof Theme>[0]["accentColor"];
 
 type SettingsStore = {
   theme: "light" | "dark";
@@ -8,6 +12,12 @@ type SettingsStore = {
   togglePanelBackground: () => void;
   bg: string;
   setBg: (bg: string) => void;
+  radius: Radius;
+  setRadius: (value: Radius) => void;
+  accentColor: AccentColor;
+  setAccentColor: (value: AccentColor) => void;
+  overrides: (keyof SettingsStore)[];
+  setOverrides: (overrides: (keyof SettingsStore)[]) => void;
 };
 
 export const SETTINGS_LS_KEY = "settings";
@@ -15,6 +25,12 @@ export const SETTINGS_LS_KEY = "settings";
 export const useSettingsStore = create(
   persist<SettingsStore>(
     (set) => ({
+      radius: "medium",
+      overrides: [],
+      setOverrides: (overrides) => set(() => ({ overrides })),
+      setRadius: (radius) => set(() => ({ radius })),
+      accentColor: "gray",
+      setAccentColor: (clr) => set(() => ({ accentColor: clr })),
       theme: "dark" as const,
       toggleTheme: () =>
         set((state) => ({
@@ -42,6 +58,8 @@ export const useSettingsStore = create(
           theme: state.theme,
           panelBackground: state.panelBackground,
           bg: state.bg,
+          accentColor: state.accentColor,
+          radius: state.radius,
         } as SettingsStore),
     }
   )

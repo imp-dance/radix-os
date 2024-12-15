@@ -23,6 +23,8 @@ function RadixOS<T extends string>(props: {
   desktopShortcuts?: Array<DesktopShortcut>;
   accentColor?: AccentColor;
   radius?: Radius;
+  theme?: "light" | "dark";
+  panelBackground?: "solid" | "translucent";
 }) {
   return (
     <div className={styles.radixOs}>
@@ -31,6 +33,8 @@ function RadixOS<T extends string>(props: {
         applications={props.applications ?? []}
         accentColor={props.accentColor}
         radius={props.radius}
+        theme={props.theme}
+        panelBackground={props.panelBackground}
       >
         <SystemFileUpload />
         <WindowDragManager>

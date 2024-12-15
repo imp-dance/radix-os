@@ -1,13 +1,13 @@
 import { QuestionMarkCircledIcon } from "@radix-ui/react-icons";
 import "@radix-ui/themes/styles.css";
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
 import {
   createUseAppLauncher,
   createZustandFsIntegration,
   RadixOS,
   setupApps,
-} from "radix-os";
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
+} from "../packages/radix-os/dist";
 import { ExampleApp } from "./applications/ExampleApp.tsx";
 import "./index.css";
 
@@ -33,8 +33,6 @@ createRoot(document.getElementById("root")!).render(
       fs={fs}
       applications={applications}
       desktopShortcuts={[]}
-      radius="none"
-      accentColor="bronze"
     />
   </StrictMode>
 );
