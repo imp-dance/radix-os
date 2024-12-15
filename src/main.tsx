@@ -1,13 +1,13 @@
 import { QuestionMarkCircledIcon } from "@radix-ui/react-icons";
 import "@radix-ui/themes/styles.css";
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
 import {
   createUseAppLauncher,
   createZustandFsIntegration,
   RadixOS,
   setupApps,
-} from "../packages/radix-os/dist";
+} from "radix-os";
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
 import { ExampleApp } from "./applications/ExampleApp.tsx";
 import "./index.css";
 
