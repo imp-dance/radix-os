@@ -21,14 +21,14 @@ type Option = {
   color?: ButtonColor;
 };
 
-type Menu = Array<{
+export type MenubarMenu = Array<{
   label: string;
   color?: ButtonColor;
   options: Array<Option | "separator">;
 }>;
 
 export function MenuBar(props: {
-  menu: Menu;
+  menu: MenubarMenu;
   windowId?: symbol;
 }) {
   const kd = props.menu.flatMap((menu) =>

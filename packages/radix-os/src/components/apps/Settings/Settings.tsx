@@ -1,16 +1,17 @@
-import { InfoCircledIcon } from "@radix-ui/react-icons";
+import { ExternalLinkIcon } from "@radix-ui/react-icons";
 import {
   AlertDialog,
   Button,
-  Callout,
   Code,
   Flex,
   Heading,
   Kbd,
   Select,
   Switch,
+  Table,
   Tabs,
   Text,
+  TextField,
 } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 import { FS_LS_KEY } from "../../../stores/fs";
@@ -29,8 +30,6 @@ export const Settings: RadixOsAppComponent = (props) => {
   const [tab, setTab] = useState<
     "customize" | "storage" | "shortcuts" | "about"
   >(initialTab);
-  const isMac = navigator.platform.toUpperCase().includes("MAC");
-  const altOrOpt = isMac ? "⌥" : "Alt";
 
   useEffect(() => {
     setTab(initialTab);
@@ -52,18 +51,52 @@ export const Settings: RadixOsAppComponent = (props) => {
         <Flex p="2" direction="column" gap="3" height="100%">
           <Text size="2" color="gray">
             RadixOS is an open source project built using{" "}
-            <Code>React</Code>, <Code>Radix</Code>,{" "}
-            <Code>Zustand</Code> & <Code>dnd kit</Code>.
+            <ul>
+              <li>
+                <BrowserLink href="https://radix-ui.com">
+                  <Code>Radix</Code>
+                </BrowserLink>
+              </li>
+              <li>
+                <BrowserLink href="https://zustand.docs.pmnd.rs/getting-started/introduction">
+                  <Code>Zustand</Code>
+                </BrowserLink>
+              </li>
+              <li>
+                <BrowserLink href="https://dndkit.com/">
+                  <Code>dnd kit</Code>
+                </BrowserLink>
+              </li>
+              <li>
+                <BrowserLink href="https://react.dev">
+                  <Code>React</Code>
+                </BrowserLink>
+              </li>
+            </ul>
           </Text>
           <Text size="2" color="gray">
             The file system and settings are stored in{" "}
             <Code>localStorage</Code>.
           </Text>
-          <Text size="2" color="gray">
-            Written in 2024.
-          </Text>
+          <div>
+            <Button
+              variant="soft"
+              color="ruby"
+              onClick={() => {
+                window.open(
+                  "https://github.com/imp-dance/radix-os/issues/new",
+                  "_blank"
+                );
+              }}
+            >
+              <Flex gap="3" align="center">
+                Report an issue
+                <ExternalLinkIcon />
+              </Flex>
+            </Button>
+          </div>
           <Text size="1" color="gray" mt="auto">
-            Made by{" "}
+            Made with ❤️ by{" "}
             <BrowserLink
               target="_blank"
               href="https://haakon.dev"
@@ -78,58 +111,81 @@ export const Settings: RadixOsAppComponent = (props) => {
             >
               Ryfylke React AS
             </BrowserLink>
-            )
+            ) 2024
           </Text>
         </Flex>
       </Tabs.Content>
       <CustomizeTab />
       <StorageTab />
       <Tabs.Content value="shortcuts">
-        <Flex p="2" direction="column" gap="3">
-          <Callout.Root size="1">
-            <Callout.Icon>
-              <InfoCircledIcon />
-            </Callout.Icon>
-            <Callout.Text>
-              Shortcuts have varying support across browsers and
-              operating systems.
-            </Callout.Text>
-          </Callout.Root>
-          <Flex gap="2" align="center">
-            <Kbd>{isMac ? altOrOpt : "CTRL"} + Tab</Kbd>
-            <Text size="2" color="gray">
-              Switch between applications
-            </Text>
-          </Flex>
-          <Flex gap="2" align="center">
-            <Kbd>{isMac ? altOrOpt : "CTRL"} + Shift + Tab</Kbd>
-            <Text size="2" color="gray">
-              Switch between applications
-            </Text>
-          </Flex>
-          <Flex gap="2" align="center">
-            <Kbd>{altOrOpt} + W</Kbd>
-            <Text size="2" color="gray">
-              Close active window
-            </Text>
-          </Flex>
-          <Flex gap="2" align="center">
-            <Kbd>Double click window title</Kbd>
-            <Text size="2" color="gray">
-              Toggle maximize
-            </Text>
-          </Flex>
-          <Flex gap="2" align="center">
-            <Kbd>Shift + Drag window</Kbd>
-            <Text size="2" color="gray">
-              Tile window
-            </Text>
-          </Flex>
-        </Flex>
+        <ShortcutsTab />
       </Tabs.Content>
     </Tabs.Root>
   );
 };
+
+function ShortcutsTab() {
+  const [search, setSearch] = useState("");
+  const isMac = navigator.platform.toUpperCase().includes("MAC");
+  const altOrOpt = isMac ? "⌥" : "Alt";
+
+  const shortcuts: [string, string][] = [
+    ["Open app launcher", "CTRL + P"],
+    [
+      "Switch between applications",
+      (isMac ? altOrOpt : "CTRL") + " (+ Shift) + Tab",
+    ],
+    ["Close active window", `${altOrOpt} + W`],
+    ["Toggle maximize", "Double click window"],
+    ["Tile window", "Shift + drag window"],
+  ].filter(([desc, scut]) => {
+    if (search === "") return true;
+    return (
+      desc.toLowerCase().search(search.toLowerCase()) > -1 ||
+      scut
+        .replaceAll("⌥", "⌥ alt option")
+        .toLowerCase()
+        .search(search.toLowerCase()) > -1
+    );
+  }) as [string, string][];
+
+  return (
+    <Flex p="2" direction="column" gap="3">
+      <TextField.Root
+        size="1"
+        placeholder="Filter shortcuts"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+      <Table.Root size="1">
+        <Table.Header>
+          <Table.Row>
+            <Table.RowHeaderCell>
+              <Text size="1">Description</Text>
+            </Table.RowHeaderCell>
+            <Table.RowHeaderCell>
+              <Text size="1">Shortcut</Text>
+            </Table.RowHeaderCell>
+          </Table.Row>
+        </Table.Header>
+        <Table.Body>
+          {shortcuts.map(([description, shortcut]) => (
+            <Table.Row key={`${description}${shortcut}`}>
+              <Table.Cell>
+                <Text color="gray" size="1">
+                  {description}
+                </Text>
+              </Table.Cell>
+              <Table.Cell>
+                <Kbd>{shortcut}</Kbd>
+              </Table.Cell>
+            </Table.Row>
+          ))}
+        </Table.Body>
+      </Table.Root>
+    </Flex>
+  );
+}
 
 function CustomizeTab() {
   const settingsStore = useSettingsStore();

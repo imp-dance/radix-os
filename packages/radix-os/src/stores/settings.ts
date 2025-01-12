@@ -29,7 +29,7 @@ export const useSettingsStore = create(
       overrides: [],
       setOverrides: (overrides) => set(() => ({ overrides })),
       setRadius: (radius) => set(() => ({ radius })),
-      accentColor: "gray",
+      accentColor: "indigo",
       setAccentColor: (clr) => set(() => ({ accentColor: clr })),
       theme: "dark" as const,
       toggleTheme: () =>

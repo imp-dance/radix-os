@@ -3,6 +3,7 @@ import {
   DragOverlay,
   Modifier,
   MouseSensor,
+  pointerWithin,
   useDraggable,
   useSensor,
 } from "@dnd-kit/core";
@@ -128,6 +129,7 @@ export function Desktop(props: {
         snapToGridModifier,
         detectionModifiers,
       ]}
+      collisionDetection={pointerWithin}
       sensors={[mouseSensor]}
       onDragStart={(event) => {
         setDragTarget(event.active.id?.toString());

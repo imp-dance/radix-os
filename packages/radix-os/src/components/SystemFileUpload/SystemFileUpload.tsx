@@ -1,5 +1,5 @@
 import { Flex, Text } from "@radix-ui/themes";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useFs } from "../../services/fs/fs-integration";
 import {
   getParentPath,
@@ -9,12 +9,27 @@ import { createFile } from "../../services/fs/upload";
 import { FsFile } from "../../stores/fs";
 import { SaveAsDialog } from "../SaveAsDialog/SaveAsDialog";
 
-export function SystemFileUpload() {
+export function SystemFileUpload(props: {
+  handler?: (file: File) => Promise<FsFile | null>;
+}) {
   const fs = useFs();
   const [isDroppingFile, setDroppingFile] = useState(false);
   const [uploadOpen, setUploadOpen] = useState<false | FsFile>(
     false
   );
+
+  const onDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    setDroppingFile(false);
+    try {
+      const file = await createFile(
+        e.dataTransfer.files[0],
+        props.handler
+      );
+      setUploadOpen(file);
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   useEffect(() => {
     const dropStopper = (e: Event) => {
@@ -62,17 +77,7 @@ export function SystemFileUpload() {
           }}
           onClick={() => setDroppingFile(false)}
           onDragLeave={() => setDroppingFile(false)}
-          onDrop={async (e) => {
-            setDroppingFile(false);
-            try {
-              const file = await createFile(
-                e.dataTransfer.files[0]
-              );
-              setUploadOpen(file);
-            } catch (err) {
-              console.log(err);
-            }
-          }}
+          onDrop={onDrop}
         >
           <div style={{ margin: "auto" }}>
             <Text size="5">Drop file here to upload</Text>

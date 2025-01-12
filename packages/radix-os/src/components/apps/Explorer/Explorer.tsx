@@ -2,6 +2,7 @@ import {
   DndContext,
   DragOverlay,
   MouseSensor,
+  pointerWithin,
   useDraggable,
   useDroppable,
   useSensor,
@@ -145,6 +146,7 @@ export function Explorer({
   return (
     <DndContext
       sensors={[mouseSensor]}
+      collisionDetection={pointerWithin}
       onDragEnd={(event) => {
         const active = event.active.id.toString();
         const over = event.over?.id.toString();

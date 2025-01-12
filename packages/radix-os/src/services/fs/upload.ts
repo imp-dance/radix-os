@@ -1,8 +1,18 @@
 import { FsFile } from "../../stores/fs";
 
-export async function createFile(file: File): Promise<FsFile> {
+export async function createFile(
+  file: File,
+  handler?: (file: File) => Promise<FsFile | null>
+): Promise<FsFile> {
   let data = "";
   let launcher = [];
+
+  if (handler) {
+    const result = await handler(file);
+    if (result !== null) {
+      return result;
+    }
+  }
 
   const typeIs = (type: string) => file.type.startsWith(type);
 

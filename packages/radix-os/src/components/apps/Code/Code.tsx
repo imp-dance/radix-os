@@ -1,6 +1,18 @@
 import Editor from "@monaco-editor/react";
-import { Flex } from "@radix-ui/themes";
-import { useRef, useState } from "react";
+import {
+  Button,
+  Card,
+  Flex,
+  Heading,
+  Link,
+  Text,
+} from "@radix-ui/themes";
+import {
+  CSSProperties,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   useCreateFileMutation,
   useFileSystemQuery,
@@ -20,13 +32,15 @@ import {
   useWindowStore,
 } from "../../../stores/window";
 import { ConfirmDialog } from "../../ConfirmDialog/ConfirmDialog";
-import { MenuBar } from "../../MenuBar/MenuBar";
+import { MenuBar, MenubarMenu } from "../../MenuBar/MenuBar";
 import { OpenFileDialog } from "../../OpenFileDialog/OpenFileDialog";
 import { SaveAsDialog } from "../../SaveAsDialog/SaveAsDialog";
 
 type EditorType = Parameters<
   NonNullable<Parameters<typeof Editor>[0]["onMount"]>
 >[0];
+
+type CodeAppView = "editor" | "home";
 
 export const CodeApp: RadixOsAppComponent = (props) => {
   const [openedFile, setOpenedFile] = useState<null | {
@@ -47,6 +61,9 @@ export const CodeApp: RadixOsAppComponent = (props) => {
     openedFile?.file ?? props.file?.file ?? createdFile;
   const path =
     openedFile?.path ?? props.file?.path ?? createdPath;
+  const [currentView, setCurrentView] = useState<CodeAppView>(
+    path ? "editor" : "home"
+  );
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [value, setValue] = useState(file?.data ?? "");
   const editorRef = useRef<EditorType | null>(null);
@@ -101,6 +118,22 @@ export const CodeApp: RadixOsAppComponent = (props) => {
     });
   };
 
+  useEffect(() => {
+    const winState = useWindowStore.getState();
+    const winObj = winState.windows.find(
+      (w) => w.id === props.appWindow.id
+    );
+    if (winObj) {
+      if (path) {
+        winState.setTitle(winObj, pathToName(path));
+      } else if (currentView === "home") {
+        winState.setTitle(winObj, "Code");
+      } else if (currentView === "editor") {
+        winState.setTitle(winObj, "Code - New file");
+      }
+    }
+  }, [currentView]);
+
   return (
     <Flex
       direction="column"
@@ -110,163 +143,137 @@ export const CodeApp: RadixOsAppComponent = (props) => {
         overflow: "hidden",
       }}
     >
-      {openDialogOpen && (
-        <OpenFileDialog
-          open
-          setOpen={setOpenDialogOpen}
-          onFileOpened={(file, path) => {
-            setOpenedFile({ file, path });
-            setValue(file.data);
-          }}
-          fileDisabled={(file) =>
-            !file.launcher.includes("code")
-          }
-        />
+      {currentView === "editor" && (
+        <>
+          <MenuBar
+            windowId={props.appWindow.id}
+            menu={createMenu({
+              touched,
+              path,
+              launch,
+              value,
+              editor: editorRef.current,
+              onDeleteFile: () => setDeleteOpen(true),
+              onNewFile: () => launch("code"),
+              onOpenFile: () => setOpenDialogOpen(true),
+              onSaveFile: () => requestSave(),
+            })}
+          />
+          <div
+            style={{
+              height: "var(--space-3)",
+              background: theme === "dark" ? "#1e1e1e" : "#fff",
+            }}
+          />
+          <button
+            data-returnfocus="true"
+            style={{
+              opacity: 0,
+              position: "absolute",
+              top: 0,
+              left: 0,
+              pointerEvents: "none",
+            }}
+            onFocus={(e) => {
+              e.preventDefault();
+              if (editorRef.current) {
+                editorRef.current.focus();
+              } else {
+                setTimeout(() => {
+                  if (editorRef.current) {
+                    editorRef.current.focus();
+                  }
+                }, 500);
+              }
+            }}
+          />
+          <Editor
+            height="calc(100% - 2.5rem)"
+            width="100%"
+            className="rxos-editor"
+            theme={theme === "dark" ? "vs-dark" : "light"}
+            defaultLanguage="html"
+            defaultValue={value}
+            wrapperProps={{ "data-returnfocus": true }}
+            value={value}
+            onChange={(v) => setValue(v ?? "")}
+            onMount={(editor) => {
+              editorRef.current = editor;
+            }}
+            options={{
+              automaticLayout: true,
+              minimap: { enabled: false },
+            }}
+          />
+        </>
       )}
-      <MenuBar
-        windowId={props.appWindow.id}
-        menu={[
-          {
-            label: "File",
-            color: touched ? "grass" : "gray",
-            options: [
+      {currentView === "home" && (
+        <Flex
+          align="center"
+          width="100%"
+          height="100%"
+          justify="center"
+          direction="column"
+        >
+          <Card
+            variant="surface"
+            size="3"
+            style={
               {
-                label: "New file",
-                onClick: () => {
-                  launch("code");
-                },
-                shortcut: {
-                  key: "N",
-                  modifiers: ["ctrl"],
-                  label: "ctrl N",
-                },
-              },
-              {
-                label: "Open file",
-                onClick: () => {
-                  setOpenDialogOpen(true);
-                },
-                shortcut: {
-                  key: "O",
-                  modifiers: ["ctrl"],
-                  label: "ctrl O",
-                },
-              },
-              {
-                label: "Save",
-                onClick: () => {
-                  requestSave();
-                },
-                disabled: !touched,
-                shortcut: {
-                  key: "S",
-                  modifiers: ["ctrl"],
-                  label: "ctrl S",
-                  dependency: value,
-                },
-                color: touched ? "grass" : "gray",
-              },
-              "separator",
-              {
-                label: "Delete",
-                onClick: () => setDeleteOpen(true),
-                color: "red",
-                disabled: !path,
-              },
-            ],
-          },
-          {
-            label: "Edit",
-            color: "gray",
-            options: [
-              {
-                label: "Undo",
-                onClick: () => {
-                  if (editorRef.current) {
-                    editorRef.current.trigger(
-                      "myapp",
-                      "undo",
-                      {}
-                    );
-                  }
-                },
-                shortcut: {
-                  key: "Z",
-                  modifiers: ["ctrl"],
-                  label: "ctrl Z",
-                },
-              },
-              {
-                label: "Redo",
-                onClick: () => {
-                  if (editorRef.current) {
-                    editorRef.current.trigger(
-                      "myapp",
-                      "redo",
-                      {}
-                    );
-                  }
-                },
-                shortcut: {
-                  key: "R",
-                  modifiers: ["ctrl"],
-                  label: "ctrl R",
-                },
-              },
-              "separator",
-              {
-                label: "Fold",
-                onClick: () => {
-                  if (editorRef.current) {
-                    editorRef.current.trigger(
-                      "myapp",
-                      "editor.fold",
-                      {}
-                    );
-                  }
-                },
-              },
-              {
-                label: "Unfold",
-                onClick: () => {
-                  if (editorRef.current) {
-                    editorRef.current.trigger(
-                      "myapp",
-                      "editor.unfold",
-                      {}
-                    );
-                  }
-                },
-              },
-              "separator",
-              {
-                label: "Find",
-                onClick: () => {
-                  if (editorRef.current) {
-                    editorRef.current.trigger(
-                      "myapp",
-                      "actions.find",
-                      {}
-                    );
-                  }
-                },
-              },
-              {
-                label: "Replace",
-                onClick: () => {
-                  if (editorRef.current) {
-                    editorRef.current.trigger(
-                      "myapp",
-                      "editor.action.startFindReplaceAction",
-                      {}
-                    );
-                  }
-                },
-              },
-            ],
-          },
-        ]}
-      />
+                "--card-background-color": "var(--gray-a2)",
+              } as CSSProperties
+            }
+          >
+            <Flex direction="column" gap="1">
+              <Heading size="5">Code for Radix OS</Heading>
+              <Text size="1" color="gray" mb="3">
+                Made using Microsoft's{" "}
+                <Link
+                  href="https://microsoft.github.io/monaco-editor/"
+                  target="_blank"
+                >
+                  Monaco Editor
+                </Link>
+              </Text>
+              <Flex direction="column" gap="2">
+                <ul
+                  style={{
+                    margin: 0,
+                    paddingLeft: "var(--space-4)",
+                  }}
+                >
+                  <li>
+                    {" "}
+                    <div>
+                      <Button
+                        variant="ghost"
+                        ml="2"
+                        mb="2"
+                        onClick={() => setCurrentView("editor")}
+                      >
+                        Create a new file
+                      </Button>
+                    </div>
+                  </li>
+                  <li>
+                    <div>
+                      <Button
+                        color="gray"
+                        ml="2"
+                        mb="2"
+                        variant="ghost"
+                        onClick={() => setOpenDialogOpen(true)}
+                      >
+                        Open an existing file
+                      </Button>
+                    </div>
+                  </li>
+                </ul>
+              </Flex>
+            </Flex>
+          </Card>
+        </Flex>
+      )}
       <ConfirmDialog
         open={deleteOpen}
         setOpen={setDeleteOpen}
@@ -284,52 +291,158 @@ export const CodeApp: RadixOsAppComponent = (props) => {
         setOpen={setCreateDialogOpen}
         onPathCreate={createFile}
       />
-      <div
-        style={{
-          height: "var(--space-3)",
-          background: theme === "dark" ? "#1e1e1e" : "#fff",
-        }}
-      />
-      <button
-        data-returnfocus="true"
-        style={{
-          opacity: 0,
-          position: "absolute",
-          top: 0,
-          left: 0,
-          pointerEvents: "none",
-        }}
-        onFocus={(e) => {
-          e.preventDefault();
-          if (editorRef.current) {
-            editorRef.current.focus();
-          } else {
-            setTimeout(() => {
-              if (editorRef.current) {
-                editorRef.current.focus();
-              }
-            }, 500);
+      {openDialogOpen && (
+        <OpenFileDialog
+          open
+          setOpen={setOpenDialogOpen}
+          onFileOpened={(file, path) => {
+            setOpenedFile({ file, path });
+            setValue(file.data);
+            setCurrentView("editor");
+            const winState = useWindowStore.getState();
+            const winObj = winState.windows.find(
+              (w) => w.id === props.appWindow.id
+            );
+            if (winObj) {
+              winState.setTitle(
+                winObj,
+                `Code - ${pathToName(path)}`
+              );
+            }
+          }}
+          fileDisabled={(file) =>
+            !file.launcher.includes("code")
           }
-        }}
-      />
-      <Editor
-        height="calc(100% - 2.5rem)"
-        width="100%"
-        className="rxos-editor"
-        theme={theme === "dark" ? "vs-dark" : "light"}
-        defaultLanguage="html"
-        defaultValue={value}
-        wrapperProps={{ "data-returnfocus": true }}
-        value={value}
-        onChange={(v) => setValue(v ?? "")}
-        onMount={(editor) => {
-          editorRef.current = editor;
-        }}
-        options={{
-          automaticLayout: true,
-          minimap: { enabled: false },
-        }}
-      />
+        />
+      )}
     </Flex>
   );
+};
+
+const createMenu = (args: {
+  onOpenFile: () => void;
+  onSaveFile: () => void;
+  onNewFile: () => void;
+  onDeleteFile: () => void;
+  launch: (appName: string) => void;
+  touched: boolean;
+  editor: EditorType | null;
+  path: string | null;
+  value: string;
+}): MenubarMenu => {
+  return [
+    {
+      label: "File",
+      color: args.touched ? "grass" : "gray",
+      options: [
+        {
+          label: "New file",
+          onClick: args.onNewFile,
+          shortcut: {
+            key: "N",
+            modifiers: ["ctrl"],
+            label: "ctrl N",
+          },
+        },
+        {
+          label: "Open file",
+          onClick: args.onOpenFile,
+          shortcut: {
+            key: "O",
+            modifiers: ["ctrl"],
+            label: "ctrl O",
+          },
+        },
+        {
+          label: "Save",
+          onClick: args.onSaveFile,
+          disabled: !args.touched,
+          shortcut: {
+            key: "S",
+            modifiers: ["ctrl"],
+            label: "ctrl S",
+            dependency: args.value,
+          },
+          color: args.touched ? "grass" : "gray",
+        },
+        "separator",
+        {
+          label: "Delete",
+          onClick: args.onDeleteFile,
+          color: "red",
+          disabled: !args.path,
+        },
+      ],
+    },
+    {
+      label: "Edit",
+      color: "gray",
+      options: [
+        {
+          label: "Undo",
+          onClick: () => {
+            if (args.editor) {
+              args.editor.trigger("myapp", "undo", {});
+            }
+          },
+          shortcut: {
+            key: "Z",
+            modifiers: ["ctrl"],
+            label: "ctrl Z",
+          },
+        },
+        {
+          label: "Redo",
+          onClick: () => {
+            if (args.editor) {
+              args.editor.trigger("myapp", "redo", {});
+            }
+          },
+          shortcut: {
+            key: "R",
+            modifiers: ["ctrl"],
+            label: "ctrl R",
+          },
+        },
+        "separator",
+        {
+          label: "Fold",
+          onClick: () => {
+            if (args.editor) {
+              args.editor.trigger("myapp", "editor.fold", {});
+            }
+          },
+        },
+        {
+          label: "Unfold",
+          onClick: () => {
+            if (args.editor) {
+              args.editor.trigger("myapp", "editor.unfold", {});
+            }
+          },
+        },
+        "separator",
+        {
+          label: "Find",
+          onClick: () => {
+            if (args.editor) {
+              args.editor.trigger("myapp", "actions.find", {});
+            }
+          },
+        },
+        {
+          label: "Replace",
+          onClick: () => {
+            if (args.editor) {
+              args.editor.trigger(
+                "myapp",
+                "editor.action.startFindReplaceAction",
+                {}
+              );
+            }
+          },
+        },
+      ],
+    },
+  ];
 };

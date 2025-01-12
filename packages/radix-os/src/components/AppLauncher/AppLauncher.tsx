@@ -1,4 +1,10 @@
-import { Button, Card, Flex, TextField } from "@radix-ui/themes";
+import {
+  Button,
+  Card,
+  Flex,
+  Text,
+  TextField,
+} from "@radix-ui/themes";
 import { useRef, useState } from "react";
 import { useClickOutside } from "../../hooks/useClickOutside";
 import { useKeydown } from "../../hooks/useKeyboard";
@@ -91,29 +97,43 @@ export function AppLauncher(props: {
             }
           }}
         />
-        {matchingApps.map((app, i) => (
-          <Button
-            color={i === selectedIndex ? undefined : "gray"}
-            variant="soft"
-            style={{ textAlign: "left" }}
-            onFocus={close}
-            onClick={() => {
-              launch(app.appId);
-              close();
-            }}
-            size="2"
-          >
-            <Flex
-              gap="2"
-              align="center"
-              justify="start"
-              style={{ marginRight: "auto" }}
-            >
-              {app.defaultWindowSettings.icon}
-              {app.appName}
-            </Flex>
-          </Button>
-        ))}
+        {matchingApps.length > 0 && (
+          <Flex direction="column" gap="2">
+            {matchingApps.map((app, i) => (
+              <Button
+                color={i === selectedIndex ? undefined : "gray"}
+                variant="ghost"
+                mx="2"
+                style={{
+                  textAlign: "left",
+                  background:
+                    i === selectedIndex
+                      ? "var(--gray-a3)"
+                      : undefined,
+                }}
+                onFocus={close}
+                onClick={() => {
+                  launch(app.appId);
+                  close();
+                }}
+                size="3"
+              >
+                <Flex
+                  gap="2"
+                  align="center"
+                  justify="start"
+                  style={{ marginRight: "auto" }}
+                >
+                  {app.defaultWindowSettings.icon}
+                  {app.appName}
+                  <Text size="1" color="gray" weight="light">
+                    Open app
+                  </Text>
+                </Flex>
+              </Button>
+            ))}
+          </Flex>
+        )}
       </Flex>
     </Card>
   );

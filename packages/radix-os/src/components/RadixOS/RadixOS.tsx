@@ -3,6 +3,7 @@ import { Theme } from "@radix-ui/themes";
 import { Providers } from "../../Providers";
 import { DesktopShortcut } from "../../services/applications/desktop-shortcuts";
 import { FsIntegration } from "../../services/fs/fs-integration";
+import { FsFile } from "../../stores/fs";
 import { RadixOsApp } from "../../stores/window";
 import { AppLauncher } from "../AppLauncher/AppLauncher";
 import { ConfettiEmitter } from "../ConfettiEmitter/ConfettiEmitter";
@@ -17,7 +18,7 @@ import styles from "./RadixOS.module.css";
 type AccentColor = Parameters<typeof Theme>[0]["accentColor"];
 type Radius = Parameters<typeof Theme>[0]["radius"];
 
-function RadixOS<T extends string>(props: {
+export type RadixOSProps<T extends string> = {
   applications: readonly RadixOsApp<T>[];
   fs: FsIntegration;
   desktopShortcuts?: Array<DesktopShortcut>;
@@ -25,7 +26,10 @@ function RadixOS<T extends string>(props: {
   radius?: Radius;
   theme?: "light" | "dark";
   panelBackground?: "solid" | "translucent";
-}) {
+  fileUploadHandler?: (file: File) => Promise<FsFile | null>;
+};
+
+function RadixOS<T extends string>(props: RadixOSProps<T>) {
   return (
     <div className={styles.radixOs}>
       <Providers
@@ -36,7 +40,7 @@ function RadixOS<T extends string>(props: {
         theme={props.theme}
         panelBackground={props.panelBackground}
       >
-        <SystemFileUpload />
+        <SystemFileUpload handler={props.fileUploadHandler} />
         <WindowDragManager>
           <Desktop
             applications={props.applications}

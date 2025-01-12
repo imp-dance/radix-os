@@ -121,6 +121,7 @@ export const Terminal = (
     const args = joinQuotedArgs(args_);
     const flags = extractFlags(args);
     const plugins = props.plugins ?? [];
+    const currentDirectory = path.current.join("/");
     for (const plugin of plugins) {
       if (plugin.matcher(command, args)) {
         plugin.exec(pushOutput, command, args);
@@ -133,7 +134,7 @@ export const Terminal = (
         return parseOpen({
           tree,
           args,
-          cd: path.current.join("/"),
+          cd: currentDirectory,
           flags,
           openFile,
           pushOutput,
@@ -172,7 +173,7 @@ export const Terminal = (
         const currentNode =
           path.current.length === 0
             ? tree
-            : findNodeByPath(path.current.join("/"), tree);
+            : findNodeByPath(currentDirectory, tree);
         if (isFolder(currentNode)) {
           pushOutput(
             <Command command="ls" />,
@@ -210,9 +211,7 @@ export const Terminal = (
           );
         }
         createFolderMutation
-          .mutateAsync(
-            parseRelativePath(path.current.join("/"), name)
-          )
+          .mutateAsync(parseRelativePath(currentDirectory, name))
           .then(() => {
             pushOutput(<Command command={`mkdir ${name}`} />);
           });
@@ -227,8 +226,8 @@ export const Terminal = (
             </Code>
           );
         }
-        from = parseRelativePath(path.current.join("/"), from);
-        to = parseRelativePath(path.current.join("/"), to);
+        from = parseRelativePath(currentDirectory, from);
+        to = parseRelativePath(currentDirectory, to);
         const fromNode = findNodeByPath(from, tree);
         const toNode = findNodeByPath(to, tree);
         if (!fromNode) {
@@ -248,7 +247,7 @@ export const Terminal = (
         return parseFs({
           pushOutput,
           args,
-          currentPath: path.current.join("/"),
+          currentPath: currentDirectory,
           updateFile: (path, file) =>
             updateFile.mutateAsync({ path, file }),
           tree: tree as FsFolder,
@@ -256,7 +255,7 @@ export const Terminal = (
       }
       case "cd": {
         const parsedNextPath = parseRelativePath(
-          path.current.join("/"),
+          currentDirectory,
           args[0]
         );
         const newNode = findNodeByPath(parsedNextPath, tree);

@@ -4,6 +4,8 @@ import {
   Code,
   ContextMenu,
   Flex,
+  Inset,
+  Popover,
   Text,
 } from "@radix-ui/themes";
 import React, { memo, useState } from "react";
@@ -112,7 +114,7 @@ export function MultiTaskBar() {
                   </React.Fragment>
                 );
               })}
-              <Clock />
+              <Calendar />
             </Flex>
           </Box>
         </ContextMenu.Trigger>
@@ -158,3 +160,42 @@ const Clock = memo(() => {
     </Flex>
   );
 });
+
+function Calendar() {
+  const getDate = () => {
+    const date = new Date();
+    return new Intl.DateTimeFormat(undefined, {
+      dateStyle: "full",
+    }).format();
+  };
+  const [time, setTime] = useState(getDate());
+  setTimeout(() => {
+    setTime(getDate());
+  }, 60000);
+  return (
+    <Popover.Root>
+      <Popover.Trigger>
+        <Button
+          variant="soft"
+          style={{
+            marginLeft: "auto",
+            marginRight: "var(--size-3)",
+            background: "transparent",
+            cursor: "pointer",
+          }}
+        >
+          <Clock />
+        </Button>
+      </Popover.Trigger>
+      <Popover.Content side="top" size="1">
+        <Inset>
+          <Box p="1" px="3">
+            <Text size="1" weight="medium">
+              {time}
+            </Text>
+          </Box>
+        </Inset>
+      </Popover.Content>
+    </Popover.Root>
+  );
+}
