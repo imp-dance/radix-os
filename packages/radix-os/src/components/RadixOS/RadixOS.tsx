@@ -40,12 +40,12 @@ function RadixOS<T extends string>(props: RadixOSProps<T>) {
         theme={props.theme}
         panelBackground={props.panelBackground}
       >
-        <SystemFileUpload handler={props.fileUploadHandler} />
         <WindowDragManager>
           <Desktop
             applications={props.applications}
             shortcuts={props.desktopShortcuts ?? []}
           />
+          <SystemFileUpload handler={props.fileUploadHandler} />
           <MultiTaskBar />
           <WindowRenderer />
           <WindowDropzones />

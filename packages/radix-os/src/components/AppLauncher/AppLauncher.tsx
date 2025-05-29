@@ -3,9 +3,9 @@ import {
   Card,
   Flex,
   Text,
-  TextField,
+  TextField
 } from "@radix-ui/themes";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useClickOutside } from "../../hooks/useClickOutside";
 import { useKeydown } from "../../hooks/useKeyboard";
 import { useUntypedAppContext } from "../../services/applications/launcher";
@@ -26,7 +26,7 @@ export function AppLauncher(props: {
     ctrlKey: true,
     callback: () => {
       setOpen(true);
-    },
+    }
   });
 
   const close = () => {
@@ -36,8 +36,6 @@ export function AppLauncher(props: {
   };
 
   useClickOutside(container, close);
-
-  if (!open) return null;
 
   const matchingApps = value
     ? props.applications
@@ -49,6 +47,13 @@ export function AppLauncher(props: {
         )
         .slice(0, 3)
     : [];
+
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [matchingApps.length]);
+
+  if (!open) return null;
+
   return (
     <Card
       ref={container}
@@ -59,7 +64,7 @@ export function AppLauncher(props: {
         margin: "auto",
         position: "absolute",
         transform: "translateX(-50%)",
-        minWidth: 450,
+        minWidth: 450
       }}
       variant="surface"
     >
@@ -74,7 +79,9 @@ export function AppLauncher(props: {
             if (e.key === "Escape") {
               close();
             }
-
+            if (["ArrowUp", "ArrowDown"].includes(e.key)) {
+              e.preventDefault();
+            }
             if (e.key === "ArrowUp" && selectedIndex !== 0) {
               setSelectedIndex((p) => p - 1);
             } else if (e.key === "ArrowUp") {
@@ -109,7 +116,7 @@ export function AppLauncher(props: {
                   background:
                     i === selectedIndex
                       ? "var(--gray-a3)"
-                      : undefined,
+                      : undefined
                 }}
                 onFocus={close}
                 onClick={() => {

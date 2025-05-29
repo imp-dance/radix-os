@@ -3,7 +3,7 @@ import {
   FileSystemStore,
   FsFile,
   FsNode,
-  useFileSystemStore,
+  useFileSystemStore
 } from "../../stores/fs";
 import { findNodeByPath } from "./tree-helpers";
 
@@ -94,6 +94,7 @@ export const createZustandFsIntegration = (opts?: {
         const { tree } = useFileSystemStore.getState();
         const target = !path ? tree : findNodeByPath(path, tree);
         opts?.onAction?.("readDir");
+
         return resolve(target ?? null);
       }),
     updateFile: (path, file) =>
@@ -119,7 +120,7 @@ export const createZustandFsIntegration = (opts?: {
         } catch (err) {
           return resolve(false);
         }
-      }),
+      })
   };
   return fsZustandIntegration;
 };
@@ -185,5 +186,5 @@ export const fsZustandIntegration: FsIntegration = {
       } catch (err) {
         return resolve(false);
       }
-    }),
+    })
 };

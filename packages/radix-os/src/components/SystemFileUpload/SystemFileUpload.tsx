@@ -3,23 +3,42 @@ import React, { useEffect, useState } from "react";
 import { useFs } from "../../services/fs/fs-integration";
 import {
   getParentPath,
-  pathToName,
+  pathToName
 } from "../../services/fs/tree-helpers";
 import { createFile } from "../../services/fs/upload";
 import { FsFile } from "../../stores/fs";
 import { SaveAsDialog } from "../SaveAsDialog/SaveAsDialog";
+import { useFileDrop } from "../../hooks/useFileDrop";
 
 export function SystemFileUpload(props: {
   handler?: (file: File) => Promise<FsFile | null>;
 }) {
   const fs = useFs();
-  const [isDroppingFile, setDroppingFile] = useState(false);
   const [uploadOpen, setUploadOpen] = useState<false | FsFile>(
     false
   );
+  const [, rerender] = useState(0);
+  const { isDroppingFile, finishDrop } = useFileDrop(
+    typeof document !== "undefined"
+      ? document.getElementById("rxosdesktop")
+      : undefined
+  );
+  useEffect(() => {
+    let el = document.getElementById("rxosdesktop");
+    rerender((p) => p + 1);
+    if (el) return;
+    let interval = setInterval(() => {
+      el = document.getElementById("rxosdesktop");
+      if (el) {
+        clearInterval(interval);
+        rerender((p) => p + 1);
+      }
+    }, 200);
+    return () => clearInterval(interval);
+  }, []);
 
   const onDrop = async (e: React.DragEvent<HTMLDivElement>) => {
-    setDroppingFile(false);
+    finishDrop();
     try {
       const file = await createFile(
         e.dataTransfer.files[0],
@@ -31,23 +50,6 @@ export function SystemFileUpload(props: {
     }
   };
 
-  useEffect(() => {
-    const dropStopper = (e: Event) => {
-      e.preventDefault();
-    };
-    const onDragOver = (e: Event) => {
-      e.preventDefault();
-      setDroppingFile(true);
-    };
-    document.body.addEventListener("dragenter", onDragOver);
-    window.addEventListener("dragover", dropStopper);
-    window.addEventListener("drop", dropStopper);
-    return () => {
-      document.body.removeEventListener("dragenter", onDragOver);
-      window.removeEventListener("dragover", dropStopper);
-      window.removeEventListener("drop", dropStopper);
-    };
-  }, []);
   return (
     <>
       {uploadOpen && (
@@ -55,7 +57,7 @@ export function SystemFileUpload(props: {
           onPathCreate={async (path) => {
             await fs.makeFile(getParentPath(path), {
               ...uploadOpen,
-              name: pathToName(path),
+              name: pathToName(path)
             });
             setUploadOpen(false);
           }}
@@ -72,15 +74,17 @@ export function SystemFileUpload(props: {
           inset="0"
           style={{
             background: "rgba(0,0,0,0.5)",
-            zIndex: 99,
-            animation: "rxosFadeIn 0.15s ease-out",
+            animation: "rxosFadeIn 0.15s ease-out"
           }}
-          onClick={() => setDroppingFile(false)}
-          onDragLeave={() => setDroppingFile(false)}
+          onClick={() => finishDrop()}
+          onDragLeave={() => finishDrop()}
           onDrop={onDrop}
+          pt="5"
         >
-          <div style={{ margin: "auto" }}>
-            <Text size="5">Drop file here to upload</Text>
+          <div style={{ margin: "auto", marginTop: 0 }}>
+            <Text size="6" weight="bold">
+              Drop file to upload
+            </Text>
           </div>
         </Flex>
       )}

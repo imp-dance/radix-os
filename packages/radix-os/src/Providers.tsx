@@ -4,17 +4,17 @@ import { ReactNode, useEffect, useMemo, useRef } from "react";
 import { queryClient } from "./lib/react-query/client";
 import {
   AppContextProvider,
-  UseAppLauncherReturn,
+  UseAppLauncherReturn
 } from "./services/applications/launcher";
 import {
   FsIntegration,
-  FsProvider,
+  FsProvider
 } from "./services/fs/fs-integration";
 import { useSettingsStore } from "./stores/settings";
 import {
   createWindow,
   RadixOsApp,
-  useWindowStore,
+  useWindowStore
 } from "./stores/window";
 
 type AccentColor = Parameters<typeof Theme>[0]["accentColor"];
@@ -48,7 +48,7 @@ export function Providers(props: ProvidersProps) {
         }
         const win = createWindow({
           ...content.defaultWindowSettings,
-          ...settings,
+          ...settings
         });
         const Component = content.component;
         win.content = (
@@ -70,6 +70,7 @@ export function Providers(props: ProvidersProps) {
           { ...settings, file }
         );
       },
+      applications: props.applications
     } as UseAppLauncherReturn<string>;
   }, [props.applications]);
 
@@ -106,7 +107,7 @@ function useSyncPropsWithSettings(props: ProvidersProps) {
     "theme",
     "panelBackground",
     "accentColor",
-    "radius",
+    "radius"
   ];
   const keys = Object.keys(props)
     .filter((k) => relevantKeys.includes(k))

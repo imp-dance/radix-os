@@ -24,23 +24,23 @@ export function Command(props: { command: string }) {
   );
 }
 
-export const helpText = `Available commands:
-help                       - Show this help message
-echo [...text]             - Print text to the terminal
-clear                      - Clear the terminal 
-
-mkdir [name]               - Create a new directory
-ls                         - List files in current directory
-cd [path]                  - Change directory
-mv [path1] [path2]         - Move file/folder from [path1] to [path2]
-open [path]                - Open a file
-open --help                - Show help for opening files
-
-fs [path] -R [name]        - Rename a file or folder
-fs [path] -L [launcher]    - Set a file's default launcher
-fs [path] --ll             - List a file's available launchers
-fs [path] --ex [launcher]  - Make file executable in given launcher
-
+export const helpText = `---AVAILABLE COMMANDS:-------------------------------------------------
+------------------Terminal:--------------------------------------------
+  help                       - Show this help message
+  echo [...text]             - Print text to the terminal
+  clear                      - Clear the terminal
+----------------File system:-------------------------------------------
+  mkdir [name]               - Create a new directory
+  ls                         - List files in current directory
+  cd [path]                  - Change directory
+  mv [path1] [path2]         - Move file/folder from [path1] to [path2]
+  open [path]                - Open a file
+  open --help                - Show help for opening files
+  fs [path] -R [name]        - Rename a file or folder
+  fs [path] -L [launcher]    - Set a file's default launcher
+  fs [path] --ll             - List a file's available launchers
+  fs [path] --ex [launcher]  - Make file executable in given launcher
+-----------------------------------------------------------------------
 Relative paths are supported. Use quotes for paths with spaces.`;
 
 export const openHelpText = `Available flags for command "open":

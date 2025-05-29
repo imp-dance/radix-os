@@ -1,6 +1,9 @@
 import { Context, createContext, useContext } from "react";
 import { FsFile } from "../../stores/fs";
-import { RadixOsAppWindow } from "../../stores/window";
+import {
+  RadixOsApp,
+  RadixOsAppWindow
+} from "../../stores/window";
 import { RadixAppList } from "./setupApps";
 
 type AppWindowSettings = Partial<
@@ -14,6 +17,7 @@ export type UseAppLauncherReturn<T extends string> = {
     file: { file: FsFile; path: string },
     settings?: Omit<AppWindowSettings, "file"> & { launcher?: T }
   ) => void;
+  applications: readonly RadixOsApp<string>[];
 };
 
 const appContext =
