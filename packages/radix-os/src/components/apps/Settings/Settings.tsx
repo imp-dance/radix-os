@@ -11,13 +11,13 @@ import {
   Table,
   Tabs,
   Text,
-  TextField,
+  TextField
 } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 import { FS_LS_KEY } from "../../../stores/fs";
 import {
   SETTINGS_LS_KEY,
-  useSettingsStore,
+  useSettingsStore
 } from "../../../stores/settings";
 import { RadixOsAppComponent } from "../../../stores/window";
 import { BrowserLink } from "../../BrowserLink/BrowserLink";
@@ -133,17 +133,17 @@ function ShortcutsTab() {
     ["Open app launcher", "CTRL + P"],
     [
       "Switch between applications",
-      (isMac ? altOrOpt : "CTRL") + " (+ Shift) + Tab",
+      (isMac ? altOrOpt : "CTRL") + " (+ Shift) + Tab"
     ],
     ["Close active window", `${altOrOpt} + W`],
     ["Toggle maximize", "Double click window"],
-    ["Tile window", "Shift + drag window"],
+    ["Tile window", "Shift + drag window"]
   ].filter(([desc, scut]) => {
     if (search === "") return true;
     return (
       desc.toLowerCase().search(search.toLowerCase()) > -1 ||
       scut
-        .replaceAll("⌥", "⌥ alt option")
+        .replace("⌥", "⌥ alt option")
         .toLowerCase()
         .search(search.toLowerCase()) > -1
     );
@@ -206,7 +206,7 @@ function CustomizeTab() {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "var(--space-2)",
+              gap: "var(--space-2)"
             }}
           >
             <Switch
@@ -227,7 +227,7 @@ function CustomizeTab() {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "var(--space-2)",
+              gap: "var(--space-2)"
             }}
           >
             <Switch
@@ -251,7 +251,7 @@ function CustomizeTab() {
               display: "flex",
               alignItems: "flex-start",
               flexDirection: "column",
-              gap: "var(--space-2)",
+              gap: "var(--space-2)"
             }}
           >
             Radius
@@ -281,7 +281,7 @@ function CustomizeTab() {
               display: "flex",
               alignItems: "flex-start",
               flexDirection: "column",
-              gap: "var(--space-2)",
+              gap: "var(--space-2)"
             }}
           >
             Accent color
@@ -422,7 +422,7 @@ function formatBytes(bytes: number, decimals = 2) {
     "PiB",
     "EiB",
     "ZiB",
-    "YiB",
+    "YiB"
   ];
 
   const i = Math.floor(Math.log(bytes) / Math.log(k));

@@ -2,7 +2,6 @@ import {
   CollisionDetection,
   DndContext,
   DragOverlay,
-  Modifier,
   MouseSensor,
   pointerWithin,
   rectIntersection,
@@ -10,7 +9,6 @@ import {
   useDroppable,
   useSensor
 } from "@dnd-kit/core";
-import { CSS } from "@dnd-kit/utilities";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -21,9 +19,7 @@ import {
   Cross1Icon,
   FileIcon,
   GlobeIcon,
-  PlusIcon,
-  StarIcon,
-  UploadIcon
+  StarIcon
 } from "@radix-ui/react-icons";
 import {
   Box,
@@ -41,7 +37,6 @@ import {
 import React, {
   ReactNode,
   useEffect,
-  useMemo,
   useRef,
   useState
 } from "react";
@@ -55,7 +50,6 @@ import {
 } from "../../../api/fs/fs-api";
 import { useUntypedAppContext } from "../../../services/applications/launcher";
 import {
-  findNodeByPath,
   isFile,
   isFolder,
   parsePath
@@ -68,8 +62,6 @@ import {
   useWindowStore
 } from "../../../stores/window";
 import { useQueryClient } from "@tanstack/react-query";
-import { restrictToParentElement } from "@dnd-kit/modifiers";
-import { restrictToBoundingRect } from "../../../lib/dnd-kit/restrictToBoundingRect";
 import { useFileDrop } from "../../../hooks/useFileDrop";
 import { createFile } from "../../../services/fs/upload";
 import { useFs } from "../../../services/fs/fs-integration";
@@ -131,21 +123,6 @@ export function Explorer({
   const moveMutation = useMoveMutation();
   const queryClient = useQueryClient();
   const [path, _setPath] = useState(initialPath);
-  const [isFetchingWithTimeout, setIsFetchingWithTimeout] =
-    useState(treeQuery.isFetching);
-
-  useEffect(() => {
-    if (treeQuery.isFetching) {
-      setIsFetchingWithTimeout(true);
-      return;
-    }
-    const timeout = setTimeout(() => {
-      setIsFetchingWithTimeout(false);
-    }, 200);
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, [treeQuery.isFetching]);
 
   const steps = path.split("/").filter(Boolean);
   const currentFolder = steps.reduce((acc, step) => {
@@ -425,10 +402,12 @@ export function Explorer({
                           (disableFiles && isFile(child)) ||
                           (isFile(child) &&
                             fileDisabled?.(child));
+                        let draggedChild = null;
+                        if (isDragging) {
+                          const split = isDragging.split("/");
+                          draggedChild = split[split.length - 1];
+                        }
 
-                        const draggedChild = isDragging
-                          ? isDragging.split("/").at(-1)
-                          : null;
                         const itemIsBeingDragged =
                           (selected.length > 1 &&
                             selected.includes(
@@ -1277,29 +1256,6 @@ const launcherToLabel: Record<Launcher, string> = {
 
 const removeStartingSlash = (str: string) =>
   str.startsWith("/") ? str.substring(1) : str;
-
-const fixCursorSnapOffset: CollisionDetection = (args) => {
-  // Bail out if keyboard activated
-  if (!args.pointerCoordinates) {
-    return rectIntersection(args);
-  }
-  const { x, y } = args.pointerCoordinates;
-  const { width, height } = args.collisionRect;
-  const updated = {
-    ...args,
-    // The collision rectangle is broken when using snapCenterToCursor. Reset
-    // the collision rectangle based on pointer location and overlay size.
-    collisionRect: {
-      width,
-      height,
-      bottom: y + height / 2,
-      left: x - width / 2,
-      right: x + width / 2,
-      top: y - height / 2
-    }
-  };
-  return rectIntersection(updated);
-};
 
 const pointerWithinPlus: CollisionDetection = (args) => {
   // First, let's see if there are any collisions with the pointer

@@ -5,26 +5,26 @@ import {
   Flex,
   ScrollArea,
   Text,
-  TextField,
+  TextField
 } from "@radix-ui/themes";
 import React, {
   ComponentProps,
   ReactNode,
   useLayoutEffect,
   useRef,
-  useState,
+  useState
 } from "react";
 import {
   useCreateDirMutation,
   useFileSystemQuery,
   useMoveMutation,
-  useUpdateFileMutation,
+  useUpdateFileMutation
 } from "../../../api/fs/fs-api";
 import { useUntypedAppContext } from "../../../services/applications/launcher";
 import {
   findNodeByPath,
   isFolder,
-  parseRelativePath,
+  parseRelativePath
 } from "../../../services/fs/tree-helpers";
 import { FsFolder } from "../../../stores/fs";
 import { RadixOsAppComponent } from "../../../stores/window";
@@ -44,17 +44,17 @@ export type TerminalPlugin = {
   passThrough?: boolean;
 };
 
-function findLeafString(node: ReactNode): string {
-  if (typeof node === "string") return node;
-  if (typeof node === "number") return node.toString();
-  if (Array.isArray(node))
-    return node.map(findLeafString).join("");
-  if (node === null || node === undefined) return "";
-  if (typeof node === "object" && "props" in node) {
-    return findLeafString(node.props.children);
-  }
-  return "";
-}
+// function findLeafString(node: ReactNode): string {
+//   if (typeof node === "string") return node;
+//   if (typeof node === "number") return node.toString();
+//   if (Array.isArray(node))
+//     return node.map(findLeafString).join("");
+//   if (node === null || node === undefined) return "";
+//   if (typeof node === "object" && "props" in node) {
+//     return findLeafString(node.props.children);
+//   }
+//   return "";
+// }
 
 export const Terminal = (
   props: ComponentProps<RadixOsAppComponent> & {
@@ -75,7 +75,7 @@ export const Terminal = (
     initialPath?.split("/").filter(Boolean) ?? ["Home"]
   );
   const [output, setOutput] = useState<ReactNode[]>([
-    <Code size="1">Type "help" to get started</Code>,
+    <Code size="1">Type "help" to get started</Code>
   ]);
 
   function pushOutput(...output: ReactNode[]) {
@@ -137,7 +137,7 @@ export const Terminal = (
           cd: currentDirectory,
           flags,
           openFile,
-          pushOutput,
+          pushOutput
         });
         break;
       }
@@ -250,7 +250,7 @@ export const Terminal = (
           currentPath: currentDirectory,
           updateFile: (path, file) =>
             updateFile.mutateAsync({ path, file }),
-          tree: tree as FsFolder,
+          tree: tree as FsFolder
         });
       }
       case "cd": {
@@ -275,7 +275,7 @@ export const Terminal = (
   useLayoutEffect(() => {
     scrollRef.current?.scrollTo({
       top: scrollRef.current.scrollHeight,
-      behavior: "smooth",
+      behavior: "smooth"
     });
     currentCommandIndex.current = prevCommands.current.length;
   }, [output.length]);
@@ -288,7 +288,7 @@ export const Terminal = (
       style={{
         height: "100%",
         display: "grid",
-        gridTemplateRows: "1fr min-content",
+        gridTemplateRows: "1fr min-content"
       }}
     >
       <ScrollArea
@@ -320,7 +320,7 @@ export const Terminal = (
           size="1"
           style={{
             width: "100%",
-            fontFamily: "var(--code-font-family)",
+            fontFamily: "var(--code-font-family)"
           }}
           onKeyDown={(e) => {
             if (e.key === "Enter") {

@@ -6,7 +6,7 @@ import {
   Flex,
   Inset,
   Popover,
-  Text,
+  Text
 } from "@radix-ui/themes";
 import React, { memo, useState } from "react";
 import { useKeydown } from "../../hooks/useKeyboard";
@@ -20,7 +20,7 @@ export function MultiTaskBar() {
     activeWindow,
     minimizeWindow,
     minimizedWindows,
-    minimizeAll,
+    minimizeAll
   } = useWindowStore();
 
   const closeActiveWindow = () => {
@@ -30,13 +30,13 @@ export function MultiTaskBar() {
   useKeydown({
     key: "Ω",
     altKey: true,
-    callback: closeActiveWindow,
+    callback: closeActiveWindow
   });
 
   useKeydown({
     key: "w",
     altKey: true,
-    callback: closeActiveWindow,
+    callback: closeActiveWindow
   });
 
   return (
@@ -152,7 +152,7 @@ const Clock = memo(() => {
         size="1"
         color="gray"
         style={{
-          fontVariantNumeric: "tabular-nums",
+          fontVariantNumeric: "tabular-nums"
         }}
       >
         <Code color="gray">{time}</Code>
@@ -163,9 +163,8 @@ const Clock = memo(() => {
 
 function Calendar() {
   const getDate = () => {
-    const date = new Date();
     return new Intl.DateTimeFormat(undefined, {
-      dateStyle: "full",
+      dateStyle: "full"
     }).format();
   };
   const [time, setTime] = useState(getDate());
@@ -181,7 +180,7 @@ function Calendar() {
             marginLeft: "auto",
             marginRight: "var(--size-3)",
             background: "transparent",
-            cursor: "pointer",
+            cursor: "pointer"
           }}
         >
           <Clock />

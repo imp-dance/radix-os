@@ -1,7 +1,5 @@
 import { Button, Card, Dialog, Flex } from "@radix-ui/themes";
 import { useState } from "react";
-import { useFileSystemQuery } from "../../api/fs/fs-api";
-import { findNodeByPath } from "../../services/fs/tree-helpers";
 import { FsFile } from "../../stores/fs";
 import { Explorer } from "../apps/Explorer/Explorer";
 
@@ -15,11 +13,7 @@ export function OpenFileDialog(props: {
     file: FsFile;
     path: string;
   }>(null);
-  const fsQuery = useFileSystemQuery("");
-  const root = fsQuery?.data ?? null;
   const [path, setPath] = useState("");
-
-  const node = root ? findNodeByPath(path, root) : null;
 
   const isValid = selectedFile !== null;
   return (
@@ -36,7 +30,7 @@ export function OpenFileDialog(props: {
             display: "grid",
             gridTemplateRows: "1fr min-content",
             gridTemplateColumns: "1fr",
-            border: "1px solid var(--gray-3)",
+            border: "1px solid var(--gray-3)"
           }}
           size="1"
           my="3"

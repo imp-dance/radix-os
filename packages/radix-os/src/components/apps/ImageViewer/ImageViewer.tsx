@@ -21,7 +21,7 @@ export const ImageViewer: RadixOsAppComponent = (props) => {
         <OpenFileDialog
           open={fileDialogOpen}
           setOpen={setFileDialogOpen}
-          onFileOpened={(file, path) => setOpenedFile(file.data)}
+          onFileOpened={(file) => setOpenedFile(file.data)}
           fileDisabled={(file) =>
             !file.launcher.includes("image")
           }
@@ -41,7 +41,7 @@ export const ImageViewer: RadixOsAppComponent = (props) => {
             height: "100%",
             width: "100%",
             objectFit: "contain",
-            padding: "var(--space-5)",
+            padding: "var(--space-5)"
           }}
         />
       )}
@@ -51,7 +51,7 @@ export const ImageViewer: RadixOsAppComponent = (props) => {
             height: "100%",
             width: "100%",
             objectFit: "contain",
-            padding: "var(--space-5)",
+            padding: "var(--space-5)"
           }}
           className="rxos-svgContainer"
           dangerouslySetInnerHTML={{ __html: trimmedData }}
