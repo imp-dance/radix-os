@@ -4,9 +4,9 @@ import {
   createUseAppLauncher,
   createZustandFsIntegration,
   RadixOS,
-  setupApps
-} from "../packages/radix-os/src/index";
-// from "radix-os";
+  setupApps,
+  // } from "../packages/radix-os/src/index";
+} from "radix-os";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
@@ -28,9 +28,9 @@ createRoot(document.getElementById("root")!).render(
           icon: <ExclamationTriangleIcon />,
           onClick: (appLauncher) => {
             appLauncher.launch("tissefant");
-          }
-        }
+          },
+        },
       ]}
     />
-  </StrictMode>
+  </StrictMode>,
 );
