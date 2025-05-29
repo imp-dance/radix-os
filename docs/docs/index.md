@@ -6,7 +6,10 @@ sidebar_position: 1
 
 Radix OS is an operating system simulated on the web, with a modular file system that can be swapped out with any async source, able to run your own custom built applications. Designed to be flexible and easily extendable so it can fit your needs.
 
+
 [![Preview](/sh.jpg)](https://imp-dance.github.io/radix-os/)
+
+- [Open live demo](https://imp-dance.github.io/radix-os/)
 
 :::tip So what it, really?
 
