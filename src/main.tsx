@@ -1,31 +1,17 @@
-import {
-  ExclamationTriangleIcon,
-  QuestionMarkCircledIcon,
-} from "@radix-ui/react-icons";
+import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import "@radix-ui/themes/styles.css";
 import {
   createUseAppLauncher,
   createZustandFsIntegration,
   RadixOS,
-  setupApps,
-} from "radix-os";
+  setupApps
+} from "../packages/radix-os/src/index";
+// from "radix-os";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { ExampleApp } from "./applications/ExampleApp.tsx";
 import "./index.css";
 
-export const applications = setupApps([
-  {
-    component: ExampleApp,
-    appId: "example-app",
-    appName: "Example App",
-    addToDesktop: true,
-    defaultWindowSettings: {
-      title: "Example App",
-      icon: <QuestionMarkCircledIcon />,
-    },
-  },
-]);
+export const applications = setupApps([]);
 
 const fs = createZustandFsIntegration({});
 
@@ -38,12 +24,12 @@ createRoot(document.getElementById("root")!).render(
       applications={applications}
       desktopShortcuts={[
         {
-          label: "Shortcut example",
+          label: "Tissefant example",
           icon: <ExclamationTriangleIcon />,
-          onClick: () => {
-            alert("And custom desktop shortcuts!");
-          },
-        },
+          onClick: (appLauncher) => {
+            appLauncher.launch("tissefant");
+          }
+        }
       ]}
     />
   </StrictMode>
