@@ -5,11 +5,7 @@ import {
   isFile,
   parseRelativePath,
 } from "../../../../services/fs/tree-helpers";
-import {
-  FsFile,
-  FsFolder,
-  Launcher,
-} from "../../../../stores/fs";
+import { FsFile, FsFolder } from "../../../../stores/fs";
 import { Command, DirNotFound } from "../constants";
 import { quotableRestArgs } from "../utils";
 
@@ -26,7 +22,7 @@ export function parseFs({
   tree: FsFolder;
   updateFile: (
     path: string,
-    file: Partial<FsFile>
+    file: Partial<FsFile>,
   ) => Promise<boolean>;
 }) {
   // eslint-disable-next-line prefer-const
@@ -38,7 +34,7 @@ export function parseFs({
   }
   const setDefaultLauncher = (
     path: string,
-    launcher: Launcher
+    launcher: string,
   ) => {
     const node = findNodeByPath(path, tree);
     if (!node || !isFile(node)) return null;
@@ -51,7 +47,7 @@ export function parseFs({
   };
   const makeExecutableWith = (
     path: string,
-    launcher: Launcher
+    launcher: string,
   ) => {
     const node = findNodeByPath(path, tree);
     if (!node || !isFile(node)) return null;
@@ -75,7 +71,7 @@ export function parseFs({
         pushOutput(
           <Code size="1" variant="soft" color="crimson">
             fs -R needs a name as argument
-          </Code>
+          </Code>,
         );
         break;
       }
@@ -83,13 +79,13 @@ export function parseFs({
         pushOutput(
           <Code size="1" variant="soft" color="crimson">
             Name cannot contain "/"
-          </Code>
+          </Code>,
         );
         break;
       }
       rename(path, name);
       return pushOutput(
-        <Command command={`fs ${path} -R ${name}`} />
+        <Command command={`fs ${path} -R ${name}`} />,
       );
     }
     case "-L":
@@ -99,14 +95,14 @@ export function parseFs({
         return pushOutput(
           <Code size="1" variant="soft" color="crimson">
             fs --L needs a launcher as argument
-          </Code>
+          </Code>,
         );
       }
       if (!isFile(node)) {
         return pushOutput(
           <Code size="1" variant="soft" color="crimson">
             Not a file
-          </Code>
+          </Code>,
         );
       }
       const validLaunchers = node.launcher;
@@ -114,12 +110,12 @@ export function parseFs({
         return pushOutput(
           <Code size="1" variant="soft" color="crimson">
             Invalid launcher
-          </Code>
+          </Code>,
         );
       }
       setDefaultLauncher(path, launcher as "code");
       return pushOutput(
-        <Command command={`fs ${path} --L ${launcher}`} />
+        <Command command={`fs ${path} --L ${launcher}`} />,
       );
     }
     case "--ll":
@@ -132,7 +128,7 @@ export function parseFs({
         return pushOutput(
           <Code size="1" variant="soft" color="crimson">
             Not a file
-          </Code>
+          </Code>,
         );
       }
 
@@ -147,7 +143,7 @@ export function parseFs({
           >
             {launcher}
           </Code>
-        ))
+        )),
       );
       break;
     }
@@ -161,7 +157,7 @@ export function parseFs({
         return pushOutput(
           <Code size="1" variant="soft" color="crimson">
             Not a file
-          </Code>
+          </Code>,
         );
       }
       const launcher = restArgs[0];
@@ -169,12 +165,12 @@ export function parseFs({
         return pushOutput(
           <Code size="1" variant="soft" color="crimson">
             No launcher supplied
-          </Code>
+          </Code>,
         );
       }
       makeExecutableWith(path, launcher as "code");
       return pushOutput(
-        <Command command={`fs ${path} --ex ${restArgs[0]}`} />
+        <Command command={`fs ${path} --ex ${restArgs[0]}`} />,
       );
       break;
     }

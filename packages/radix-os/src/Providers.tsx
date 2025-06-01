@@ -4,18 +4,19 @@ import { ReactNode, useEffect, useMemo, useRef } from "react";
 import { queryClient } from "./lib/react-query/client";
 import {
   AppContextProvider,
-  UseAppLauncherReturn
+  UseAppLauncherReturn,
 } from "./services/applications/launcher";
 import {
   FsIntegration,
-  FsProvider
+  FsProvider,
 } from "./services/fs/fs-integration";
 import { useSettingsStore } from "./stores/settings";
 import {
   createWindow,
   RadixOsApp,
-  useWindowStore
+  useWindowStore,
 } from "./stores/window";
+import { ToastProvider } from "./components/Toast/Toast";
 
 type AccentColor = Parameters<typeof Theme>[0]["accentColor"];
 type Radius = Parameters<typeof Theme>[0]["radius"];
@@ -41,14 +42,14 @@ export function Providers(props: ProvidersProps) {
     return {
       launch: (app, settings) => {
         const content = props.applications?.find(
-          (a) => a.appId === app
+          (a) => a.appId === app,
         );
         if (!content) {
           throw new Error("Could not find app to launch");
         }
         const win = createWindow({
           ...content.defaultWindowSettings,
-          ...settings
+          ...settings,
         });
         const Component = content.component;
         win.content = (
@@ -67,10 +68,10 @@ export function Providers(props: ProvidersProps) {
       openFile: (file, settings) => {
         contextValue.launch(
           settings?.launcher ?? file.file.launcher[0] ?? "code",
-          { ...settings, file }
+          { ...settings, file },
         );
       },
-      applications: props.applications
+      applications: props.applications,
     } as UseAppLauncherReturn<string>;
   }, [props.applications]);
 
@@ -93,7 +94,7 @@ export function Providers(props: ProvidersProps) {
       <AppContextProvider value={contextValue}>
         <FsProvider value={props.fs}>
           <QueryClientProvider client={queryClient}>
-            {props.children}
+            <ToastProvider>{props.children}</ToastProvider>
           </QueryClientProvider>
         </FsProvider>
       </AppContextProvider>
@@ -107,7 +108,7 @@ function useSyncPropsWithSettings(props: ProvidersProps) {
     "theme",
     "panelBackground",
     "accentColor",
-    "radius"
+    "radius",
   ];
   const keys = Object.keys(props)
     .filter((k) => relevantKeys.includes(k))

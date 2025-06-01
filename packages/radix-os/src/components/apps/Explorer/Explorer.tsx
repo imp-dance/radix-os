@@ -7,7 +7,7 @@ import {
   rectIntersection,
   useDraggable,
   useDroppable,
-  useSensor
+  useSensor,
 } from "@dnd-kit/core";
 import {
   ArrowDownIcon,
@@ -19,7 +19,8 @@ import {
   Cross1Icon,
   FileIcon,
   GlobeIcon,
-  StarIcon
+  SpeakerLoudIcon,
+  StarIcon,
 } from "@radix-ui/react-icons";
 import {
   Box,
@@ -32,13 +33,13 @@ import {
   Select,
   Spinner,
   Text,
-  TextField
+  TextField,
 } from "@radix-ui/themes";
 import React, {
   ReactNode,
   useEffect,
   useRef,
-  useState
+  useState,
 } from "react";
 import {
   useCreateDirMutation,
@@ -46,25 +47,26 @@ import {
   useFileSystemQuery,
   useMoveMutation,
   useRemoveFileMutation,
-  useUpdateFileMutation
+  useUpdateFileMutation,
 } from "../../../api/fs/fs-api";
 import { useUntypedAppContext } from "../../../services/applications/launcher";
 import {
   isFile,
   isFolder,
-  parsePath
+  parsePath,
 } from "../../../services/fs/tree-helpers";
 import { useFavouriteFolderStore } from "../../../stores/explorer";
-import { FsFile, FsNode, Launcher } from "../../../stores/fs";
+import { FsFile, FsNode } from "../../../stores/fs";
 import {
   RadixOsApp,
   RadixOsAppComponent,
-  useWindowStore
+  useWindowStore,
 } from "../../../stores/window";
 import { useQueryClient } from "@tanstack/react-query";
 import { useFileDrop } from "../../../hooks/useFileDrop";
 import { createFile } from "../../../services/fs/upload";
 import { useFs } from "../../../services/fs/fs-integration";
+import { useRawAppLauncher } from "../../..";
 
 export const ExplorerApp: RadixOsAppComponent = (props) => (
   <Explorer
@@ -79,7 +81,7 @@ export function Explorer({
   onPathChange,
   disableFiles,
   fileDisabled,
-  onRequestOpenFile
+  onRequestOpenFile,
 }: {
   initialPath?: string;
   windowId?: symbol;
@@ -92,11 +94,11 @@ export function Explorer({
   const containerRef = useRef<HTMLDivElement>(null);
   const mouseSensor = useSensor(MouseSensor, {
     activationConstraint: {
-      distance: 10
-    }
+      distance: 10,
+    },
   });
   const [isDragging, setIsDragging] = useState<false | string>(
-    false
+    false,
   );
   const fs = useFs();
   const prevSelected = useRef<string>("");
@@ -107,17 +109,17 @@ export function Explorer({
     useState(false);
   const [createFileOpen, setCreateFileOpen] = useState(false);
   const [sortDir, setSortDir] = useState<"asc" | "desc" | null>(
-    "asc"
+    "asc",
   );
   const [renameFileOpen, setRenameFileOpen] = useState(false);
   const [renamingNode, setRenamingNode] = useState<string>("");
   const treeQuery = useFileSystemQuery("");
   const tree = treeQuery.data ?? null;
   const favourites = useFavouriteFolderStore(
-    (s) => s.favouriteFolders
+    (s) => s.favouriteFolders,
   );
   const { finishDrop, isDroppingFile } = useFileDrop(
-    containerRef.current
+    containerRef.current,
   );
 
   const moveMutation = useMoveMutation();
@@ -136,12 +138,12 @@ export function Explorer({
     return [...currentFolder.children].sort((a, b) =>
       sortDir === "asc"
         ? a.name.localeCompare(b.name)
-        : b.name.localeCompare(a.name)
+        : b.name.localeCompare(a.name),
     );
   })();
 
   const setPath = (
-    newPath: string | ((prev: string) => string)
+    newPath: string | ((prev: string) => string),
   ) => {
     _setPath(newPath);
     setSelected([]);
@@ -171,14 +173,14 @@ export function Explorer({
             selected.map((s) =>
               moveMutation.mutateAsync({
                 fromPath: s,
-                toPath: over
-              })
-            )
+                toPath: over,
+              }),
+            ),
           );
         } else {
           moveMutation.mutateAsync({
             fromPath: active,
-            toPath: over
+            toPath: over,
           });
         }
       }}
@@ -197,7 +199,7 @@ export function Explorer({
             inset="0"
             style={{
               background: "rgba(0,0,0,0.5)",
-              animation: "rxosFadeIn 0.15s ease-out"
+              animation: "rxosFadeIn 0.15s ease-out",
             }}
             onClick={() => finishDrop()}
             onDragLeave={() => finishDrop()}
@@ -205,11 +207,11 @@ export function Explorer({
               finishDrop();
               try {
                 const file = await createFile(
-                  e.dataTransfer.files[0]
+                  e.dataTransfer.files[0],
                 );
                 await fs.makeFile(path, file).then(() => {
                   queryClient.invalidateQueries({
-                    predicate: (r) => r.queryKey.includes("fs")
+                    predicate: (r) => r.queryKey.includes("fs"),
                   });
                 });
               } catch (e) {
@@ -246,7 +248,7 @@ export function Explorer({
           style={{
             width: 200,
             borderRight: "1px solid var(--gray-5)",
-            height: "100%"
+            height: "100%",
           }}
           p="2"
           pr="4"
@@ -258,7 +260,7 @@ export function Explorer({
                 (isDragging === favourite ||
                 (isDragging !== false &&
                   selected.find(
-                    (s) => parsePath(s) === parsePath(favourite)
+                    (s) => parsePath(s) === parsePath(favourite),
                   ))
                   ? true
                   : false)
@@ -269,7 +271,7 @@ export function Explorer({
                 isDragging === favourite ||
                 (isDragging !== false &&
                   selected.find(
-                    (s) => parsePath(s) === parsePath(favourite)
+                    (s) => parsePath(s) === parsePath(favourite),
                   ))
                   ? true
                   : false
@@ -286,7 +288,7 @@ export function Explorer({
             <div
               style={{
                 height: "100%",
-                width: "100%"
+                width: "100%",
               }}
               onClick={() => setSelected([])}
             >
@@ -317,7 +319,7 @@ export function Explorer({
                         isCurrent={i === steps.length - 1}
                         onClick={() =>
                           setPath(
-                            steps.slice(0, i + 1).join("/")
+                            steps.slice(0, i + 1).join("/"),
                           )
                         }
                       />
@@ -333,7 +335,7 @@ export function Explorer({
                           ? "desc"
                           : p === "desc"
                             ? null
-                            : "asc"
+                            : "asc",
                       )
                     }
                     variant="ghost"
@@ -348,21 +350,21 @@ export function Explorer({
                         : "auto",
                       marginTop: treeQuery.isFetching
                         ? "calc(var(--space-2) * -1)"
-                        : "calc(var(--space-1) * -1)"
+                        : "calc(var(--space-1) * -1)",
                     }}
                   >
                     {sortDir === "asc" ? (
                       <ArrowDownIcon
                         style={{
                           width: "0.875em",
-                          height: "0.875em"
+                          height: "0.875em",
                         }}
                       />
                     ) : (
                       <ArrowUpIcon
                         style={{
                           width: "0.875em",
-                          height: "0.875em"
+                          height: "0.875em",
                         }}
                       />
                     )}
@@ -374,7 +376,7 @@ export function Explorer({
                     adjustScale={false}
                     wrapperElement="div"
                     style={{
-                      pointerEvents: "none"
+                      pointerEvents: "none",
                     }}
                   >
                     <Box
@@ -387,7 +389,7 @@ export function Explorer({
                         width: "max-content",
                         transform: `translate(-${(window?.x ?? 0) + 0}px, -${(window?.y ?? 0) + 22}px)`,
                         borderRadius: "var(--radius-2)",
-                        opacity: 0.8
+                        opacity: 0.8,
                       }}
                     >
                       <Text size="1" color="gray">
@@ -411,7 +413,7 @@ export function Explorer({
                         const itemIsBeingDragged =
                           (selected.length > 1 &&
                             selected.includes(
-                              `${path}/${child.name}`
+                              `${path}/${child.name}`,
                             ) &&
                             isDragging !== false) ||
                           draggedChild === child.name;
@@ -429,18 +431,18 @@ export function Explorer({
                             }
                             onSelect={({
                               shiftKey,
-                              metaKey
+                              metaKey,
                             }) => {
                               if (
                                 onRequestOpenFile &&
                                 isFile(child)
                               ) {
                                 setSelected([
-                                  `${path}/${child.name}`
+                                  `${path}/${child.name}`,
                                 ]);
                                 return onRequestOpenFile(
                                   child,
-                                  `${path}/${child.name}`
+                                  `${path}/${child.name}`,
                                 );
                               }
                               setSelected((prev) => {
@@ -453,13 +455,13 @@ export function Explorer({
                                     sortedChildren.findIndex(
                                       (c) =>
                                         c.name ===
-                                        start.split("/").pop()
+                                        start.split("/").pop(),
                                     );
                                   const endIdx =
                                     sortedChildren.findIndex(
                                       (c) =>
                                         c.name ===
-                                        end.split("/").pop()
+                                        end.split("/").pop(),
                                     );
                                   const [a, b] =
                                     startIdx < endIdx
@@ -468,25 +470,25 @@ export function Explorer({
                                   return sortedChildren
                                     .slice(a, b + 1)
                                     .map(
-                                      (c) => `${path}/${c.name}`
+                                      (c) => `${path}/${c.name}`,
                                     );
                                 } else if (metaKey) {
                                   return prev.includes(
-                                    `${path}/${child.name}`
+                                    `${path}/${child.name}`,
                                   )
                                     ? prev.filter(
                                         (p) =>
                                           p !==
-                                          `${path}/${child.name}`
+                                          `${path}/${child.name}`,
                                       )
                                     : [
                                         ...prev,
-                                        `${path}/${child.name}`
+                                        `${path}/${child.name}`,
                                       ];
                                 } else {
                                   prevSelected.current = `${path}/${child.name}`;
                                   return [
-                                    `${path}/${child.name}`
+                                    `${path}/${child.name}`,
                                   ];
                                 }
                               });
@@ -495,19 +497,19 @@ export function Explorer({
                               if (isFolder(child)) {
                                 setPath(
                                   (prev) =>
-                                    `${prev}/${child.name}`
+                                    `${prev}/${child.name}`,
                                 );
                               } else if (isFile(child)) {
                                 e.stopPropagation();
                                 if (onRequestOpenFile) {
                                   onRequestOpenFile(
                                     child,
-                                    `${path}/${child.name}`
+                                    `${path}/${child.name}`,
                                   );
                                 } else {
                                   openFile({
                                     file: child,
-                                    path: `${path}/${child.name}`
+                                    path: `${path}/${child.name}`,
                                   });
                                 }
                               }
@@ -515,7 +517,7 @@ export function Explorer({
                             returnFocus={i === 0 ? true : false}
                             onRename={() => {
                               setRenamingNode(
-                                `${path}/${child.name}`
+                                `${path}/${child.name}`,
                               );
                               setRenameFileOpen(true);
                             }}
@@ -546,9 +548,9 @@ export function Explorer({
                   file: {
                     data: path,
                     launcher: ["terminal"],
-                    name: path
+                    name: path,
                   },
-                  path
+                  path,
                 });
               }}
             >
@@ -579,12 +581,12 @@ function FavouriteItem(props: {
   const favQuery = useFileSystemQuery(props.favourite);
   const deleteMutation = useRemoveFileMutation();
   const removeFolderFromFavourites = useFavouriteFolderStore(
-    (s) => s.removeFolderFromFavourites
+    (s) => s.removeFolderFromFavourites,
   );
   const favouriteNode = favQuery.data ?? null;
   const droppable = useDroppable({
     id: ":" + removeStartingSlash(props.favourite),
-    disabled: props.disabled
+    disabled: props.disabled,
   });
 
   useEffect(() => {
@@ -601,7 +603,7 @@ function FavouriteItem(props: {
           style={{
             justifyContent: "flex-start",
             paddingInline: "var(--space-4)",
-            cursor: props.disabled ? "not-allowed" : undefined
+            cursor: props.disabled ? "not-allowed" : undefined,
           }}
           variant="ghost"
           size="1"
@@ -652,11 +654,11 @@ function FavouriteItem(props: {
   );
 }
 
-const launcherToIcon: Record<Launcher, ReactNode> = {
+const launcherToIcon: Record<string, ReactNode> = {
   code: <CodeIcon />,
   web: <GlobeIcon />,
   terminal: <CardStackIcon />,
-  image: <CameraIcon />
+  image: <CameraIcon />,
 };
 
 function ExplorerItem(props: {
@@ -674,24 +676,25 @@ function ExplorerItem(props: {
   disabled?: boolean;
   hidden?: boolean;
 }) {
+  const { applications } = useUntypedAppContext();
   const [addLauncherModalOpen, setAddLauncherModalOpen] =
     useState(false);
   const { openFile } = useUntypedAppContext();
   const droppable = useDroppable({
     id: removeStartingSlash(props.path),
-    disabled: isFile(props.item) || props.isDragging
+    disabled: isFile(props.item) || props.isDragging,
   });
   const draggable = useDraggable({
-    id: removeStartingSlash(props.path)
+    id: removeStartingSlash(props.path),
   });
   const deleteMutation = useRemoveFileMutation();
   const {
     addFolderToFavourites: addToFavourites,
     removeFolderFromFavourites: removeFromFavourites,
-    favouriteFolders: favourites
+    favouriteFolders: favourites,
   } = useFavouriteFolderStore();
   const isFavorite = favourites.some(
-    (f) => parsePath(f) === parsePath(props.path)
+    (f) => parsePath(f) === parsePath(props.path),
   );
   const isSelected = props.selected?.includes(props.path);
 
@@ -700,6 +703,22 @@ function ExplorerItem(props: {
       return [props.path];
     return props.selected;
   };
+
+  const launcher = isFile(props.item)
+    ? props.item.launcher[0]
+    : "";
+  const launcherApp = applications.find(
+    (app) => app.appId === launcher,
+  );
+
+  const icon =
+    launcherToIcon[launcher] ??
+    launcherApp?.defaultWindowSettings?.icon ??
+    null;
+
+  const label =
+    launcherToLabel[launcher] ??
+    launcherApp?.defaultWindowSettings?.title;
 
   return (
     <ContextMenu.Root>
@@ -729,7 +748,7 @@ function ExplorerItem(props: {
                 ? 0.5
                 : props.isDragging
                   ? 0.2
-                  : 1
+                  : 1,
           }}
           data-returnfocus={
             props.returnFocus ? "true" : undefined
@@ -747,7 +766,7 @@ function ExplorerItem(props: {
             if (props.onSelect) {
               props.onSelect({
                 shiftKey: e.shiftKey,
-                metaKey: e.metaKey
+                metaKey: e.metaKey,
               });
             } else {
               props.onClick?.(e);
@@ -762,10 +781,7 @@ function ExplorerItem(props: {
           {...draggable.listeners}
         >
           {isFolder(props.item) && <FileIcon />}
-          {isFile(props.item) &&
-            launcherToIcon[
-              (props.item.launcher[0] as "code") ?? "code"
-            ]}
+          {icon}
           {props.item.name}
         </Button>
       </ContextMenu.Trigger>
@@ -784,11 +800,14 @@ function ExplorerItem(props: {
                     if (isFile(props.item))
                       openFile(
                         { file: props.item, path: props.path },
-                        { launcher }
+                        { launcher },
                       );
                   }}
                 >
                   {launcherToLabel[launcher as "code"] ??
+                    applications?.find(
+                      (app) => app.appId === launcher,
+                    )?.defaultWindowSettings?.title ??
                     launcher}{" "}
                   {i === 0 && "(default)"}
                 </ContextMenu.Item>
@@ -823,7 +842,7 @@ function ExplorerItem(props: {
         <ContextMenu.Item
           onClick={() => {
             Promise.all(
-              getTargets().map((t) => deleteMutation.mutate(t))
+              getTargets().map((t) => deleteMutation.mutate(t)),
             );
           }}
           color="crimson"
@@ -842,7 +861,7 @@ function Step(props: {
   name?: string;
 }) {
   const droppable = useDroppable({
-    id: "::" + removeStartingSlash(props.path)
+    id: "::" + removeStartingSlash(props.path),
   });
   const steps = props.path.split("/").filter(Boolean);
 
@@ -912,7 +931,7 @@ function CreateFolderDialog(props: {
               onClick={() => {
                 createFolderMutation
                   .mutateAsync(
-                    `${props.path}/${inputRef.current?.value ?? "New folder"}`
+                    `${props.path}/${inputRef.current?.value ?? "New folder"}`,
                   )
                   .then(() => {
                     inputRef.current!.value = "New folder";
@@ -955,7 +974,7 @@ function LoadedEditLaunchersDialog(props: {
   file: FsFile;
 }) {
   const [selected, setSelected] = useState<string[]>(
-    props.file.launcher
+    props.file.launcher,
   );
   const [selectedAddable, setSelectedAddable] = useState<
     string | null
@@ -969,28 +988,28 @@ function LoadedEditLaunchersDialog(props: {
       {
         path: props.path,
         file: {
-          launcher: selected
-        }
+          launcher: selected,
+        },
       },
       {
         onSuccess: () => {
           props.onOpenChange(false);
           queryClient.invalidateQueries({
-            queryKey: ["fs", ""]
+            queryKey: ["fs", ""],
           });
-        }
-      }
+        },
+      },
     );
   };
 
   const resolvedLaunchers = selected
     .map((l) =>
-      appLauncher.applications.find((a) => a.appId === l)
+      appLauncher.applications.find((a) => a.appId === l),
     )
     .filter(Boolean) as RadixOsApp<string>[];
 
   const addableLaunchers = appLauncher.applications.filter(
-    (a) => !selected.includes(a.appId)
+    (a) => !selected.includes(a.appId),
   );
 
   useEffect(() => {
@@ -1033,8 +1052,8 @@ function LoadedEditLaunchersDialog(props: {
                     onClick={() =>
                       setSelected((p) =>
                         [...p].sort((v) =>
-                          v === launcher.appId ? -9999 : 0
-                        )
+                          v === launcher.appId ? -9999 : 0,
+                        ),
                       )
                     }
                     color={i === 0 ? undefined : "gray"}
@@ -1046,7 +1065,7 @@ function LoadedEditLaunchersDialog(props: {
                   <Button
                     onClick={() =>
                       setSelected((p) =>
-                        p.filter((v) => v !== launcher.appId)
+                        p.filter((v) => v !== launcher.appId),
                       )
                     }
                     color="gray"
@@ -1073,13 +1092,16 @@ function LoadedEditLaunchersDialog(props: {
                 <Select.Trigger style={{ flexGrow: 2 }}>
                   {selectedAddable
                     ? (appLauncher.applications.find(
-                        (a) => a.appId === selectedAddable
+                        (a) => a.appId === selectedAddable,
                       )?.appName ?? selectedAddable)
                     : "-"}
                 </Select.Trigger>
                 <Select.Content>
                   {addableLaunchers.map((app) => (
-                    <Select.Item value={app.appId}>
+                    <Select.Item
+                      key={app.appId}
+                      value={app.appId}
+                    >
                       {app.appName}
                     </Select.Item>
                   ))}
@@ -1162,8 +1184,9 @@ function CreateFileDialog(props: {
                   .mutateAsync({
                     path: props.path,
                     file: {
-                      name: inputRef.current?.value ?? "New file"
-                    }
+                      name:
+                        inputRef.current?.value ?? "New file",
+                    },
                   })
                   .then(() => {
                     inputRef.current!.value = "New file";
@@ -1232,7 +1255,7 @@ function RenameFileDialog(props: {
                 if (!inputRef.current) return;
                 renameFile(
                   props.path,
-                  inputRef.current.value.split("/")[0]
+                  inputRef.current.value.split("/")[0],
                 );
                 inputRef.current.value = "";
                 props.onOpenChange(false);
@@ -1247,11 +1270,12 @@ function RenameFileDialog(props: {
   );
 }
 
-const launcherToLabel: Record<Launcher, string> = {
+const launcherToLabel: Record<string, string> = {
   code: "Code",
   web: "Web Browser",
   terminal: "Terminal",
-  image: "Image Viewer"
+  image: "Image Viewer",
+  audio: "Audio Player",
 };
 
 const removeStartingSlash = (str: string) =>

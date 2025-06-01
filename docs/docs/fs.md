@@ -49,7 +49,7 @@ const uploadHandler = async (
     case "image/pdf":
       return {
         name: file.name,
-        launcher: "pdfViewer",
+        launcher: ["pdfViewer"],
         data: await pdfFileToFsFile(file),
       };
       break;

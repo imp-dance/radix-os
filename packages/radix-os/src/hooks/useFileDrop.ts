@@ -15,7 +15,6 @@ export function useFileDrop(element?: Element | null) {
       setDroppingFile(false);
     };
     if (!element) return;
-    console.log("setting up listeners");
     element.addEventListener("dragenter", onDragOver);
     element.addEventListener("mouseleave", onDragLeave);
     window.addEventListener("dragover", dropStopper);
@@ -30,6 +29,6 @@ export function useFileDrop(element?: Element | null) {
 
   return {
     isDroppingFile,
-    finishDrop: () => setDroppingFile(false)
+    finishDrop: () => setDroppingFile(false),
   };
 }

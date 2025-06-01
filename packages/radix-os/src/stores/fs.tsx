@@ -10,6 +10,7 @@ import {
 } from "../services/fs/tree-helpers";
 import { useFavouriteFolderStore } from "./explorer";
 import { initialTree } from "./fs.constants";
+import { get, set, del } from "idb-keyval";
 
 export const FS_LS_KEY = "fs";
 
@@ -17,14 +18,6 @@ export type FsFolder = {
   name: string;
   children: FsNode[];
 };
-
-export const launcherSchema = z.enum([
-  "code",
-  "web",
-  "terminal",
-  "image",
-]);
-export type Launcher = z.infer<typeof launcherSchema>;
 
 export type FsFile = {
   name: string;
@@ -44,7 +37,7 @@ export type FileSystemStore = {
   createFolder: (path: string) => void;
   createFile: (
     path: string,
-    file: { name: string } & Partial<FsFile>
+    file: { name: string } & Partial<FsFile>,
   ) => void;
   updateFile: (path: string, file: Partial<FsFile>) => void;
   setTree: (newTree: {
@@ -66,7 +59,7 @@ export const useFileSystemStore = create(
           const newState = { ...state };
           const parent = findNodeByPath(
             getParentPath(path),
-            newState.tree
+            newState.tree,
           );
           if (!isFolder(parent)) {
             return state;
@@ -102,26 +95,26 @@ export const useFileSystemStore = create(
           const toNode = findNodeByPath(to, newTree);
           const fromParentNode = findNodeByPath(
             getParentPath(from),
-            newTree
+            newTree,
           );
           if (!isFolder(fromParentNode) || !isFolder(toNode)) {
             return state;
           }
           fromParentNode.children =
             fromParentNode.children.filter(
-              (c) => c.name !== pathToName(from)
+              (c) => c.name !== pathToName(from),
             );
           toNode.children.push(fromNode);
 
           if (
             newFavourites.some(
-              (f) => parsePath(f) === parsePath(from)
+              (f) => parsePath(f) === parsePath(from),
             )
           ) {
             newFavourites = newFavourites.map((f) =>
               parsePath(f) === parsePath(from)
                 ? parsePath(`${to}/${pathToName(from)}`)
-                : f
+                : f,
             );
           }
           useFavouriteFolderStore
@@ -137,13 +130,13 @@ export const useFileSystemStore = create(
           const newTree = { ...state.tree };
           const parent = findNodeByPath(
             getParentPath(path),
-            newTree
+            newTree,
           );
           if (!isFolder(parent)) return state;
 
           parent.children = [
             ...parent.children.filter(
-              (c) => c.name !== pathToName(path)
+              (c) => c.name !== pathToName(path),
             ),
           ];
           const { setFavourites, favouriteFolders } =
@@ -151,8 +144,8 @@ export const useFileSystemStore = create(
 
           setFavourites(
             favouriteFolders.filter(
-              (f) => parsePath(f) !== parsePath(path)
-            )
+              (f) => parsePath(f) !== parsePath(path),
+            ),
           );
 
           return {
@@ -166,13 +159,13 @@ export const useFileSystemStore = create(
           const newTree = { ...state.tree };
           const parent = findNodeByPath(
             getParentPath(path),
-            newTree
+            newTree,
           );
           if (!isFolder(parent)) {
             return state;
           }
           const child = parent.children.find(
-            (n) => n.name === pathToName(path)
+            (n) => n.name === pathToName(path),
           );
           if (!child) {
             return state;
@@ -187,11 +180,26 @@ export const useFileSystemStore = create(
     }),
     {
       name: FS_LS_KEY,
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => ({
+        getItem: async (
+          name: string,
+        ): Promise<string | null> => {
+          return (await get(name)) || null;
+        },
+        setItem: async (
+          name: string,
+          value: string,
+        ): Promise<void> => {
+          await set(name, value);
+        },
+        removeItem: async (name: string): Promise<void> => {
+          await del(name);
+        },
+      })),
       partialize: (state) =>
         ({
           tree: state.tree,
-        } as FileSystemStore),
-    }
-  )
+        }) as FileSystemStore,
+    },
+  ),
 );

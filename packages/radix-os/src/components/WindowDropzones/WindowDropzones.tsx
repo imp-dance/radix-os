@@ -128,24 +128,29 @@ function Dropzone(props: {
 
 function useKeyHeld(targetKey: string) {
   const [keyHeld, setKeyHeld] = useState(false);
+
   function downHandler({ key }: KeyboardEvent) {
     if (key === targetKey) {
       setKeyHeld(true);
     }
   }
 
+  const stopKeyPress = () => setKeyHeld(false);
+
   function upHandler({ key }: KeyboardEvent) {
     if (key === targetKey) {
-      setKeyHeld(false);
+      stopKeyPress();
     }
   }
 
   useEffect(() => {
     window.addEventListener("keydown", downHandler);
     window.addEventListener("keyup", upHandler);
+    window.addEventListener("blur", stopKeyPress);
     return () => {
       window.removeEventListener("keydown", downHandler);
       window.removeEventListener("keyup", upHandler);
+      window.removeEventListener("blur", stopKeyPress);
     };
   }, []);
 

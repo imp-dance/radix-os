@@ -10,6 +10,10 @@ The desktop in RadixOS is very minimal and simple, mostly used to launch applica
 You can also launch applications by using the command palette, opened with the keyboard shortcut `CTRL + P`.
 :::
 
+:::warning Work in progress
+The desktop system is very much still a WIP as we're not happy about it's current state. Consider it subject to change in the future. Most likely this will be in a major upgrade.
+:::
+
 ## Application shortcuts
 
 You can add apps to the desktop by configuring them to be added in `setupApps`. You can also configure which of the default apps appear in the desktop by passing a second argument.

@@ -5,26 +5,26 @@ import {
   Flex,
   ScrollArea,
   Text,
-  TextField
+  TextField,
 } from "@radix-ui/themes";
 import React, {
   ComponentProps,
   ReactNode,
   useLayoutEffect,
   useRef,
-  useState
+  useState,
 } from "react";
 import {
   useCreateDirMutation,
   useFileSystemQuery,
   useMoveMutation,
-  useUpdateFileMutation
+  useUpdateFileMutation,
 } from "../../../api/fs/fs-api";
 import { useUntypedAppContext } from "../../../services/applications/launcher";
 import {
   findNodeByPath,
   isFolder,
-  parseRelativePath
+  parseRelativePath,
 } from "../../../services/fs/tree-helpers";
 import { FsFolder } from "../../../stores/fs";
 import { RadixOsAppComponent } from "../../../stores/window";
@@ -32,13 +32,14 @@ import { Command, helpText } from "./constants";
 import { parseFs } from "./modules/fs";
 import { parseOpen } from "./modules/open";
 import { extractFlags, joinQuotedArgs } from "./utils";
+import { useToast } from "../../Toast/Toast";
 
 export type TerminalPlugin = {
   matcher: (command: string, args: string[]) => boolean;
   exec: (
     pushOutput: (...output: ReactNode[]) => void,
     command: string,
-    args: string[]
+    args: string[],
   ) => void;
   /** Continue checking for other commands after exec, even if command is matched */
   passThrough?: boolean;
@@ -59,7 +60,7 @@ export type TerminalPlugin = {
 export const Terminal = (
   props: ComponentProps<RadixOsAppComponent> & {
     plugins?: TerminalPlugin[];
-  }
+  },
 ) => {
   const { openFile } = useUntypedAppContext();
   const currentCommandIndex = useRef(0);
@@ -72,10 +73,11 @@ export const Terminal = (
   const updateFile = useUpdateFileMutation();
   const initialPath = props.file?.file?.data;
   const path = useRef<string[]>(
-    initialPath?.split("/").filter(Boolean) ?? ["Home"]
+    initialPath?.split("/").filter(Boolean) ?? ["Home"],
   );
+
   const [output, setOutput] = useState<ReactNode[]>([
-    <Code size="1">Type "help" to get started</Code>
+    <Code size="1">Type "help" to get started</Code>,
   ]);
 
   function pushOutput(...output: ReactNode[]) {
@@ -96,7 +98,7 @@ export const Terminal = (
         key={output.length}
       >
         Directory not found: "{dir}"
-      </Code>
+      </Code>,
     );
   }
 
@@ -109,7 +111,7 @@ export const Terminal = (
         key={output.length}
       >
         Not a directory
-      </Code>
+      </Code>,
     );
   }
 
@@ -137,7 +139,7 @@ export const Terminal = (
           cd: currentDirectory,
           flags,
           openFile,
-          pushOutput
+          pushOutput,
         });
         break;
       }
@@ -150,7 +152,7 @@ export const Terminal = (
             color="gray"
           >
             {args.join(" ")}
-          </Code>
+          </Code>,
         );
         break;
       }
@@ -165,7 +167,7 @@ export const Terminal = (
             <pre style={{ margin: 0, textWrap: "wrap" }}>
               {helpText}
             </pre>
-          </Code>
+          </Code>,
         );
         break;
       }
@@ -186,7 +188,7 @@ export const Terminal = (
               >
                 {child.name}
               </Code>
-            ))
+            )),
           );
         } else {
           notAFolder();
@@ -197,7 +199,7 @@ export const Terminal = (
         pushOutput(
           <Code size="1" variant="soft" color="crimson">
             Command not found: {command}
-          </Code>
+          </Code>,
         );
         break;
       }
@@ -207,7 +209,7 @@ export const Terminal = (
           return pushOutput(
             <Code size="1" variant="soft" color="crimson">
               mkdir needs a name as argument
-            </Code>
+            </Code>,
           );
         }
         createFolderMutation
@@ -223,7 +225,7 @@ export const Terminal = (
           return pushOutput(
             <Code size="1" variant="soft" color="crimson">
               mv needs two paths as arguments
-            </Code>
+            </Code>,
           );
         }
         from = parseRelativePath(currentDirectory, from);
@@ -250,13 +252,13 @@ export const Terminal = (
           currentPath: currentDirectory,
           updateFile: (path, file) =>
             updateFile.mutateAsync({ path, file }),
-          tree: tree as FsFolder
+          tree: tree as FsFolder,
         });
       }
       case "cd": {
         const parsedNextPath = parseRelativePath(
           currentDirectory,
-          args[0]
+          args[0],
         );
         const newNode = findNodeByPath(parsedNextPath, tree);
         if (!newNode) {
@@ -275,7 +277,7 @@ export const Terminal = (
   useLayoutEffect(() => {
     scrollRef.current?.scrollTo({
       top: scrollRef.current.scrollHeight,
-      behavior: "smooth"
+      behavior: "smooth",
     });
     currentCommandIndex.current = prevCommands.current.length;
   }, [output.length]);
@@ -288,7 +290,7 @@ export const Terminal = (
       style={{
         height: "100%",
         display: "grid",
-        gridTemplateRows: "1fr min-content"
+        gridTemplateRows: "1fr min-content",
       }}
     >
       <ScrollArea
@@ -320,7 +322,7 @@ export const Terminal = (
           size="1"
           style={{
             width: "100%",
-            fontFamily: "var(--code-font-family)"
+            fontFamily: "var(--code-font-family)",
           }}
           onKeyDown={(e) => {
             if (e.key === "Enter") {

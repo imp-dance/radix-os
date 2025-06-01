@@ -5,6 +5,8 @@ import {
   GlobeIcon,
   HomeIcon,
   ImageIcon,
+  SpeakerLoudIcon,
+  VideoIcon,
 } from "@radix-ui/react-icons";
 import { CodeApp } from "./components/apps/Code/Code";
 import { ExplorerApp } from "./components/apps/Explorer/Explorer";
@@ -12,6 +14,8 @@ import { ImageViewer } from "./components/apps/ImageViewer/ImageViewer";
 import { Settings } from "./components/apps/Settings/Settings";
 import { Terminal } from "./components/apps/Terminal/Terminal";
 import { WebBrowser } from "./components/apps/WebBrowser/WebBrowser";
+import { AudioPlayer } from "./components/apps/AudioPlayer/AudioPlayer";
+import { VideoPlayer } from "./components/apps/VideoPlayer/VideoPlayer";
 
 export const defaultApps = [
   {
@@ -89,6 +93,34 @@ export const defaultApps = [
       icon: <ImageIcon />,
       initialHeight: 600,
       initialWidth: 800,
+    },
+  },
+  {
+    component: AudioPlayer,
+    appId: "audio",
+    appName: "Audio Player",
+    addToDesktop: false,
+    defaultWindowSettings: {
+      title: "Audio Player",
+      icon: <SpeakerLoudIcon />,
+      initialHeight: 250,
+      initialWidth: 500,
+      minWidth: 300,
+      scrollable: false,
+      maxHeight: 250,
+    },
+  },
+  {
+    component: VideoPlayer,
+    appId: "video",
+    appName: "Video Player",
+    addToDesktop: false,
+    defaultWindowSettings: {
+      title: "Video Player",
+      icon: <VideoIcon />,
+      initialHeight: 500,
+      initialWidth: 500,
+      minWidth: 300,
     },
   },
 ] as const;

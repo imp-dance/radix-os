@@ -11,18 +11,20 @@ import {
   Table,
   Tabs,
   Text,
-  TextField
+  TextField,
 } from "@radix-ui/themes";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FS_LS_KEY } from "../../../stores/fs";
 import {
   SETTINGS_LS_KEY,
-  useSettingsStore
+  useSettingsStore,
 } from "../../../stores/settings";
 import { RadixOsAppComponent } from "../../../stores/window";
 import { BrowserLink } from "../../BrowserLink/BrowserLink";
 import { ImageDropper } from "../../ImageDropper/ImageDropper";
 import { RadixColorPicker } from "../../RadixColorPicker/RadixColorPicker";
+import { del, get } from "idb-keyval";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const Settings: RadixOsAppComponent = (props) => {
   const initialTab =
@@ -76,7 +78,7 @@ export const Settings: RadixOsAppComponent = (props) => {
           </Text>
           <Text size="2" color="gray">
             The file system and settings are stored in{" "}
-            <Code>localStorage</Code>.
+            <Code>IndexedDB</Code>.
           </Text>
           <div>
             <Button
@@ -85,7 +87,7 @@ export const Settings: RadixOsAppComponent = (props) => {
               onClick={() => {
                 window.open(
                   "https://github.com/imp-dance/radix-os/issues/new",
-                  "_blank"
+                  "_blank",
                 );
               }}
             >
@@ -133,11 +135,11 @@ function ShortcutsTab() {
     ["Open app launcher", "CTRL + P"],
     [
       "Switch between applications",
-      (isMac ? altOrOpt : "CTRL") + " (+ Shift) + Tab"
+      (isMac ? altOrOpt : "CTRL") + " (+ Shift) + Tab",
     ],
     ["Close active window", `${altOrOpt} + W`],
     ["Toggle maximize", "Double click window"],
-    ["Tile window", "Shift + drag window"]
+    ["Tile window", "Shift + drag window"],
   ].filter(([desc, scut]) => {
     if (search === "") return true;
     return (
@@ -206,7 +208,7 @@ function CustomizeTab() {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "var(--space-2)"
+              gap: "var(--space-2)",
             }}
           >
             <Switch
@@ -218,7 +220,7 @@ function CustomizeTab() {
           </Text>
         )}
         {!settingsStore.overrides.includes(
-          "panelBackground"
+          "panelBackground",
         ) && (
           <Text
             as="label"
@@ -227,7 +229,7 @@ function CustomizeTab() {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "var(--space-2)"
+              gap: "var(--space-2)",
             }}
           >
             <Switch
@@ -251,7 +253,7 @@ function CustomizeTab() {
               display: "flex",
               alignItems: "flex-start",
               flexDirection: "column",
-              gap: "var(--space-2)"
+              gap: "var(--space-2)",
             }}
           >
             Radius
@@ -281,7 +283,7 @@ function CustomizeTab() {
               display: "flex",
               alignItems: "flex-start",
               flexDirection: "column",
-              gap: "var(--space-2)"
+              gap: "var(--space-2)",
             }}
           >
             Accent color
@@ -319,6 +321,23 @@ function CustomizeTab() {
 }
 
 function StorageTab() {
+  const queryClient = useQueryClient();
+  const storageAmount = useQuery({
+    queryFn: async () => {
+      const item = (await get(FS_LS_KEY)) ?? null;
+      if (item && typeof item === "string") {
+        return getByteSize(item);
+      }
+      return "0kB";
+    },
+    queryKey: ["storageAmount"],
+  });
+
+  useEffect(() => {
+    queryClient.invalidateQueries({
+      queryKey: ["storageAmount"],
+    });
+  }, []);
   return (
     <Tabs.Content value="storage">
       <Flex p="2" direction="column" gap="3">
@@ -348,8 +367,9 @@ function StorageTab() {
                 <Button
                   variant="solid"
                   color="red"
-                  onClick={() => {
+                  onClick={async () => {
                     localStorage.removeItem(SETTINGS_LS_KEY);
+                    await del(SETTINGS_LS_KEY);
                     window.location.reload();
                   }}
                 >
@@ -384,8 +404,9 @@ function StorageTab() {
                 <Button
                   variant="solid"
                   color="red"
-                  onClick={() => {
+                  onClick={async () => {
                     localStorage.removeItem(FS_LS_KEY);
+                    await del(FS_LS_KEY);
                     window.location.reload();
                   }}
                 >
@@ -396,8 +417,7 @@ function StorageTab() {
           </AlertDialog.Content>
         </AlertDialog.Root>
         <Text size="1" color="gray">
-          Used space:{" "}
-          {getByteSize(localStorage.getItem(FS_LS_KEY) ?? "")}
+          Used space: {storageAmount.data ?? "Calculating..."}
         </Text>
       </Flex>
     </Tabs.Content>
@@ -422,7 +442,7 @@ function formatBytes(bytes: number, decimals = 2) {
     "PiB",
     "EiB",
     "ZiB",
-    "YiB"
+    "YiB",
   ];
 
   const i = Math.floor(Math.log(bytes) / Math.log(k));

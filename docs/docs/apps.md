@@ -10,14 +10,19 @@ Applications in RadixOS are components that are mounted in controlled windows, w
 
 There are 5 apps by default that come with RadixOS:
 
-| Name         | `appId`    | Description                                | Launch interface  |
-| ------------ | ---------- | ------------------------------------------ | ----------------- |
-| Terminal     | `terminal` | Can modify and read file system            | Path              |
-| Explorer     | `explorer` | Can modify and read file system            | Path              |
-| Web Browser  | `web`      | Can launch html files and navigate to urls | URL or HTML       |
-| Code         | `code`     | Monaco editor for code and text            | Text              |
-| Settings     | `settings` | System customization and formatting        | Tab-id            |
-| Image Viewer | `image`    | Can open images                            | data:image or SVG |
+| Name         | `appId`    | Description                                | Launch interface           |
+| ------------ | ---------- | ------------------------------------------ | -------------------------- |
+| Terminal     | `terminal` | Can modify and read file system            | Path                       |
+| Explorer     | `explorer` | Can modify and read file system            | Path                       |
+| Web Browser  | `web`      | Can launch html files and navigate to urls | URL or HTML                |
+| Code         | `code`     | Monaco editor for code and text            | Text                       |
+| Settings     | `settings` | System customization and formatting        | Tab-id                     |
+| Image Viewer | `image`    | Can open images                            | [data:image](https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Schemes/data) or SVG          |
+| Audio Player | `audio`    | Can open audio files                       | `"${mimeType} B64 ${base64}"`|
+| Video Player | `video`    | Can open video files                       | `"${mimeType} B64 ${base64}"`|
+
+If you are interested in more detail in regards to how different file types are processed and encoded into RadixOS's file objects, you
+can look at [this file](https://github.com/imp-dance/radix-os/blob/main/packages/radix-os/src/services/fs/upload.ts) from our source code.
 
 ### Configuration
 
@@ -69,6 +74,7 @@ In the component passed to `createApp`, you have access to the following props:
 - **`file?`**: An object that if not `undefined` contains:
   - `.file` The file object that the app was launched by
   - `.path` The path of the file object that the app was launched by
+  - [See more](#launching-files)
 
 To add your custom application to the operating system and make it launchable, supply it to the `setupApps` function:
 
@@ -121,6 +127,27 @@ To configure which element should be focused when the title-bar is clicked, or w
 <Button data-returnfocus="true">Call to action</Button>
 ```
 
+### Reacting to launched files
+
+If your application was launched with a file, it will have a `file` prop that looks something like this:
+
+```json
+{
+  "file": {
+    "name": "Some file",
+    "launcher": ["code", "some-app-id"],
+    "data": "a string of data",
+  },
+  "path": "/Documents/Some file",
+}
+```
+
+This means that `if (props.file !== undefined)`, then a file was launched.
+
+If you want to do something with that file, like for example creating a `Blob` from the data and trying to play it as audio - you totally can. What you expect from the string of data and how you use it is completely up to you.
+
+If you want to handle file uploads so that you can encode them into whatever format you want and add your `appId` as a launcher, you should read about [system file upload](/fs#system-file-upload).
+
 ## Application Hooks
 
 The app components are mounted inside `RadixOS`, which gives them access to a few hooks to control the operating system.
@@ -172,6 +199,28 @@ Gives you direct access to the internal zustand settings store.
 ### `useWindowStore`
 
 Gives you direct access to the internal zustand window store, allowing you to interact with open windows.
+
+
+### `useToast`
+
+This hook will let you fire off system toasts.
+
+    * `toast(toastOpts)` - Fires off a toast with given options
+        ```ts
+        type ToastOptions = {
+          title: string;
+          type?: "foreground" | "background";
+          description?: string;
+          dismissText?: string;
+          action?: {
+            onClick: () => void;
+            altText?: string;
+            label: string;
+          };
+        };
+        ```
+    * `toasts` - Returns a list of toasts stored in memory
+
 
 ## Overwriting default components
 

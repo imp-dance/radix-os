@@ -1,8 +1,9 @@
 import { FsFile } from "../../stores/fs";
+import { encodeBase64WithMimeType } from "../base64/base64";
 
 export async function createFile(
   file: File,
-  handler?: (file: File) => Promise<FsFile | null>
+  handler?: (file: File) => Promise<FsFile | null>,
 ): Promise<FsFile> {
   let data = "";
   let launcher = [];
@@ -23,11 +24,19 @@ export async function createFile(
         data = await parseTextFile(file);
         if (data.trim().startsWith("<")) break;
       }
-      data = await parseImageData(file);
+      data = await parseImageFile(file);
       break;
     case typeIs("text/html"):
       launcher.push("web");
       data = await parseTextFile(file);
+      break;
+    case typeIs("audio/"):
+      data = await parseAudioFile(file);
+      launcher.push("audio");
+      break;
+    case typeIs("video/"):
+      data = await parseVideoFile(file);
+      launcher.push("video");
       break;
     default:
       data = await parseTextFile(file);
@@ -43,7 +52,7 @@ export async function createFile(
   };
 }
 
-function parseImageData(file: File): Promise<string> {
+function parseImageFile(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     const onload = (e: ProgressEvent<FileReader>) => {
@@ -69,4 +78,12 @@ function parseTextFile(file: File): Promise<string> {
     reader.onabort = () => reject();
     reader.readAsText(file);
   });
+}
+
+function parseAudioFile(file: File) {
+  return encodeBase64WithMimeType(file);
+}
+
+function parseVideoFile(file: File) {
+  return encodeBase64WithMimeType(file);
 }
