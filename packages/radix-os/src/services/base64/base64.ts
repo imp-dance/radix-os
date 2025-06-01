@@ -1,4 +1,3 @@
-import Worker from "web-worker";
 import { decoderWorker } from "./decoder-worker";
 export const MIME_BASE64_SEPARATOR = " B64 ";
 
