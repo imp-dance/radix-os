@@ -1,12 +1,4 @@
 import { InfoCircledIcon } from "@radix-ui/react-icons";
-import "@radix-ui/themes/styles.css";
-import {
-  createUseAppLauncher,
-  createZustandFsIntegration,
-  RadixOS,
-  setupApps,
-} from "../packages/radix-os/src/index";
-//} from "radix-os";
 import {
   Box,
   Flex,
@@ -14,6 +6,13 @@ import {
   Link,
   Text,
 } from "@radix-ui/themes";
+import "@radix-ui/themes/styles.css";
+import {
+  createUseAppLauncher,
+  createZustandFsIntegration,
+  RadixOS,
+  setupApps,
+} from "radix-os";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
