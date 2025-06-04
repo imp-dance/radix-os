@@ -1,9 +1,10 @@
 import { Text } from "@radix-ui/themes";
-import { useState } from "react";
+import { CSSProperties, useState } from "react";
 
 export function ImageDropper(props: {
   onChange: (base64img: string) => void;
   value?: string;
+  style?: CSSProperties;
 }) {
   const [preview, setPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -36,6 +37,7 @@ export function ImageDropper(props: {
         backgroundSize: "cover",
         textAlign: "center",
         cursor: "pointer",
+        ...props.style,
       }}
       onDragEnter={() => setIsDragging(true)}
       onDragLeave={() => setIsDragging(false)}

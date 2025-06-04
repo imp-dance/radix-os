@@ -6,13 +6,12 @@ import {
   Text,
 } from "@radix-ui/themes";
 import { useEffect, useMemo, useRef, useState } from "react";
+import WaveSurfer from "wavesurfer.js";
+import { useDecodeB64MT } from "../../../hooks/useDecodeBase64";
+import { MIME_BASE64_SEPARATOR } from "../../../services/base64/base64";
+import { useSettingsStore } from "../../../stores/settings";
 import { RadixOsAppComponent } from "../../../stores/window";
 import { OpenFileDialog } from "../../OpenFileDialog/OpenFileDialog";
-import { MIME_BASE64_SEPARATOR } from "../../../services/base64/base64";
-import WaveSurfer from "wavesurfer.js";
-import styles from "./AudioPlayer.module.css";
-import { useSettingsStore } from "../../../stores/settings";
-import { useDecodeB64MT } from "../../../hooks/useDecodeBase64";
 
 export const AudioPlayer: RadixOsAppComponent = (props) => {
   const settings = useSettingsStore();
@@ -100,61 +99,58 @@ export const AudioPlayer: RadixOsAppComponent = (props) => {
           setOpen={setFileDialogOpen}
           onFileOpened={(file) => setOpenedFile(file.data)}
           fileDisabled={(file) =>
-            !file.launcher.includes("image")
+            !file.launcher.includes("audio")
           }
         />
       )}
-      {trimmedData === "" && (
+      {trimmedData === "" ? (
         <div style={{ margin: "auto" }}>
           <Button onClick={() => setFileDialogOpen(true)}>
             Open file
           </Button>
         </div>
+      ) : (
+        <>
+          {err && !loading ? (
+            <Flex
+              mx="auto"
+              mt="auto"
+              direction="column"
+              style={{ position: "absolute", inset: "0" }}
+              p="5"
+            >
+              <Text weight="bold" size="1">
+                Failed to load file.
+              </Text>
+              <div>
+                <Code size="1" color="gray">
+                  {props.file?.file?.name}
+                </Code>
+              </div>
+              <div>
+                <Code size="1" color="red">
+                  {trimmedData.split(MIME_BASE64_SEPARATOR)[0]}
+                </Code>
+              </div>
+            </Flex>
+          ) : null}
+          {audioUrl === null ? (
+            <Flex mx="auto" my="auto" gap="2">
+              <Spinner />
+              <Text color="gray">Loading audio...</Text>
+            </Flex>
+          ) : null}
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              overflow: "hidden",
+            }}
+          >
+            <div ref={vizRef} />
+          </div>
+        </>
       )}
-      {err && !loading ? (
-        <Flex
-          mx="auto"
-          mt="auto"
-          direction="column"
-          style={{ position: "absolute", inset: "0" }}
-          p="5"
-        >
-          <Text weight="bold" size="1">
-            Failed to load file.
-          </Text>
-          <div>
-            <Code size="1" color="gray">
-              {props.file?.file?.name}
-            </Code>
-          </div>
-          <div>
-            <Code size="1" color="red">
-              {trimmedData.split(MIME_BASE64_SEPARATOR)[0]}
-            </Code>
-          </div>
-        </Flex>
-      ) : null}
-      {audioUrl === null ? (
-        <Flex mx="auto" my="auto" gap="2">
-          <Spinner />
-          <Text color="gray">Loading audio...</Text>
-        </Flex>
-      ) : null}
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          overflow: "hidden",
-        }}
-      >
-        <div ref={vizRef} />
-      </div>
-      {/* <audio
-        controls
-        src={audioUrl}
-
-        autoPlay
-      /> */}
     </Flex>
   );
 };

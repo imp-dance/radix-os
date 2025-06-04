@@ -2,6 +2,7 @@ import { ExternalLinkIcon } from "@radix-ui/react-icons";
 import {
   AlertDialog,
   Button,
+  Card,
   Code,
   Flex,
   Heading,
@@ -13,7 +14,9 @@ import {
   Text,
   TextField,
 } from "@radix-ui/themes";
-import { useEffect, useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { del, get } from "idb-keyval";
+import { useEffect, useState } from "react";
 import { FS_LS_KEY } from "../../../stores/fs";
 import {
   SETTINGS_LS_KEY,
@@ -23,8 +26,6 @@ import { RadixOsAppComponent } from "../../../stores/window";
 import { BrowserLink } from "../../BrowserLink/BrowserLink";
 import { ImageDropper } from "../../ImageDropper/ImageDropper";
 import { RadixColorPicker } from "../../RadixColorPicker/RadixColorPicker";
-import { del, get } from "idb-keyval";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const Settings: RadixOsAppComponent = (props) => {
   const initialTab =
@@ -55,24 +56,54 @@ export const Settings: RadixOsAppComponent = (props) => {
             RadixOS is an open source project built using{" "}
             <ul>
               <li>
-                <BrowserLink href="https://radix-ui.com">
-                  <Code>Radix</Code>
-                </BrowserLink>
+                <Flex gap="1" align="center">
+                  <BrowserLink href="https://radix-ui.com">
+                    <Code>Radix</Code>
+                  </BrowserLink>
+                  <Text size="1" color="gray">
+                    Design system
+                  </Text>
+                </Flex>
               </li>
               <li>
-                <BrowserLink href="https://zustand.docs.pmnd.rs/getting-started/introduction">
-                  <Code>Zustand</Code>
-                </BrowserLink>
+                <Flex gap="1" align="center">
+                  <BrowserLink href="https://react.dev">
+                    <Code>React</Code>
+                  </BrowserLink>
+                  <Text size="1" color="gray">
+                    UI management
+                  </Text>
+                </Flex>
               </li>
               <li>
-                <BrowserLink href="https://dndkit.com/">
-                  <Code>dnd kit</Code>
-                </BrowserLink>
+                <Flex gap="1" align="center">
+                  <BrowserLink href="https://tanstack.com/query/">
+                    <Code>Tanstack Query</Code>
+                  </BrowserLink>
+                  <Text size="1" color="gray">
+                    Async state
+                  </Text>
+                </Flex>
               </li>
               <li>
-                <BrowserLink href="https://react.dev">
-                  <Code>React</Code>
-                </BrowserLink>
+                <Flex gap="1" align="center">
+                  <BrowserLink href="https://dndkit.com/">
+                    <Code>dnd kit</Code>
+                  </BrowserLink>
+                  <Text size="1" color="gray">
+                    Drag and drop
+                  </Text>
+                </Flex>
+              </li>
+              <li>
+                <Flex gap="1" align="center">
+                  <BrowserLink href="https://wavesurfer.xyz/">
+                    <Code>wavesurfer.js</Code>
+                  </BrowserLink>
+                  <Text size="1" color="gray">
+                    Audio visualization
+                  </Text>
+                </Flex>
               </li>
             </ul>
           </Text>
@@ -87,7 +118,7 @@ export const Settings: RadixOsAppComponent = (props) => {
               onClick={() => {
                 window.open(
                   "https://github.com/imp-dance/radix-os/issues/new",
-                  "_blank",
+                  "_blank"
                 );
               }}
             >
@@ -196,125 +227,147 @@ function CustomizeTab() {
     : undefined;
   return (
     <Tabs.Content value="customize">
-      <Flex p="2" direction="column" gap="3">
-        <Heading size="1" color="gray">
-          Options
-        </Heading>
-        {!settingsStore.overrides.includes("theme") && (
-          <Text
-            as="label"
-            size="1"
-            color="gray"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "var(--space-2)",
-            }}
-          >
-            <Switch
-              size="1"
-              checked={settingsStore.theme === "dark"}
-              onCheckedChange={settingsStore.toggleTheme}
+      <Flex p="2" direction="row" gap="3" minHeight={"270px"}>
+        <Card style={{ flex: 1 }}>
+          <Flex direction="column" gap="3">
+            <Heading size="1" color="gray">
+              Options
+            </Heading>
+            {!settingsStore.overrides.includes("theme") && (
+              <Text
+                as="label"
+                size="1"
+                color="gray"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "var(--space-2)",
+                }}
+              >
+                <Switch
+                  size="1"
+                  checked={settingsStore.theme === "dark"}
+                  onCheckedChange={settingsStore.toggleTheme}
+                />
+                Dark mode
+              </Text>
+            )}
+            {!settingsStore.overrides.includes(
+              "panelBackground"
+            ) && (
+              <Text
+                as="label"
+                size="1"
+                color="gray"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "var(--space-2)",
+                }}
+              >
+                <Switch
+                  size="1"
+                  checked={
+                    settingsStore.panelBackground ===
+                    "translucent"
+                  }
+                  onCheckedChange={
+                    settingsStore.togglePanelBackground
+                  }
+                />
+                Translucent windows
+              </Text>
+            )}
+            {!settingsStore.overrides.includes("radius") && (
+              <Text
+                as="label"
+                size="1"
+                color="gray"
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  flexDirection: "column",
+                  gap: "var(--space-2)",
+                }}
+              >
+                Radius
+                <Select.Root
+                  value={settingsStore.radius ?? "medium"}
+                  onValueChange={(value) =>
+                    settingsStore.setRadius(value as "small")
+                  }
+                >
+                  <Select.Trigger variant="soft" />
+                  <Select.Content>
+                    <Select.Item value="none">None</Select.Item>
+                    <Select.Item value="small">
+                      Small
+                    </Select.Item>
+                    <Select.Item value="medium">
+                      Medium
+                    </Select.Item>
+                    <Select.Item value="large">
+                      Large
+                    </Select.Item>
+                    <Select.Item value="full">Full</Select.Item>
+                  </Select.Content>
+                </Select.Root>
+              </Text>
+            )}
+            {!settingsStore.overrides.includes(
+              "accentColor"
+            ) && (
+              <Text
+                as="label"
+                size="1"
+                color="gray"
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  flexDirection: "column",
+                  gap: "var(--space-2)",
+                }}
+              >
+                Accent color
+                <RadixColorPicker
+                  onColorSelected={(clr) =>
+                    settingsStore.setAccentColor(clr)
+                  }
+                  selectedColor={
+                    settingsStore.accentColor as "gray"
+                  }
+                  label="Select color"
+                />
+              </Text>
+            )}
+          </Flex>
+        </Card>
+        <Card style={{ flex: 1 }}>
+          <Flex gap="2" direction="column">
+            <Heading size="1" color="gray">
+              Background
+            </Heading>
+            <div>
+              <RadixColorPicker
+                onColorSelected={(clr) =>
+                  settingsStore.setBg(clr)
+                }
+                selectedColor={settingsStore.bg as "gray"}
+                label="Select color"
+              />
+            </div>
+            <Text size="1" color="gray">
+              or
+            </Text>
+            <ImageDropper
+              onChange={(img) => {
+                settingsStore.setBg(img);
+              }}
+              value={imgBg}
+              style={{ width: "100%", height: "140px" }}
             />
-            Dark mode
-          </Text>
-        )}
-        {!settingsStore.overrides.includes(
-          "panelBackground",
-        ) && (
-          <Text
-            as="label"
-            size="1"
-            color="gray"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "var(--space-2)",
-            }}
-          >
-            <Switch
-              size="1"
-              checked={
-                settingsStore.panelBackground === "translucent"
-              }
-              onCheckedChange={
-                settingsStore.togglePanelBackground
-              }
-            />
-            Translucent windows
-          </Text>
-        )}
-        {!settingsStore.overrides.includes("radius") && (
-          <Text
-            as="label"
-            size="1"
-            color="gray"
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              flexDirection: "column",
-              gap: "var(--space-2)",
-            }}
-          >
-            Radius
-            <Select.Root
-              value={settingsStore.radius ?? "medium"}
-              onValueChange={(value) =>
-                settingsStore.setRadius(value as "small")
-              }
-            >
-              <Select.Trigger variant="soft" />
-              <Select.Content>
-                <Select.Item value="none">None</Select.Item>
-                <Select.Item value="small">Small</Select.Item>
-                <Select.Item value="medium">Medium</Select.Item>
-                <Select.Item value="large">Large</Select.Item>
-                <Select.Item value="full">Full</Select.Item>
-              </Select.Content>
-            </Select.Root>
-          </Text>
-        )}
-        {!settingsStore.overrides.includes("accentColor") && (
-          <Text
-            as="label"
-            size="1"
-            color="gray"
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              flexDirection: "column",
-              gap: "var(--space-2)",
-            }}
-          >
-            Accent color
-            <RadixColorPicker
-              onColorSelected={(clr) =>
-                settingsStore.setAccentColor(clr)
-              }
-              selectedColor={settingsStore.accentColor as "gray"}
-              label="Select color"
-            />
-          </Text>
-        )}
-        <Heading size="1" color="gray">
-          Background
-        </Heading>
-        <div>
-          <RadixColorPicker
-            onColorSelected={(clr) => settingsStore.setBg(clr)}
-            selectedColor={settingsStore.bg as "gray"}
-            label="Select color"
-          />
-        </div>
-        <Text size="1" color="gray">
-          or
-        </Text>
-        <ImageDropper
-          onChange={(img) => {
-            settingsStore.setBg(img);
-          }}
-          value={imgBg}
-        />
+          </Flex>
+        </Card>
       </Flex>
     </Tabs.Content>
   );

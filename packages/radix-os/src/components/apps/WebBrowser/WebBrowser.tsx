@@ -9,7 +9,9 @@ export const WebBrowser: RadixOsAppComponent = (props) => {
     props.file.file.data.startsWith("http");
   const [redirect, setRedirect] = useState("");
   const [url, setUrl] = useState(
-    isLinked ? props.file?.file.data! : "https://haakon.dev"
+    isLinked
+      ? props.file?.file.data!
+      : "https://radix-os.netlify.app/"
   );
 
   useEffect(() => {
@@ -49,7 +51,9 @@ export const WebBrowser: RadixOsAppComponent = (props) => {
           isLinked
             ? props.file?.file.data!
             : redirect ||
-              (props.file ? "#" : "https://haakon.dev")
+              (props.file
+                ? "#"
+                : "https://radix-os.netlify.app/")
         }
         style={{
           flex: 1,

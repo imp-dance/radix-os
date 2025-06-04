@@ -8,14 +8,14 @@ import {
   SpeakerLoudIcon,
   VideoIcon,
 } from "@radix-ui/react-icons";
+import { AudioPlayer } from "./components/apps/AudioPlayer/AudioPlayer";
 import { CodeApp } from "./components/apps/Code/Code";
 import { ExplorerApp } from "./components/apps/Explorer/Explorer";
 import { ImageViewer } from "./components/apps/ImageViewer/ImageViewer";
 import { Settings } from "./components/apps/Settings/Settings";
 import { Terminal } from "./components/apps/Terminal/Terminal";
-import { WebBrowser } from "./components/apps/WebBrowser/WebBrowser";
-import { AudioPlayer } from "./components/apps/AudioPlayer/AudioPlayer";
 import { VideoPlayer } from "./components/apps/VideoPlayer/VideoPlayer";
+import { WebBrowser } from "./components/apps/WebBrowser/WebBrowser";
 
 export const defaultApps = [
   {

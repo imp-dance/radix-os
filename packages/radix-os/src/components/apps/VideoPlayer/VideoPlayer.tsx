@@ -1,8 +1,8 @@
 import { Button, Flex, Spinner, Text } from "@radix-ui/themes";
 import { useMemo, useState } from "react";
+import { useDecodeB64MT } from "../../../hooks/useDecodeBase64";
 import { RadixOsAppComponent } from "../../../stores/window";
 import { OpenFileDialog } from "../../OpenFileDialog/OpenFileDialog";
-import { useDecodeB64MT } from "../../../hooks/useDecodeBase64";
 
 export const VideoPlayer: RadixOsAppComponent = (props) => {
   const [openedFile, setOpenedFile] = useState("");
@@ -30,30 +30,33 @@ export const VideoPlayer: RadixOsAppComponent = (props) => {
           setOpen={setFileDialogOpen}
           onFileOpened={(file) => setOpenedFile(file.data)}
           fileDisabled={(file) =>
-            !file.launcher.includes("image")
+            !file.launcher.includes("video")
           }
         />
       )}
-      {trimmedData === "" && (
+      {trimmedData === "" ? (
         <div style={{ margin: "auto" }}>
           <Button onClick={() => setFileDialogOpen(true)}>
             Open file
           </Button>
         </div>
-      )}
-      {!videoUrl ? (
-        <Flex mx="auto" my="auto" align="center" gap="2">
-          <Spinner />
-          <Text mx="auto" my="auto" color="gray">
-            Loading video...
-          </Text>
-        </Flex>
       ) : (
-        <video
-          src={videoUrl}
-          style={{ maxWidth: "100%" }}
-          controls
-        />
+        <>
+          {!videoUrl ? (
+            <Flex mx="auto" my="auto" align="center" gap="2">
+              <Spinner />
+              <Text mx="auto" my="auto" color="gray">
+                Loading video...
+              </Text>
+            </Flex>
+          ) : (
+            <video
+              src={videoUrl}
+              style={{ maxWidth: "100%" }}
+              controls
+            />
+          )}
+        </>
       )}
     </Flex>
   );

@@ -5,7 +5,7 @@ import { themes as prismThemes } from "prism-react-renderer";
 const config: Config = {
   title: "Radix OS",
   tagline: "OS-like library for React, built with Radix",
-  favicon: "img/favicon.ico",
+  favicon: "img/rxos.svg",
 
   // Set the production url of your site here
   url: "https://radix-os.netlify.app",
@@ -52,10 +52,10 @@ const config: Config = {
     // Replace with your project's social card
     image: "img/docusaurus-social-card.jpg",
     navbar: {
-      title: "Radix OS",
+      title: "Radix OS Documentation",
       logo: {
         alt: "Radix OS Logo",
-        src: "img/logo.svg",
+        src: "img/rxos.svg",
       },
       items: [
         {

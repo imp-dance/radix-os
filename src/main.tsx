@@ -5,11 +5,8 @@ import {
   createZustandFsIntegration,
   RadixOS,
   setupApps,
-  //} from "../packages/radix-os/src/index";
-} from "radix-os";
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import "./index.css";
+} from "../packages/radix-os/src/index";
+//} from "radix-os";
 import {
   Box,
   Flex,
@@ -17,6 +14,9 @@ import {
   Link,
   Text,
 } from "@radix-ui/themes";
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "./index.css";
 
 function InfoApp() {
   return (
@@ -77,5 +77,5 @@ export const useAppLauncher = createUseAppLauncher(applications);
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <RadixOS fs={fs} applications={applications} />
-  </StrictMode>,
+  </StrictMode>
 );
