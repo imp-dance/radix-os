@@ -1,6 +1,6 @@
 {
   "name": "radix-os",
-  "version": "0.2.57",
+  "version": "0.2.6",
   "description": "A simulated operating system built with React and Radix UI",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -18,11 +18,12 @@
     "@radix-ui/react-toast": "^1.2.14",
     "@radix-ui/themes": "^3.1.4",
     "@tanstack/react-query": "^5.59.15",
+    "@types/lodash.debounce": "^4.0.9",
     "classnames": "^2.5.1",
     "idb-keyval": "^6.2.2",
-    "react": "^18.3.1",
+    "lodash.debounce": "^4.0.8",
     "react-confetti": "^6.1.0",
-    "react-dom": "^18.3.1",
+    "react-pdf": "^9.2.1",
     "rollup": "^4.24.0",
     "wavesurfer.js": "^7.9.5",
     "zod": "^3.23.8",
@@ -34,12 +35,18 @@
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^12.1.1",
     "@types/react": "^18.3.11",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "postcss": "^8.4.47",
     "rollup-plugin-dts": "^6.1.1",
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "rollup-plugin-postcss": "^4.0.2",
     "tslib": "^2.8.0",
     "typescript": "^5.6.3"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
   },
   "repository": {
     "type": "git",

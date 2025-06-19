@@ -7,9 +7,9 @@ sidebar_position: 2
 Radix OS comes with a preconfigured client-side file system that can be imported and passed directly:
 
 ```tsx
-import { createZustandFsIntegration, RadixOS } from "radix-os";
+import { createLocalFileSystem, RadixOS } from "radix-os";
 
-const fs = createZustandFsIntegration();
+const fs = createLocalFileSystem();
 
 createRoot(...).render(
     <StrictMode>
@@ -18,7 +18,7 @@ createRoot(...).render(
 );
 ```
 
-You can optionally pass an object with `initialTree`, or `onAction` (to listen to actions) to `createZustandFsIntegration`.
+You can optionally pass an object with `initialTree`, or `onAction` (to listen to actions) to `createLocalFileSystem`. This will set up a file system that uses zustand internally, and persists the data through IndexedDB (via a web worker).
 
 ## Create custom integration
 
@@ -45,11 +45,11 @@ You can drag and drop files from your desktop onto Radix OS. By default, Radix O
 const uploadHandler = async (
   file: File
 ): Promise<FsFile | null> => {
-  switch (file.type) {
-    case "image/pdf":
+  switch (true) {
+    case file.type.startsWith("image/"):
       return {
         name: file.name,
-        launcher: ["pdfViewer"],
+        launcher: ["my-custom-image-app"],
         data: await pdfFileToFsFile(file),
       };
       break;

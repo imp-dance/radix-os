@@ -14,6 +14,7 @@ export {
   setupApps,
 } from "./services/applications/setupApps";
 export {
+  createLocalFileSystem,
   createZustandFsIntegration,
   fsZustandIntegration,
   useFs,

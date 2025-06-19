@@ -18,6 +18,7 @@ There are 5 apps by default that come with RadixOS:
 | Code         | `code`     | Monaco editor for code and text            | Text                       |
 | Settings     | `settings` | System customization and formatting        | Tab-id                     |
 | Image Viewer | `image`    | Can open images                            | [data:image](https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Schemes/data) or SVG          |
+| PDF Viewer   | `pdf`      | Can open PDF files                         | `"${mimeType} B64 ${base64}"`|
 | Audio Player | `audio`    | Can open audio files                       | `"${mimeType} B64 ${base64}"`|
 | Video Player | `video`    | Can open video files                       | `"${mimeType} B64 ${base64}"`|
 

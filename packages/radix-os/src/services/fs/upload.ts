@@ -3,7 +3,7 @@ import { encodeBase64WithMimeType } from "../base64/base64";
 
 export async function createFile(
   file: File,
-  handler?: (file: File) => Promise<FsFile | null>,
+  handler?: (file: File) => Promise<FsFile | null>
 ): Promise<FsFile> {
   let data = "";
   let launcher = [];
@@ -25,6 +25,10 @@ export async function createFile(
         if (data.trim().startsWith("<")) break;
       }
       data = await parseImageFile(file);
+      break;
+    case typeIs("application/pdf"):
+      launcher.push("pdf");
+      data = await parsePdfFile(file);
       break;
     case typeIs("text/html"):
       launcher.push("web");
@@ -85,5 +89,9 @@ function parseAudioFile(file: File) {
 }
 
 function parseVideoFile(file: File) {
+  return encodeBase64WithMimeType(file);
+}
+
+function parsePdfFile(file: File) {
   return encodeBase64WithMimeType(file);
 }
