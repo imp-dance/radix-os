@@ -61,6 +61,8 @@ export const WebBrowser: RadixOsAppComponent = (props) => {
           padding: 0,
           margin: 0,
           borderRadius: "var(--radius-2)",
+          borderTopLeftRadius: 0,
+          borderTopRightRadius: 0,
         }}
       />
     </Flex>

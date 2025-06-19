@@ -1,6 +1,7 @@
 import {
   CardStackIcon,
   CodeIcon,
+  FileTextIcon,
   GearIcon,
   GlobeIcon,
   HomeIcon,
@@ -12,6 +13,7 @@ import { AudioPlayer } from "./components/apps/AudioPlayer/AudioPlayer";
 import { CodeApp } from "./components/apps/Code/Code";
 import { ExplorerApp } from "./components/apps/Explorer/Explorer";
 import { ImageViewer } from "./components/apps/ImageViewer/ImageViewer";
+import { PDFViewer } from "./components/apps/PDFViewer/PDFViewer";
 import { Settings } from "./components/apps/Settings/Settings";
 import { Terminal } from "./components/apps/Terminal/Terminal";
 import { VideoPlayer } from "./components/apps/VideoPlayer/VideoPlayer";
@@ -119,6 +121,19 @@ export const defaultApps = [
       title: "Video Player",
       icon: <VideoIcon />,
       initialHeight: 500,
+      initialWidth: 500,
+      minWidth: 300,
+    },
+  },
+  {
+    component: PDFViewer,
+    appId: "pdf",
+    appName: "PDF Viewer",
+    addToDesktop: false,
+    defaultWindowSettings: {
+      title: "PDF Viewer",
+      icon: <FileTextIcon />,
+      initialHeight: 600,
       initialWidth: 500,
       minWidth: 300,
     },

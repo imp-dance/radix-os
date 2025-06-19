@@ -51,10 +51,10 @@ export const Settings: RadixOsAppComponent = (props) => {
         <Tabs.Trigger value="shortcuts">Shortcuts</Tabs.Trigger>
       </Tabs.List>
       <Tabs.Content value="about" style={{ height: "100%" }}>
-        <Flex p="2" direction="column" gap="3" height="100%">
-          <Text size="2" color="gray">
+        <Flex p="2" direction="column" gap="2" height="100%">
+          <Text size="1" color="gray">
             RadixOS is an open source project built using{" "}
-            <ul>
+            <ul style={{ paddingLeft: "var(--space-4)" }}>
               <li>
                 <Flex gap="1" align="center">
                   <BrowserLink href="https://radix-ui.com">
@@ -105,19 +105,30 @@ export const Settings: RadixOsAppComponent = (props) => {
                   </Text>
                 </Flex>
               </li>
+              <li>
+                <Flex gap="1" align="center">
+                  <BrowserLink href="https://github.com/wojtekmaj/react-pdf">
+                    <Code>react-pdf</Code>
+                  </BrowserLink>
+                  <Text size="1" color="gray">
+                    PDF rendering
+                  </Text>
+                </Flex>
+              </li>
             </ul>
           </Text>
-          <Text size="2" color="gray">
+          <Text size="1" color="gray">
             The file system and settings are stored in{" "}
             <Code>IndexedDB</Code>.
           </Text>
-          <div>
+          <Flex gap="2">
             <Button
               variant="soft"
+              size="1"
               color="ruby"
               onClick={() => {
                 window.open(
-                  "https://github.com/imp-dance/radix-os/issues/new",
+                  "https://github.com/imp-dance/radix-os/issues/new?template=bug_report.md",
                   "_blank"
                 );
               }}
@@ -127,7 +138,23 @@ export const Settings: RadixOsAppComponent = (props) => {
                 <ExternalLinkIcon />
               </Flex>
             </Button>
-          </div>
+            <Button
+              variant="soft"
+              size="1"
+              color="indigo"
+              onClick={() => {
+                window.open(
+                  "https://github.com/imp-dance/radix-os/issues/new?template=feature_request.md",
+                  "_blank"
+                );
+              }}
+            >
+              <Flex gap="3" align="center">
+                Suggest a feature
+                <ExternalLinkIcon />
+              </Flex>
+            </Button>
+          </Flex>
           <Text size="1" color="gray" mt="auto">
             Made with ❤️ by{" "}
             <BrowserLink

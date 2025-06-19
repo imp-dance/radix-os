@@ -8,8 +8,8 @@ import {
 } from "@radix-ui/themes";
 import "@radix-ui/themes/styles.css";
 import {
+  createLocalFileSystem,
   createUseAppLauncher,
-  createZustandFsIntegration,
   RadixOS,
   setupApps,
 } from "radix-os";
@@ -69,7 +69,7 @@ export const applications = setupApps([
   },
 ]);
 
-const fs = createZustandFsIntegration({});
+const fs = createLocalFileSystem({});
 
 export const useAppLauncher = createUseAppLauncher(applications);
 

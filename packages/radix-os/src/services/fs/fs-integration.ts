@@ -3,7 +3,7 @@ import {
   FileSystemStore,
   FsFile,
   FsNode,
-  useFileSystemStore
+  useFileSystemStore,
 } from "../../stores/fs";
 import { findNodeByPath } from "./tree-helpers";
 
@@ -20,6 +20,7 @@ export type FsIntegration = {
     file: Partial<FsFile>
   ) => Promise<boolean>;
   removeFile: (path: string) => Promise<boolean>;
+  reset?: () => void;
 };
 
 export const fsContext = createContext<FsIntegration | null>(
@@ -120,7 +121,7 @@ export const createZustandFsIntegration = (opts?: {
         } catch (err) {
           return resolve(false);
         }
-      })
+      }),
   };
   return fsZustandIntegration;
 };
@@ -186,5 +187,7 @@ export const fsZustandIntegration: FsIntegration = {
       } catch (err) {
         return resolve(false);
       }
-    })
+    }),
 };
+
+export const createLocalFileSystem = createZustandFsIntegration;

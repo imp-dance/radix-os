@@ -4,13 +4,14 @@ sidebar_position: 1
 
 # Radix OS
 
-* 🏗️ Build your own operating system using [React](https://react.dev) & [Radix UI](https://www.radix-ui.com/)
-* 🚀 [Create applications](/apps#creating-your-own-applications) as react components
-* ⚙️ [Customizable](/customization) and configurable
-* 🗂️ Plug in to your own async [file system](/fs) (or use our local solution)
-* 💾 Deploy wherever you want
+- 🏗️ Build your own operating system using [React](https://react.dev) & [Radix UI](https://www.radix-ui.com/)
+- 🚀 [Create applications](/apps#creating-your-own-applications) as react components
+- ⚙️ [Customizable](/customization) and configurable
+- 🗂️ Plug in to your own async [file system](/fs) (or use our local solution)
+- 💾 Deploy wherever you want
 
 ### [🚀 Live demo](https://imp-dance.github.io/radix-os/)
+
 > Play with a minimally configured deployed version of Radix OS.
 
 [![Preview](/sh-2.jpg)](https://imp-dance.github.io/radix-os/)
@@ -39,6 +40,25 @@ We also recommend that you install [`@radix-ui/react-icons`](https://www.radix-u
 
 Set up a few core exports in a separate file.
 
+:::info
+Ensure you have the following CSS globally applied:
+
+```css
+body,
+html {
+  padding: 0;
+  margin: 0;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+}
+```
+
+:::
+
 ```tsx title="/services/radix-os.ts"
 import {
   createZustandFsIntegration,
@@ -57,7 +77,7 @@ export const fs = createZustandFsIntegration();
 Add the `RadixOS` app where you want to mount the OS, and import the applications and file system.
 
 ```tsx title="/main.tsx"
-import '@radix-ui/themes/styles.css';
+import '@radix-ui/themes/styles.css'; // <- 🚨 important
 import {
   RadixOS,
 } from "radix-os;
@@ -68,9 +88,9 @@ export default function App(){
 }
 ```
 
-* [Learn more about creating your own applications](/apps#creating-your-own-applications)
-* [Setting up a custom file system](/fs#create-custom-integration)
-* [FAQ](/faq)
+- [Learn more about creating your own applications](/apps#creating-your-own-applications)
+- [Setting up a custom file system](/fs#create-custom-integration)
+- [FAQ](/faq)
 
 ### Additional information
 
