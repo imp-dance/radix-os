@@ -57,7 +57,7 @@ export const defaultApps = [
       title: "Terminal",
       icon: <CardStackIcon />,
       initialHeight: 350,
-      initialWidth: 515,
+      initialWidth: 525,
       scrollable: false,
     },
   },

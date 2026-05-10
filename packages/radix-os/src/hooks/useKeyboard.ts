@@ -71,16 +71,23 @@ export function useKeydowns(...listeners: Array<KeydownOpts>) {
   useEffect(() => {
     const handlers = listeners.map((listener) => {
       const handler = (e: KeyboardEvent) => {
-        if (
-          e.key.toLowerCase() === listener.key.toLowerCase() &&
-          (!listener.windowId ||
-            listener.windowId ===
-              useWindowStore.getState().activeWindow?.id) &&
+        const matchesKeyCode =
+          e.key.toLowerCase() === listener.key.toLowerCase();
+        const matchesActiveWindow =
+          !listener.windowId ||
+          listener.windowId ===
+            useWindowStore.getState().activeWindow?.id;
+        const matchesMetaKeys =
           (!listener.metaKey || e.metaKey) &&
           (!listener.altKey || e.altKey) &&
           (!listener.shiftKey || e.shiftKey) &&
-          (!listener.ctrlKey || e.ctrlKey) &&
-          !listener.disabled
+          (!listener.ctrlKey || e.ctrlKey);
+
+        if (
+          !listener.disabled &&
+          matchesKeyCode &&
+          matchesActiveWindow &&
+          matchesMetaKeys
         ) {
           e.preventDefault();
           e.stopPropagation();

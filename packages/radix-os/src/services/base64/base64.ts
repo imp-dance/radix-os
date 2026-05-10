@@ -1,140 +1,143 @@
 import { decoderWorker } from "./decoder-worker";
 export const MIME_BASE64_SEPARATOR = " B64 ";
 
-const decoderWorkerBlob = new Blob([decoderWorker], {
-  type: "application/javascript",
-});
+/*
+A string represented by two parts:
+"{mimeType} B64 {base64}"
+Ex: ""
+*/
+type RB64 = string & { __brand: "rb64" };
+const brandRB64 = (input: string) => input as RB64;
 
-const workerUrl =
-  typeof window !== "undefined"
-    ? window.URL.createObjectURL(decoderWorkerBlob)
-    : "";
-
-export async function encodeBase64WithMimeType(
-  file: File,
-): Promise<string> {
-  const encoded = await fileToBase64(file);
-  return (
-    encoded.mimeType + MIME_BASE64_SEPARATOR + encoded.base64
+export const encodeRb64 = (opts: {
+  mimeType: string;
+  base64: string;
+}) => {
+  const { mimeType, base64 } = opts;
+  return brandRB64(
+    `${mimeType}${MIME_BASE64_SEPARATOR}${base64}`,
   );
-}
-
-export function decodeBase64WithMimeType(
-  file: string,
-): Promise<Blob> {
-  const [mimeType, base64] = file.split(MIME_BASE64_SEPARATOR);
-  return base64ToBlobAsync(base64, mimeType);
-}
-
-export function fileToBase64(
-  file: File,
-): Promise<{ base64: string; mimeType: string }> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64 = (reader.result as string).split(",")[1]; // Remove the data URL prefix
-      resolve({ base64, mimeType: file.type });
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file); // This gives a data URL with MIME type prefix
-  });
-}
-
-const decodeWorker = new Worker(workerUrl);
-
-export async function base64ToBlobAsync(
-  base64: string,
-  mimeType: string,
-) {
-  return sendToWorker(decodeWorker, base64, mimeType);
-}
-
-let i = 0;
-const generateId = () => {
-  i++;
-  return i.toString();
+};
+export const decodeRb64 = (input: RB64 | string) => {
+  const [mimeType, base64] = input.split(MIME_BASE64_SEPARATOR);
+  if (!base64) throw new Error("Invalid RB64 string");
+  return {
+    mimeType,
+    base64,
+  };
 };
 
-export async function sendToWorker(
-  worker: Worker,
-  base64: string,
-  mimeType: string,
-): Promise<Blob> {
-  const id = generateId();
-  return new Promise((resolve, reject) => {
-    worker.postMessage({
-      type: "mimeType",
-      data: mimeType,
-      id,
+export class B64Worker {
+  private id: number;
+  private worker: Worker;
+  private chunkSize: number;
+
+  constructor(opts?: { chunkSize?: number }) {
+    this.id = 0;
+    this.worker = this.createWorker();
+    this.chunkSize = opts?.chunkSize ?? 1_000_000;
+  }
+
+  private createWorker() {
+    const decoderWorkerBlob = new Blob([decoderWorker], {
+      type: "application/javascript",
     });
-    sendChunks(worker, base64, id);
-    const listener = (e: MessageEvent) => {
-      const data = e.data as {
-        type: string;
-        blob?: Blob;
-        error?: string;
-        id: string;
+    const workerUrl =
+      typeof window !== "undefined"
+        ? window.URL.createObjectURL(decoderWorkerBlob)
+        : "";
+    return new Worker(workerUrl);
+  }
+
+  private generateId() {
+    this.id++;
+    return this.id.toString();
+  }
+
+  encodeFile(file: File) {
+    return new Promise<{ base64: string; mimeType: string }>(
+      (resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          if (typeof reader.result !== "string") {
+            const actualType =
+              reader.result === null ? "null" : "ArrayBuffer";
+            throw new Error(
+              `Encountered unexpected "${actualType}" instead of "string" when reading file`,
+            );
+          }
+          const [_dataUrl, base64] = reader.result.split(",");
+          resolve({ base64, mimeType: file.type });
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      },
+    );
+  }
+
+  decodeFile(file: { base64: string; mimeType: string }) {
+    const { mimeType, base64 } = file;
+
+    const id = this.generateId();
+    /*
+      Sends file to worker in three parts:
+      * mimeType
+      * chunks (up to many iterations)
+      * end
+      
+      The worker stores the data in a buffer indexed by the request id.
+      After sending the end-signal (last chunk) - the base64 is decoded
+      on the worker and sent back, then the chunks are cleared from memory.
+    */
+    return new Promise<Blob>((resolve, reject) => {
+      this.worker.postMessage({
+        type: "mimeType",
+        data: mimeType,
+        id,
+      });
+      this.sendChunks(base64, id);
+      const listener = (e: MessageEvent) => {
+        const data = e.data as {
+          type: string;
+          blob?: Blob;
+          error?: string;
+          id: string;
+        };
+        if (data.id !== id) return;
+        if (data.type === "error") {
+          reject(data.error);
+          this.worker.removeEventListener("message", listener);
+          return;
+        }
+        if (data.blob) {
+          resolve(data.blob);
+          this.worker.removeEventListener("message", listener);
+        }
       };
-      if (data.id !== id) return;
-      if (data.type === "error") {
-        reject(data.error);
-        worker.removeEventListener("message", listener);
-        return;
-      }
-      if (data.blob) {
-        resolve(data.blob);
-        worker.removeEventListener("message", listener);
-      }
-    };
-    worker.addEventListener("message", listener);
-  });
-}
-
-export function base64ToBlob(
-  base64: string,
-  mimeType: string,
-): Blob {
-  const byteCharacters = atob(base64);
-  const byteArrays = [];
-
-  for (
-    let offset = 0;
-    offset < byteCharacters.length;
-    offset += 512
-  ) {
-    const slice = byteCharacters.slice(offset, offset + 512);
-
-    const byteNumbers = new Array(slice.length);
-    for (let i = 0; i < slice.length; i++) {
-      byteNumbers[i] = slice.charCodeAt(i);
-    }
-
-    const byteArray = new Uint8Array(byteNumbers);
-    byteArrays.push(byteArray);
+      this.worker.addEventListener("message", listener);
+    });
   }
 
-  return new Blob(byteArrays, { type: mimeType });
-}
-
-function sendChunks(
-  worker: Worker,
-  base64: string,
-  id: string,
-  chunkSize = 1_000_000,
-) {
-  let i = 0;
-  const total = base64.length;
-
-  function sendNext() {
-    if (i < total) {
-      const chunk = base64.slice(i, i + chunkSize);
-      worker.postMessage({ type: "chunk", data: chunk, id });
-      i += chunkSize;
-      setTimeout(sendNext, 0);
-    } else {
-      worker.postMessage({ type: "end", id });
+  private sendChunks(base64: string, id: string) {
+    let i = 0;
+    const chunkSize = this.chunkSize;
+    const total = base64.length;
+    const worker = this.worker;
+    function sendNext() {
+      if (i < total) {
+        const chunk = base64.slice(i, i + chunkSize);
+        worker.postMessage({ type: "chunk", data: chunk, id });
+        i += chunkSize;
+        // We use setTimeout to yield back to the event loop inbetween iterations
+        // this is to ensure a smooth ui while the file is being sent for decoding
+        setTimeout(sendNext, 0);
+      } else {
+        worker.postMessage({ type: "end", id });
+      }
     }
-  }
 
-  sendNext();
+    sendNext();
+  }
 }
+
+export const base64Worker = new B64Worker();

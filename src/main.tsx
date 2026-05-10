@@ -12,7 +12,7 @@ import {
   createUseAppLauncher,
   RadixOS,
   setupApps,
-} from "radix-os";
+} from "radix-os"; // ../packages/radix-os/src
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
@@ -76,5 +76,5 @@ export const useAppLauncher = createUseAppLauncher(applications);
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <RadixOS fs={fs} applications={applications} />
-  </StrictMode>
+  </StrictMode>,
 );

@@ -1,21 +1,23 @@
 import {
   useMutation,
   useQuery,
-  useQueryClient
+  useQueryClient,
 } from "@tanstack/react-query";
 import { useFs } from "../../services/fs/fs-integration";
-import { FsFile } from "../../stores/fs";
 import { useFavouriteFolderStore } from "../../stores/explorer";
+import { FsFile } from "../../stores/fs";
 
 export const useFileSystemQuery = (path: string) => {
   const fs = useFs();
   return useQuery({
     queryFn: () => fs.readDir(path),
-    queryKey: ["fs", path]
+    queryKey: ["fs", path],
   });
 };
 
-export const useUpdateFileMutation = () => {
+export const useUpdateFileMutation = (opts?: {
+  onSuccess?: (data: boolean) => void;
+}) => {
   const fs = useFs();
   const queryClient = useQueryClient();
   const favouritesStore = useFavouriteFolderStore();
@@ -24,14 +26,16 @@ export const useUpdateFileMutation = () => {
       path: string;
       file: Partial<FsFile>;
     }) => fs.updateFile(args.path, args.file),
-    onSuccess: (_, { path, file: { name } }) => {
+    onSuccess: (result, { path, file: { name } }) => {
       queryClient.invalidateQueries({
         predicate: (query) => {
           return query.queryKey.includes("fs");
-        }
+        },
       });
+      opts?.onSuccess?.(result);
       // update favourites if renamed
       if (
+        result === true &&
         name &&
         favouritesStore.favouriteFolders.find((p) => p === path)
       ) {
@@ -41,7 +45,7 @@ export const useUpdateFileMutation = () => {
         favouritesStore.addFolderToFavourites(newPath.join("/"));
         favouritesStore.removeFolderFromFavourites(path);
       }
-    }
+    },
   });
 };
 
@@ -51,7 +55,7 @@ export const useRemoveFileMutation = () => {
   return useMutation({
     mutationFn: (path: string) => fs.removeFile(path),
     onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["fs"] })
+      queryClient.invalidateQueries({ queryKey: ["fs"] }),
   });
 };
 
@@ -67,9 +71,9 @@ export const useCreateFileMutation = () => {
       queryClient.invalidateQueries({
         predicate: (query) => {
           return query.queryKey.includes("fs");
-        }
+        },
       });
-    }
+    },
   });
 };
 
@@ -77,14 +81,18 @@ export const useCreateDirMutation = () => {
   const fs = useFs();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (path: string) => fs.makeDir(path),
+    mutationFn: async (path: string) => {
+      const res = await fs.makeDir(path);
+      await new Promise((res) => setTimeout(res, 2000));
+      return res;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({
         predicate: (query) => {
           return query.queryKey.includes("fs");
-        }
+        },
       });
-    }
+    },
   });
 };
 
@@ -98,8 +106,8 @@ export const useMoveMutation = () => {
       queryClient.invalidateQueries({
         predicate: (query) => {
           return query.queryKey.includes("fs");
-        }
+        },
       });
-    }
+    },
   });
 };

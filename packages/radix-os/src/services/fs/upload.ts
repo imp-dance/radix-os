@@ -1,9 +1,9 @@
 import { FsFile } from "../../stores/fs";
-import { encodeBase64WithMimeType } from "../base64/base64";
+import { base64Worker, encodeRb64 } from "../base64/base64";
 
 export async function createFile(
   file: File,
-  handler?: (file: File) => Promise<FsFile | null>
+  handler?: (file: File) => Promise<FsFile | null>,
 ): Promise<FsFile> {
   let data = "";
   let launcher = [];
@@ -84,14 +84,17 @@ function parseTextFile(file: File): Promise<string> {
   });
 }
 
-function parseAudioFile(file: File) {
-  return encodeBase64WithMimeType(file);
+async function parseAudioFile(file: File) {
+  const res = await base64Worker.encodeFile(file);
+  return encodeRb64(res);
 }
 
-function parseVideoFile(file: File) {
-  return encodeBase64WithMimeType(file);
+async function parseVideoFile(file: File) {
+  const res = await base64Worker.encodeFile(file);
+  return encodeRb64(res);
 }
 
-function parsePdfFile(file: File) {
-  return encodeBase64WithMimeType(file);
+async function parsePdfFile(file: File) {
+  const res = await base64Worker.encodeFile(file);
+  return encodeRb64(res);
 }

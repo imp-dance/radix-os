@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { decodeBase64WithMimeType } from "../services/base64/base64";
+import {
+  base64Worker,
+  decodeRb64,
+} from "../services/base64/base64";
 
 export function useDecodeB64MT(input: string) {
   const [output, setOutput] = useState<Blob | null>(null);
@@ -9,7 +12,8 @@ export function useDecodeB64MT(input: string) {
     if (!input) return;
     if (!startedRef.current) {
       startedRef.current = true;
-      decodeBase64WithMimeType(input).then((blob) => {
+      const file = decodeRb64(input);
+      base64Worker.decodeFile(file).then((blob) => {
         startedRef.current = false;
         setOutput(blob);
       });

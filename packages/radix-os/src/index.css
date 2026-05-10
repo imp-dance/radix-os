@@ -52,4 +52,17 @@
 
 .rxos-editor {
   filter: saturate(0.5);
+  transition: 0s all ease-in-out;
+}
+
+@keyframes rxosAnimateSpin {
+  from {
+    rotate: 0deg;
+  }
+  to {
+    rotate: 360deg;
+  }
+}
+.rxos-animate-spin {
+  animation: rxosAnimateSpin 1s linear infinite;
 }

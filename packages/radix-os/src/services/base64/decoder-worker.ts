@@ -1,4 +1,4 @@
-export const decoderWorker = `const buffers = {};
+export const decoderWorker = /*js*/ `const buffers = {};
 
 self.onmessage = function (e) {
   const { type, data, id } = e.data;
@@ -7,11 +7,14 @@ self.onmessage = function (e) {
       base64Buffer: "",
       mimeTypeBuffer: data,
     };
+    return;
   }
   if (type === "chunk") {
     if (!buffers[id]) return;
     buffers[id].base64Buffer += data;
-  } else if (type === "end") {
+    return;
+  }
+  if (type === "end") {
     if (!buffers[id]) return;
     try {
       const binaryString = atob(buffers[id].base64Buffer);
@@ -27,21 +30,12 @@ self.onmessage = function (e) {
       });
       self.postMessage({ type: "result", blob, id });
     } catch (err) {
-      if (err instanceof Error) {
-        self.postMessage({
-          type: "error",
-          error: err.message,
-          id,
-        });
-      } else {
-        self.postMessage({
-          type: "error",
-          error: "error",
-          id,
-        });
-      }
+      self.postMessage({
+        type: "error",
+        error: err instanceof Error ? err.message : String(err),
+      });
     }
 
-    buffers[id] = null;
+    delete buffers[id];
   }
 };`;

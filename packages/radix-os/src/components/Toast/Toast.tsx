@@ -25,6 +25,7 @@ type Toast = {
   type?: "foreground" | "background";
   description?: ReactNode;
   dismissText?: ReactNode;
+  duration?: number;
   action?: {
     onClick: () => void;
     altText?: string;
@@ -75,7 +76,12 @@ export function ToastProvider(props: { children: ReactNode }) {
       >
         {props.children}
         {toasts.map((toast, i) => (
-          <Root asChild type={toast.type} key={i}>
+          <Root
+            asChild
+            type={toast.type}
+            key={i}
+            duration={toast.duration}
+          >
             <Card size="2" style={{ minWidth: 250 }} mt="3">
               <Flex direction="column" gap="1">
                 <Title>

@@ -1,4 +1,7 @@
-import { ArrowRightIcon } from "@radix-ui/react-icons";
+import {
+  ArrowRightIcon,
+  SlashIcon,
+} from "@radix-ui/react-icons";
 import {
   Box,
   Code,
@@ -32,7 +35,6 @@ import { Command, helpText } from "./constants";
 import { parseFs } from "./modules/fs";
 import { parseOpen } from "./modules/open";
 import { extractFlags, joinQuotedArgs } from "./utils";
-import { useToast } from "../../Toast/Toast";
 
 export type TerminalPlugin = {
   matcher: (command: string, args: string[]) => boolean;
@@ -75,6 +77,12 @@ export const Terminal = (
   const path = useRef<string[]>(
     initialPath?.split("/").filter(Boolean) ?? ["Home"],
   );
+
+  const isLoadingMutation = [
+    moveMutation,
+    updateFile,
+    createFolderMutation,
+  ].some((v) => v.isPending);
 
   const [output, setOutput] = useState<ReactNode[]>([
     <Code size="1">Type "help" to get started</Code>,
@@ -293,6 +301,15 @@ export const Terminal = (
         gridTemplateRows: "1fr min-content",
       }}
     >
+      <style>{`
+@keyframes rxosAnimateSpin {
+  from {
+    rotate: 0deg;
+  }
+  to {
+    rotate: 360deg;
+  }
+}`}</style>
       <ScrollArea
         ref={scrollRef}
         scrollbars="both"
@@ -313,7 +330,20 @@ export const Terminal = (
         >
           {path.current.map((p) => `/${p}`).join("")}
         </Text>
-        <ArrowRightIcon color="gray" style={{ flexShrink: 0 }} />
+        {isLoadingMutation ? (
+          <SlashIcon
+            style={{
+              animation:
+                "rxosAnimateSpin 1.25s ease-in-out infinite",
+              flexShrink: 0,
+            }}
+          />
+        ) : (
+          <ArrowRightIcon
+            color="gray"
+            style={{ flexShrink: 0 }}
+          />
+        )}
         <TextField.Root
           variant="surface"
           color="gray"

@@ -1,4 +1,4 @@
-export const fsWorker = `
+export const fsWorker = /*js*/ `
 let db;
 
 self.onmessage = function(e) {
@@ -130,13 +130,13 @@ async function openFsDb() {
       if (data.action === "open") {
         fsWorkerInstance.removeEventListener(
           "message",
-          listener
+          listener,
         );
         if (data.success) {
           resolve(true);
         } else {
           reject(
-            new Error("Failed to open file system database")
+            new Error("Failed to open file system database"),
           );
         }
       }
@@ -164,7 +164,7 @@ async function getFsData(key: string) {
       if (data.action === "get") {
         fsWorkerInstance.removeEventListener(
           "message",
-          listener
+          listener,
         );
         if (data.success && data.data) {
           resolve(JSON.parse(data.data.data as string));
@@ -191,12 +191,11 @@ async function setFsData(key: string, value: string) {
       if (data.action === "add") {
         fsWorkerInstance.removeEventListener(
           "message",
-          listener
+          listener,
         );
         if (data.success) {
           resolve(true);
         } else {
-          console.log(data);
           reject(new Error("Failed to set file system data"));
         }
       }
@@ -219,7 +218,7 @@ async function removeFsData(key: string) {
       if (data.action === "delete") {
         fsWorkerInstance.removeEventListener(
           "message",
-          listener
+          listener,
         );
         if (data.success) {
           resolve(true);
@@ -242,13 +241,13 @@ async function clearFsDb() {
       if (data.action === "clear") {
         fsWorkerInstance.removeEventListener(
           "message",
-          listener
+          listener,
         );
         if (data.success) {
           resolve(true);
         } else {
           reject(
-            new Error("Failed to clear file system database")
+            new Error("Failed to clear file system database"),
           );
         }
       }

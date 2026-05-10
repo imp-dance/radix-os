@@ -19,7 +19,6 @@ import {
   Cross1Icon,
   FileIcon,
   GlobeIcon,
-  SpeakerLoudIcon,
   StarIcon,
 } from "@radix-ui/react-icons";
 import {
@@ -30,11 +29,13 @@ import {
   ContextMenu,
   Dialog,
   Flex,
+  ScrollArea,
   Select,
   Spinner,
   Text,
   TextField,
 } from "@radix-ui/themes";
+import { useQueryClient } from "@tanstack/react-query";
 import React, {
   ReactNode,
   useEffect,
@@ -49,12 +50,15 @@ import {
   useRemoveFileMutation,
   useUpdateFileMutation,
 } from "../../../api/fs/fs-api";
+import { useFileDrop } from "../../../hooks/useFileDrop";
 import { useUntypedAppContext } from "../../../services/applications/launcher";
+import { useFs } from "../../../services/fs/fs-integration";
 import {
   isFile,
   isFolder,
   parsePath,
 } from "../../../services/fs/tree-helpers";
+import { createFile } from "../../../services/fs/upload";
 import { useFavouriteFolderStore } from "../../../stores/explorer";
 import { FsFile, FsNode } from "../../../stores/fs";
 import {
@@ -62,11 +66,6 @@ import {
   RadixOsAppComponent,
   useWindowStore,
 } from "../../../stores/window";
-import { useQueryClient } from "@tanstack/react-query";
-import { useFileDrop } from "../../../hooks/useFileDrop";
-import { createFile } from "../../../services/fs/upload";
-import { useFs } from "../../../services/fs/fs-integration";
-import { useRawAppLauncher } from "../../..";
 
 export const ExplorerApp: RadixOsAppComponent = (props) => (
   <Explorer
@@ -82,6 +81,7 @@ export function Explorer({
   disableFiles,
   fileDisabled,
   onRequestOpenFile,
+  hideFavourites,
 }: {
   initialPath?: string;
   windowId?: symbol;
@@ -89,6 +89,7 @@ export function Explorer({
   disableFiles?: boolean;
   fileDisabled?: (file: FsFile) => boolean;
   onRequestOpenFile?: (file: FsFile, path: string) => void;
+  hideFavourites?: boolean;
 }) {
   const { openFile } = useUntypedAppContext();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -103,6 +104,7 @@ export function Explorer({
   const fs = useFs();
   const prevSelected = useRef<string>("");
   const windows = useWindowStore((s) => s.windows);
+  const pathContainerRef = useRef<HTMLDivElement>(null);
   const window = windows.find((w) => w.id === windowId);
   const [selected, setSelected] = useState<string[]>([]);
   const [createFolderOpen, setCreateFolderOpen] =
@@ -151,6 +153,15 @@ export function Explorer({
       typeof newPath === "string" ? newPath : newPath(path);
     onPathChange?.(nextValue);
   };
+
+  useEffect(() => {
+    if (pathContainerRef.current) {
+      pathContainerRef.current.scrollTo({
+        left: pathContainerRef.current.scrollWidth,
+        behavior: "smooth",
+      });
+    }
+  }, [path]);
 
   return (
     <DndContext
@@ -214,8 +225,11 @@ export function Explorer({
                     predicate: (r) => r.queryKey.includes("fs"),
                   });
                 });
-              } catch (e) {
-                console.log(e);
+              } catch (err) {
+                console.warn(
+                  `Failed to create file: ${e.dataTransfer.files[0].name}`,
+                );
+                console.warn(err);
               }
             }}
             pt="5"
@@ -242,47 +256,51 @@ export function Explorer({
           onOpenChange={setRenameFileOpen}
           path={renamingNode}
         />
-        <Flex
-          direction="column"
-          gap="2"
-          style={{
-            width: 200,
-            borderRight: "1px solid var(--gray-5)",
-            height: "100%",
-          }}
-          p="2"
-          pr="4"
-        >
-          {favourites.map((favourite) => (
-            <FavouriteItem
-              key={
-                favourite +
-                (isDragging === favourite ||
-                (isDragging !== false &&
-                  selected.find(
-                    (s) => parsePath(s) === parsePath(favourite),
-                  ))
-                  ? true
-                  : false)
-              }
-              favourite={favourite}
-              onClick={() => setPath(parsePath(favourite))}
-              disabled={
-                isDragging === favourite ||
-                (isDragging !== false &&
-                  selected.find(
-                    (s) => parsePath(s) === parsePath(favourite),
-                  ))
-                  ? true
-                  : false
-              }
-              onRename={() => {
-                setRenamingNode(favourite);
-                setRenameFileOpen(true);
-              }}
-            />
-          ))}
-        </Flex>
+        {!hideFavourites && (
+          <Flex
+            direction="column"
+            gap="2"
+            style={{
+              width: 200,
+              borderRight: "1px solid var(--gray-5)",
+              height: "100%",
+            }}
+            p="2"
+            pr="4"
+          >
+            {favourites.map((favourite) => (
+              <FavouriteItem
+                key={
+                  favourite +
+                  (isDragging === favourite ||
+                  (isDragging !== false &&
+                    selected.find(
+                      (s) =>
+                        parsePath(s) === parsePath(favourite),
+                    ))
+                    ? true
+                    : false)
+                }
+                favourite={favourite}
+                onClick={() => setPath(parsePath(favourite))}
+                disabled={
+                  isDragging === favourite ||
+                  (isDragging !== false &&
+                    selected.find(
+                      (s) =>
+                        parsePath(s) === parsePath(favourite),
+                    ))
+                    ? true
+                    : false
+                }
+                onRename={() => {
+                  setRenamingNode(favourite);
+                  setRenameFileOpen(true);
+                }}
+              />
+            ))}
+          </Flex>
+        )}
         <ContextMenu.Root key={path}>
           <ContextMenu.Trigger>
             <div
@@ -298,78 +316,85 @@ export function Explorer({
                 pr="2"
                 pt="2"
               >
-                <Flex
-                  gap="1"
-                  mb="3"
-                  align="center"
-                  height="24px"
+                <ScrollArea
+                  scrollbars="horizontal"
+                  ref={pathContainerRef}
                 >
-                  <Step
-                    path={""}
-                    name="Home"
-                    isCurrent={steps.length === 0}
-                    onClick={() => setPath("")}
-                  />
-                  {steps.map((_, i) => (
-                    <React.Fragment key={i}>
-                      <CaretRightIcon color="gray" />
-                      <Step
-                        key={i}
-                        path={steps.slice(0, i + 1).join("/")}
-                        isCurrent={i === steps.length - 1}
-                        onClick={() =>
-                          setPath(
-                            steps.slice(0, i + 1).join("/"),
-                          )
-                        }
-                      />
-                    </React.Fragment>
-                  ))}
-                  {treeQuery.isFetching ? (
-                    <Spinner size="1" ml="auto" />
-                  ) : null}
-                  <Button
-                    onClick={() =>
-                      setSortDir((p) =>
-                        p === "asc"
-                          ? "desc"
-                          : p === "desc"
-                            ? null
-                            : "asc",
-                      )
-                    }
-                    variant="ghost"
-                    color={sortDir === null ? "gray" : undefined}
-                    size="2"
-                    ml={treeQuery.isFetching ? "3" : "auto"}
-                    mr="2"
-                    style={{
-                      display: "block",
-                      marginLeft: treeQuery.isFetching
-                        ? undefined
-                        : "auto",
-                      marginTop: treeQuery.isFetching
-                        ? "calc(var(--space-2) * -1)"
-                        : "calc(var(--space-1) * -1)",
-                    }}
+                  <Flex
+                    gap="1"
+                    mb="3"
+                    align="center"
+                    height="24px"
                   >
-                    {sortDir === "asc" ? (
-                      <ArrowDownIcon
-                        style={{
-                          width: "0.875em",
-                          height: "0.875em",
-                        }}
-                      />
-                    ) : (
-                      <ArrowUpIcon
-                        style={{
-                          width: "0.875em",
-                          height: "0.875em",
-                        }}
-                      />
-                    )}
-                  </Button>
-                </Flex>
+                    <Step
+                      path={""}
+                      name="Home"
+                      isCurrent={steps.length === 0}
+                      onClick={() => setPath("")}
+                    />
+                    {steps.map((_, i) => (
+                      <React.Fragment key={i}>
+                        <CaretRightIcon color="gray" />
+                        <Step
+                          key={i}
+                          path={steps.slice(0, i + 1).join("/")}
+                          isCurrent={i === steps.length - 1}
+                          onClick={() =>
+                            setPath(
+                              steps.slice(0, i + 1).join("/"),
+                            )
+                          }
+                        />
+                      </React.Fragment>
+                    ))}
+                    {treeQuery.isFetching ? (
+                      <Spinner size="1" ml="auto" />
+                    ) : null}
+                    <Button
+                      onClick={() =>
+                        setSortDir((p) =>
+                          p === "asc"
+                            ? "desc"
+                            : p === "desc"
+                              ? null
+                              : "asc",
+                        )
+                      }
+                      variant="ghost"
+                      color={
+                        sortDir === null ? "gray" : undefined
+                      }
+                      size="2"
+                      ml={treeQuery.isFetching ? "3" : "auto"}
+                      mr="2"
+                      style={{
+                        display: "block",
+                        marginLeft: treeQuery.isFetching
+                          ? undefined
+                          : "auto",
+                        marginTop: treeQuery.isFetching
+                          ? "calc(var(--space-2) * -1)"
+                          : "calc(var(--space-1) * -1)",
+                      }}
+                    >
+                      {sortDir === "asc" ? (
+                        <ArrowDownIcon
+                          style={{
+                            width: "0.875em",
+                            height: "0.875em",
+                          }}
+                        />
+                      ) : (
+                        <ArrowUpIcon
+                          style={{
+                            width: "0.875em",
+                            height: "0.875em",
+                          }}
+                        />
+                      )}
+                    </Button>
+                  </Flex>
+                </ScrollArea>
 
                 <Flex gap="3" direction="column">
                   <DragOverlay
@@ -387,7 +412,9 @@ export function Explorer({
                         cursor: "default",
                         pointerEvents: "none",
                         width: "max-content",
-                        transform: `translate(-${(window?.x ?? 0) + 0}px, -${(window?.y ?? 0) + 22}px)`,
+                        transform: `translate(-${
+                          (window?.x ?? 0) + 0
+                        }px, -${(window?.y ?? 0) + 22}px)`,
                         borderRadius: "var(--radius-2)",
                         opacity: 0.8,
                       }}
@@ -731,6 +758,8 @@ function ExplorerItem(props: {
         <Button
           style={{
             justifyContent: "flex-start",
+            alignItems: "flex-start",
+            textAlign: "left",
             paddingInline: "var(--space-4)",
             // transform: CSS.Transform.toString(
             //   draggable.transform
@@ -781,7 +810,15 @@ function ExplorerItem(props: {
           {...draggable.listeners}
         >
           {isFolder(props.item) && <FileIcon />}
-          {icon}
+          {React.isValidElement(icon)
+            ? React.cloneElement(icon, {
+                ...(icon?.props ?? {}),
+                // @ts-ignore
+                style: {
+                  flexShrink: 0,
+                },
+              })
+            : icon}
           {props.item.name}
         </Button>
       </ContextMenu.Trigger>
@@ -931,7 +968,9 @@ function CreateFolderDialog(props: {
               onClick={() => {
                 createFolderMutation
                   .mutateAsync(
-                    `${props.path}/${inputRef.current?.value ?? "New folder"}`,
+                    `${props.path}/${
+                      inputRef.current?.value ?? "New folder"
+                    }`,
                   )
                   .then(() => {
                     inputRef.current!.value = "New folder";
